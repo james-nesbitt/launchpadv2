@@ -6,11 +6,9 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/Mirantis/launchpad/pkg/cluster"
+	"github.com/Mirantis/launchpad/pkg/component"
 	"github.com/Mirantis/launchpad/pkg/host"
 	"github.com/Mirantis/launchpad/pkg/product"
-	"github.com/Mirantis/launchpad/pkg/product/mcr"
-	"github.com/Mirantis/launchpad/pkg/product/mke"
-	"github.com/Mirantis/launchpad/pkg/product/msr"
 )
 
 // Config full cluster configuration object for the launchpad object
@@ -21,8 +19,8 @@ type Config struct {
 // Cluster from this config object
 func (c Config) Cluster() (cluster.Cluster, error) {
 	return cluster.Cluster{
-		Hosts:    c.Spec.Hosts,
-		Products: c.Spec.Products.products,
+		Hosts:      c.Spec.Hosts,
+		Components: c.Spec.Products.products,
 	}, nil
 }
 
@@ -32,55 +30,71 @@ type ConfigSpec struct {
 	Products ConfigSpecProducts `yaml:"products,omitempty"`
 }
 
+// ConfigHosts a set of hosts for a cluster
+type ConfigSpecHosts struct {
+	hosts []host.Host
+}
+
+// UnmarshalYAML custom un-marshaller
+func (ch *ConfigSpecHosts) UnmarshalYAML(py *yaml.Node) error {
+	cht := map[string]interface{}{}
+	ch.hosts = []host.Host{}
+
+	if err := py.Decode(&cht); err != nil {
+		return fmt.Errorf("Failed to parse hosts: %w", err)
+	}
+
+	var hpe error // collect all product parsing errors here
+	for t, chtp := range cht {
+		if hn, ok := chtp.(yaml.Node); ok {
+			p, err := host.DecodeHost(t, hn.Decode)
+			if err != nil {
+				if hpe == nil {
+					hpe = fmt.Errorf("Failed to parse hosts %s", "")
+				}
+				hpe = fmt.Errorf("%w; %s", hpe, err)
+				continue
+			}
+
+			ch.hosts = append(ch.hosts, p)
+		}
+	}
+
+	return hpe
+}
+
 // ConfigProducts a set of products for a cluster
 type ConfigSpecProducts struct {
-	products map[string]product.Product
+	products map[string]component.Component
 }
 
 // UnmarshalYAML custom un-marshaller
 func (cp *ConfigSpecProducts) UnmarshalYAML(py *yaml.Node) error {
 	cpt := map[string]interface{}{}
-	cp.products = map[string]product.Product{}
+	cp.products = map[string]component.Component{}
 
 	if err := py.Decode(&cpt); err != nil {
 		return fmt.Errorf("Failed to parse products: %w", err)
 	}
 
+	var ppe error // collect all product parsing errors here
 	for t, cptp := range cpt {
 		if pn, ok := cptp.(yaml.Node); ok {
-			switch t {
-			case "mcr":
-				c := mcr.Config{}
-
-				if err := pn.Decode(&c); err != nil {
-					return fmt.Errorf("Failure to unmarshal product '%s' : %w", t, err)
+			p, err := product.DecodeKnownProduct(t, pn.Decode)
+			if err != nil {
+				if ppe == nil {
+					ppe = fmt.Errorf("Failed to parse products %s", "")
 				}
-
-				cp.products[t] = mcr.NewMCR(c)
-
-			case "mke":
-				c := mke.Config{}
-
-				if err := pn.Decode(&c); err != nil {
-					return fmt.Errorf("Failure to unmarshal product '%s' : %w", t, err)
-				}
-
-				cp.products[t] = mke.NewMKE(c)
-
-			case "msr":
-				c := msr.Config{}
-
-				if err := pn.Decode(&c); err != nil {
-					return fmt.Errorf("Failure to unmarshal product '%s' : %w", t, err)
-				}
-
-				cp.products[t] = msr.NewMSR(c)
-
-			default:
-				return fmt.Errorf("Product '%s' is not recognized.", t)
+				ppe = fmt.Errorf("%w; %s", ppe, err)
+				continue
 			}
+
+			cp.products[t] = p
 		}
 	}
 
-	return nil
+	return ppe
+}
+
+type SpecHosts struct {
 }

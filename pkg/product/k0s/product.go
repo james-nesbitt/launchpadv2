@@ -3,11 +3,7 @@ package k0s
 import (
 	"context"
 
-	"github.com/Mirantis/launchpad/pkg/component"
-	"github.com/Mirantis/launchpad/pkg/host"
-	"github.com/Mirantis/launchpad/pkg/implementation/kubernetes"
 	"github.com/Mirantis/launchpad/pkg/phase"
-	"github.com/Mirantis/launchpad/pkg/product/k0s/implementation"
 )
 
 // NewK0S constructor for K0S from config.

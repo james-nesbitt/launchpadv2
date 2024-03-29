@@ -3,68 +3,33 @@ package dependency
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log/slog"
 )
 
 var (
-	ErrDependencyNotMet            = errors.New("dependency not met")
-	ErrDependencyShouldHaveHandled = errors.New("dependency not met but it should have been") // @TODO come on, this name sucks
-	ErrDependencyNotHandled        = errors.New("dependency not handled")
+	ErrDependencyNotMet            = errors.New("dependency not met")                         // No handler satisfied this dependency
+	ErrDependencyShouldHaveHandled = errors.New("dependency not met but it should have been") // This type of dependency is handled, and should have ben handled, but a failure occured.  Don't try any other handler
+	ErrDependencyNotHandled        = errors.New("dependency not handled")                     // This type of dependency is not handled so somebody else should handle it (often requivalent to a nil error)
 )
 
 // HasDependencies can determine its dependencies
 type HasDependencies interface {
-	// Requires a set of Requirements indicating what dependencies are needed
+	// Requires a set of Requirements indicating what dependency Requirements are needed
 	// - if the set is empty, then no requirements are needed
 	Requires(context.Context) Requirements
 }
 
-// ProvidesDependencies components that can meet dependency needs
-type ProvidesDependencies interface {
+// FullfillsDependencies components that can meet dependency needs
+type FullfillsDependencies interface {
 	// Provides a dependency for some type of Requirements.
-	// - A nil dependency means that the type of requirements isn't handled
+	// - A nil return means that the type of requirements isn't handled
 	// - if the error .Is(ErrDependencyNotMet) then the dependency could not be met
 	// - if the error .Is(ErrDependencyNotHandled) then the Provider doesn't handle such requirementd
 	// - if the error .Is(ErrDependencyShouldHaveHandled) then the Provider could not
 	//   be met, but it should have. No other provider should try to meet it.
 	// - A non-nil dependency with a .Met() error indicates that the dependency is not met,
 	//   and other providers will be tried.
-	Provides(context.Context, Requirement) Dependency
-}
-
-type Requirements []Requirement
-
-type Requirement interface {
-	Describe() string
-	// Fullfill the Dependency by providing a Dependency object.
-	// - The Dependency could by [un] Met(), and have an error
-	Fullfill(Dependency) error // @TODO us a chan?
-}
-
-type Dependencies []Dependency
-
-// UnMet filter for Dependencies that are not met
-func (ds Dependencies) Unmet() []Dependency {
-	ud := []Dependency{}
-
-	for _, d := range ds {
-		if d == nil {
-			continue // stupidity filter
-		}
-		if err := d.Met(); err != nil {
-			ud = append(ud, d)
-		}
-	}
-
-	return ud
-}
-
-type Dependency interface {
-	// Describe the Dependency so that we can log audit it
-	Describe() string
-	// Met or not met. If not met provide an error, else provide nil
-	Met() error
+	Provides(context.Context, Requirement) error
 }
 
 // --- Dependency and Requirement helper functions
@@ -85,33 +50,26 @@ func CollectRequirements(ctx context.Context, hds []HasDependencies) Requirement
 	return rs
 }
 
-// ProvideRequirementDependency Build a dependency for a requirement
+// FullfillRequirements Build a dependency for a requirement
 // - we could just fulfill this, but we leave it to the consumer so that they can mutate it and log/audit
-func ProvideRequirementDependency(ctx context.Context, r Requirement, pds []ProvidesDependencies) Dependency {
-	for _, pd := range pds {
-		if pd == nil {
+func FullfillRequirements(ctx context.Context, r Requirement, fds []FullfillsDependencies) error {
+	for _, fd := range fds {
+		if fd == nil {
 			continue // stupidity check
 		}
 
-		d := pd.Provides(ctx, r)
-
-		if d == nil {
-			// Provider does not handle this kind of Requirements (acceptable behaviour)
-			continue
-		}
-
-		err := d.Met()
+		err := fd.Provides(ctx, r)
 
 		if err == nil {
-			slog.Debug("Dependency generator succeeded", slog.Any("handler", pd), slog.Any("requirement", r), slog.Any("dependency", d))
-			return d // successful dependency creation
+			slog.Debug("Dependency generator succeeded", slog.Any("handler", fd), slog.Any("requirement", r))
+			return nil // successful dependency creation
 		}
 		if errors.Is(err, ErrDependencyShouldHaveHandled) {
-			slog.Debug("Dependency generator failed, stopping", slog.Any("handler", pd), slog.Any("requirement", r), slog.Any("dependency", d))
-			return d // Handler says that it should have handled it, but couldn't, so return an error
+			slog.Debug("Dependency generator failed, stopping", slog.Any("handler", fd), slog.Any("requirement", r))
+			return err // Handler says that it should have handled it, but couldn't, so return an error
 		}
 		if errors.Is(err, ErrDependencyNotHandled) {
-			slog.Debug("Dependency generator failed, trying others", slog.Any("handler", pd), slog.Any("requirement", r), slog.Any("dependency", d))
+			slog.Debug("Dependency generator failed, trying others", slog.Any("handler", fd), slog.Any("requirement", r))
 			continue // Handler failed to create a dependency, but maybe another can
 		}
 		if errors.Is(err, ErrDependencyNotMet) {
@@ -120,27 +78,5 @@ func ProvideRequirementDependency(ctx context.Context, r Requirement, pds []Prov
 		}
 	}
 
-	return DependencyNotHandled{
-		r: r,
-	}
-}
-
-// === A dependency struct for an unhandled dependency
-
-type DependencyNotHandled struct {
-	r Requirement
-}
-
-func NewUnmetDependency(requirement Requirement) Dependency {
-	return DependencyNotHandled{
-		r: requirement,
-	}
-}
-
-func (dum DependencyNotHandled) Describe() string {
-	return dum.r.Describe()
-}
-
-func (dum DependencyNotHandled) Met() error {
-	return fmt.Errorf("%w; %s", ErrDependencyNotHandled, dum.Describe())
+	return ErrDependencyNotMet
 }

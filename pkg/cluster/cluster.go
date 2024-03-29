@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"strings"
 
 	"github.com/Mirantis/launchpad/pkg/component"
@@ -20,44 +21,48 @@ type Cluster struct {
 	Hosts      host.Hosts
 	Components component.Components
 
-	dependencies dependency.Dependencies
+	requirements dependency.Requirements
 }
 
 // Validate the cluster configuration
 func (c Cluster) Validate(ctx context.Context) error {
 
 	// Dependency checking
-	c.matchDependencies(ctx)
+	c.matchRequirements(ctx)
 
-	if uds := c.dependencies.Unmet(); len(uds) > 0 {
-		var udses []string
-		for _, ud := range uds {
-			udses = append(udses, ud.Describe())
+	if urs := c.requirements.UnMet(ctx); len(urs) > 0 {
+		var urses []string
+		for _, ur := range urs {
+			urses = append(urses, ur.Describe())
 		}
 
-		return fmt.Errorf("%w; %s", ErrClusterDependenciesNotMet, strings.Join(udses, "\n"))
+		return fmt.Errorf("%w; %s", ErrClusterDependenciesNotMet, strings.Join(urses, "\n"))
 	}
 
 	return nil
 }
 
-func (c *Cluster) matchDependencies(ctx context.Context) error {
-	c.dependencies = dependency.Dependencies{}
+// match all requirements from cluster components with dependency fullfillers.
+//
+//	This allows the list of requirements to be analyzed to make sure that
+//	all of the cluster dependencies are met.
+func (c *Cluster) matchRequirements(ctx context.Context) error {
+	c.requirements = dependency.Requirements{}
 
 	// Collect all the things that provide dependencies
-	pds := []dependency.ProvidesDependencies{}
+	fds := []dependency.FullfillsDependencies{}
 
-	if cpd, ok := interface{}(c).(dependency.ProvidesDependencies); ok {
-		pds = append(pds, cpd)
+	if cfd, ok := interface{}(c).(dependency.FullfillsDependencies); ok {
+		fds = append(fds, cfd)
 	}
 	for _, h := range c.Hosts {
-		if pd, ok := h.(dependency.ProvidesDependencies); ok {
-			pds = append(pds, pd)
+		if fd, ok := h.(dependency.FullfillsDependencies); ok {
+			fds = append(fds, fd)
 		}
 	}
 	for _, c := range c.Components {
-		if pd, ok := c.(dependency.ProvidesDependencies); ok {
-			pds = append(pds, pd)
+		if fd, ok := c.(dependency.FullfillsDependencies); ok {
+			fds = append(fds, fd)
 		}
 	}
 
@@ -66,21 +71,25 @@ func (c *Cluster) matchDependencies(ctx context.Context) error {
 	for _, h := range c.Hosts {
 		if hd, ok := h.(dependency.HasDependencies); ok {
 			for _, r := range hd.Requires(ctx) {
-				d := dependency.ProvideRequirementDependency(ctx, r, pds)
-				c.dependencies = append(c.dependencies, d)
+				if err := dependency.FullfillRequirements(ctx, r, fds); err != nil {
+					slog.DebugContext(ctx, "host dependency requirement not met", slog.Any("cluster", c), slog.Any("requirement", r), slog.Any("host", h))
+				}
+				c.requirements = append(c.requirements, r)
 			}
 		}
 	}
 	for _, cc := range c.Components {
 		if hd, ok := cc.(dependency.HasDependencies); ok {
 			for _, r := range hd.Requires(ctx) {
-				d := dependency.ProvideRequirementDependency(ctx, r, pds)
-				c.dependencies = append(c.dependencies, d)
+				if err := dependency.FullfillRequirements(ctx, r, fds); err != nil {
+					slog.DebugContext(ctx, "component dependency requirement not met", slog.Any("cluster", c), slog.Any("requirement", r), slog.Any("component", cc))
+				}
+				c.requirements = append(c.requirements, r)
 			}
 		}
 	}
 
-	if ud := c.dependencies.Unmet(); len(ud) > 0 {
+	if ud := c.requirements.UnMet(ctx); len(ud) > 0 {
 		return fmt.Errorf("%w; Unmet depedencies: %+v", ErrClusterDependenciesNotMet, ud)
 	}
 	return nil

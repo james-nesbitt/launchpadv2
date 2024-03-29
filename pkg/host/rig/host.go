@@ -17,7 +17,7 @@ func NewHost(hc *Config) Host {
 
 // Host definition for one cluster target
 type Host struct {
-	Config
+	*Config
 	state *State
 }
 

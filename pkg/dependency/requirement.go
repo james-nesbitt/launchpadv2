@@ -2,19 +2,27 @@ package dependency
 
 import (
 	"context"
+	"log/slog"
 )
+
+// HasDependencies can determine its dependencies
+type HasDependencies interface {
+	// Requires a set of Requirements indicating what dependency Requirements are needed
+	// - if the set is empty, then no requirements are needed
+	Requires(context.Context) Requirements
+}
 
 // --- Dependency requirement definitiond ---
 
 // Requirements set
 type Requirements []Requirement
 
-// UnMet dependency requirements set
-func (rs Requirements) UnMet(ctx context.Context) Requirements {
+// UnMatched requirements subset of all Requirements that are not Matched
+func (rs Requirements) UnMatched(ctx context.Context) Requirements {
 	urs := Requirements{}
 
 	for _, r := range rs {
-		if err := r.Validate(ctx); err != nil {
+		if d := r.Matched(ctx); d == nil {
 			urs = append(urs, r)
 		}
 	}
@@ -24,19 +32,28 @@ func (rs Requirements) UnMet(ctx context.Context) Requirements {
 
 // Requirement dependency definition from the perspective of the requirer
 type Requirement interface {
-	// Describe the requirements for labelling/auditing
+	// Requirer identify the requirer with a string, which may be used for correlation in the future
+	Requirer() string
+	// Describe the Requirements for labelling/auditing
 	Describe() string
-	// Validate that the requirement can be met
-	//   Validation does not meet the dependency, it only confirms that the dependency can be met
-	//   when it is needed.  Each requirement will have its own interface for individual types of
-	//   requirements.
-	Validate(context.Context) error
+	// Match with a Dependency
+	Match(Dependency) error
+	// Matched has been Matched. If not matched return nil
+	Matched(context.Context) Dependency
 }
 
-// FullfillingRequirement a requirement that needs to be fullfilled
-type FullfillingRequirement interface {
-	// Fullfilled the requirement fullfillment is performed
-	//   This indicates that the requirement deliverebles are now available, indicating that any
-	//   requirer of the dependency can now utilize
-	Fullfilled(context.Context) bool
+// CollectRequirements from a set of HasDependencies
+func CollectRequirements(ctx context.Context, hds []HasDependencies) Requirements {
+	rs := Requirements{}
+	for _, hd := range hds {
+		if hd == nil {
+			continue // stupidity check
+		}
+
+		for _, r := range hd.Requires(ctx) {
+			slog.Debug("Dependency requirement received", slog.Any("handler", hd), slog.Any("requirement", r))
+			rs = append(rs, r)
+		}
+	}
+	return rs
 }

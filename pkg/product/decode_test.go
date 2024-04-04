@@ -1,34 +1,23 @@
 package product_test
 
 import (
-	"context"
 	"testing"
+
+	"github.com/Mirantis/launchpad/pkg/product/mock"
 
 	"github.com/Mirantis/launchpad/pkg/component"
 	"github.com/Mirantis/launchpad/pkg/phase"
 	"github.com/Mirantis/launchpad/pkg/product"
 )
 
-type DummyProduct struct {
-	name    string
-	actions phase.Actions
-}
-
-func (dp *DummyProduct) Name() string {
-	return dp.name
-}
-
-func (dp *DummyProduct) Actions(context.Context, string) (phase.Actions, error) {
-	return dp.actions, nil
-}
-
 func Test_Decode(t *testing.T) {
-	product.ProductDecoders["dummy"] = func(product.Decoder) (component.Component, error) {
-		return &DummyProduct{
-			name:    "test",
-			actions: phase.Actions{},
-		}, nil
-	}
+	product.RegisterDecoder("dummy", func(func(interface{}) error) (component.Component, error) {
+		p := mock.NewProduct(
+			"test",
+			phase.Actions{},
+		)
+		return p, nil
+	})
 
 	c, err := product.DecodeKnownProduct("dummy", nil)
 	if err != nil {

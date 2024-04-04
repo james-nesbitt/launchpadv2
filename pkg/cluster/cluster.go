@@ -22,15 +22,18 @@ type Cluster struct {
 	Components component.Components
 
 	requirements dependency.Requirements
+	dependencies dependency.Dependencies
 }
 
 // Validate the cluster configuration
-func (c Cluster) Validate(ctx context.Context) error {
+func (cl Cluster) Validate(ctx context.Context) error {
 
 	// Dependency checking
-	c.matchRequirements(ctx)
+	if err := cl.matchRequirements(ctx); err != nil {
+		return fmt.Errorf("cluster validate failed on matching requirements: %w", err)
+	}
 
-	if urs := c.requirements.UnMet(ctx); len(urs) > 0 {
+	if urs := cl.requirements.UnMatched(ctx); len(urs) > 0 {
 		var urses []string
 		for _, ur := range urs {
 			urses = append(urses, ur.Describe())
@@ -46,21 +49,22 @@ func (c Cluster) Validate(ctx context.Context) error {
 //
 //	This allows the list of requirements to be analyzed to make sure that
 //	all of the cluster dependencies are met.
-func (c *Cluster) matchRequirements(ctx context.Context) error {
-	c.requirements = dependency.Requirements{}
+func (cl *Cluster) matchRequirements(ctx context.Context) error {
+	cl.requirements = dependency.Requirements{}
+	cl.dependencies = dependency.Dependencies{}
 
 	// Collect all the things that provide dependencies
 	fds := []dependency.FullfillsDependencies{}
 
-	if cfd, ok := interface{}(c).(dependency.FullfillsDependencies); ok {
+	if cfd, ok := interface{}(cl).(dependency.FullfillsDependencies); ok {
 		fds = append(fds, cfd)
 	}
-	for _, h := range c.Hosts {
+	for _, h := range cl.Hosts {
 		if fd, ok := h.(dependency.FullfillsDependencies); ok {
 			fds = append(fds, fd)
 		}
 	}
-	for _, c := range c.Components {
+	for _, c := range cl.Components {
 		if fd, ok := c.(dependency.FullfillsDependencies); ok {
 			fds = append(fds, fd)
 		}
@@ -68,29 +72,38 @@ func (c *Cluster) matchRequirements(ctx context.Context) error {
 
 	// Run through all source of dependencies, separately, so that we
 	// Can do some logging and auditing
-	for _, h := range c.Hosts {
+	for _, h := range cl.Hosts {
 		if hd, ok := h.(dependency.HasDependencies); ok {
 			for _, r := range hd.Requires(ctx) {
-				if err := dependency.FullfillRequirements(ctx, r, fds); err != nil {
-					slog.DebugContext(ctx, "host dependency requirement not met", slog.Any("cluster", c), slog.Any("requirement", r), slog.Any("host", h))
+				if d, err := dependency.MatchRequirements(ctx, r, fds); err != nil {
+					slog.DebugContext(ctx, "host dependency requirement not met", slog.Any("cluster", cl), slog.Any("requirement", r), slog.Any("host", h))
+				} else {
+					r.Match(d)
+					slog.DebugContext(ctx, "host dependency requirement met", slog.Any("cluster", cl), slog.Any("requirement", r), slog.Any("host", h))
+					cl.requirements = append(cl.requirements, r)
+					cl.dependencies = append(cl.dependencies, d)
 				}
-				c.requirements = append(c.requirements, r)
 			}
 		}
 	}
-	for _, cc := range c.Components {
+	for _, cc := range cl.Components {
 		if hd, ok := cc.(dependency.HasDependencies); ok {
 			for _, r := range hd.Requires(ctx) {
-				if err := dependency.FullfillRequirements(ctx, r, fds); err != nil {
-					slog.DebugContext(ctx, "component dependency requirement not met", slog.Any("cluster", c), slog.Any("requirement", r), slog.Any("component", cc))
+				slog.Error("Checking Component for provides: %+v", slog.Any("requirement", r))
+				if d, err := dependency.MatchRequirements(ctx, r, fds); err != nil {
+					slog.DebugContext(ctx, "component dependency requirement not met", slog.Any("cluster", cl), slog.Any("requirement", r), slog.Any("component", cc))
+				} else {
+					r.Match(d)
+					slog.DebugContext(ctx, "component dependency requirement met and matched", slog.Any("cluster", cl), slog.Any("requirement", r), slog.Any("dependency", d), slog.Any("component", cc))
+					cl.requirements = append(cl.requirements, r)
+					cl.dependencies = append(cl.dependencies, d)
 				}
-				c.requirements = append(c.requirements, r)
 			}
 		}
 	}
 
-	if ud := c.requirements.UnMet(ctx); len(ud) > 0 {
-		return fmt.Errorf("%w; Unmet depedencies: %+v", ErrClusterDependenciesNotMet, ud)
+	if ud := cl.requirements.UnMatched(ctx); len(ud) > 0 {
+		return fmt.Errorf("%w; Unmet depedencies: %+v :: \n %+v", ErrClusterDependenciesNotMet, ud, fds)
 	}
 	return nil
 }

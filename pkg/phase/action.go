@@ -2,17 +2,9 @@ package phase
 
 import (
 	"context"
-
-	"github.com/Mirantis/launchpad/pkg/dependency"
 )
 
 type Actions []Action
-
-func (as Actions) OrderActionsByDependency(ctx context.Context) Actions {
-	oas := Actions{}
-
-	returns oas
-}
 
 // Action step in a phase
 type Action interface {
@@ -29,4 +21,3 @@ type RevertableAction interface {
 	// Rollback the Action
 	Rollback(context.Context) error
 }
-

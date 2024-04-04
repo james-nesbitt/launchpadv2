@@ -3,8 +3,8 @@ package phase
 import (
 	"context"
 	"errors"
-	"fmt"
-	"strings"
+
+	"github.com/Mirantis/launchpad/pkg/dependency"
 )
 
 type Phase interface {
@@ -19,48 +19,17 @@ type Phase interface {
 }
 
 var (
-	ErrPhaseValidationFailure = errors.New("Phase validation failed")
-	ErrPhaseRunFailure        = errors.New("Phase execution failed")
+	ErrPhaseValidationFailure = errors.New("phase validation failed")
+	ErrPhaseRunFailure        = errors.New("phase execution failed")
+	ErrPhaseRollbackFailure   = errors.New("phase rollback failed")
 )
 
 type ProvidesActions interface {
 	Name() string
-	ProvideActions(context.Context) Actions
+
+	ProvideActions(ctx context.Context, phaseId string, deps dependency.Dependencies) (Actions, error)
 }
 
-type StandardPhase struct {
-	name string
-	id   string
-	pas  []ProvidesActions
-}
-
-func (sp StandardPhase) Name() string {
-	return sp.name
-}
-
-func (sp StandardPhase) Validate(ctx context.Context) error {
-	errs := []string{}
-
-	for _, pa := range sp.pas {
-		for _, a := range pa.ProvideActions(ctx) {
-			if err := a.Validate(ctx); err != nil {
-				errs = append(errs, fmt.Errorf("%s:%s %s", pa.Name(), a.Label(), err.Error()).Error())
-			}
-		}
-	}
-
-	if len(errs) > 0 {
-		return fmt.Errorf("%w; phase action validation errors: %s", ErrPhaseValidationFailure, strings.Join(errs, "\n"))
-	}
-	return nil
-}
-
-func (sp StandardPhase) Run(ctx context.Context) error {
-	// executed actions, in case we need to rollback
-	return nil
-}
-
-func (sp StandardPhase) Rollback(ctx context.Context) error {
-	// executed actions, in case we need to rollback
-	return nil
+type ProvidesPhases interface {
+	SuggestPhases(command string) error
 }

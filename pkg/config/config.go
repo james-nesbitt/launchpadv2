@@ -7,11 +7,6 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/Mirantis/launchpad/pkg/cluster"
-	v2_0 "github.com/Mirantis/launchpad/pkg/config/v2_0"
-)
-
-const (
-	API_VERSION_2_0 = "launchpad.mirantis.com/v2.0"
 )
 
 // ConfigBase interpretation for what type of config is being handled
@@ -37,15 +32,6 @@ func ConfigFromYamllBytes(b []byte) (cluster.Cluster, error) {
 
 	switch cb.APIVersion {
 	case API_VERSION_2_0:
-		var v20conf v2_0.Config
-		if err := yaml.Unmarshal(b, &v20conf); err != nil {
-			return cluster, err
-		}
-		if c, err := v20conf.Cluster(); err != nil {
-			return cluster, err
-		} else {
-			cluster = c
-		}
 
 	default:
 		return cluster, errors.New(fmt.Sprintf("apiVersion '%s' is not compatible", cb.APIVersion))

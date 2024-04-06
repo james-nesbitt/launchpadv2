@@ -4,35 +4,44 @@ import (
 	"context"
 
 	"github.com/Mirantis/launchpad/pkg/dependency"
-	"github.com/Mirantis/launchpad/pkg/phase"
 )
 
-func NewComponent(name string, action phase.Actions) comp {
+func NewComponent(name string, debug interface{}, validate error) comp {
 	return comp{
-		name:    name,
-		actions: action,
+		name:     name,
+		debug:    debug,
+		validate: validate,
 	}
 }
 
 type comp struct {
-	name    string
-	actions phase.Actions
+	name     string
+	debug    interface{}
+	validate error
 }
 
 func (c comp) Name() string {
 	return c.name
 }
 
-// Actions to run for a particular string phase
-func (c comp) Actions(context.Context, string) (phase.Actions, error) {
-	return c.actions, nil
+func (c comp) Debug() interface{} {
+	return struct {
+		Name string
+	}{
+		Name: c.name,
+	}
 }
 
-func NewComponentWDependencies(name string, action phase.Actions, requirements dependency.Requirements, dependency dependency.Dependency, providesError error) compWDependencies {
+func (c comp) Validate(_ context.Context) error {
+	return c.validate
+}
+
+func NewComponentWDependencies(name string, debug interface{}, validate error, requirements dependency.Requirements, dependency dependency.Dependency, providesError error) compWDependencies {
 	return compWDependencies{
 		comp: comp{
-			name:    name,
-			actions: action,
+			name:     name,
+			debug:    debug,
+			validate: validate,
 		},
 		reqs:     requirements,
 		dep:      dependency,

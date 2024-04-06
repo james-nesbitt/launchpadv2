@@ -6,6 +6,7 @@ import (
 )
 
 type Host interface {
+	Id() string
 	Exec(ctx context.Context, cmd string, inr io.Reader) (string, string, error)
 	HasRole(string) bool
 }

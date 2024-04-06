@@ -3,48 +3,61 @@ package v20
 import (
 	"fmt"
 	"log/slog"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 
 	"github.com/Mirantis/launchpad/pkg/host"
 )
 
-type SpecHosts map[string]*SpecHost
-
-func (sc SpecHosts) hosts() host.Hosts {
-	hs := host.Hosts{}
-
-	for id, h := range sc {
-		hs[id] = h.host
-	}
-
-	return hs
+type SpecHosts struct {
+	hs host.Hosts
 }
 
-type SpecHost struct {
-	host host.Host
+func (shs SpecHosts) hosts() host.Hosts {
+	return shs.hs
 }
 
-func (sh *SpecHost) UnmarshalYAML(py *yaml.Node) error {
-	t := "rig" // hosts will be rig if not otherwise stated
-	hc := struct {
-		Handler string `yaml:"handler"`
-		Role    string `yaml:"role"`
-	}{}
+func (shs *SpecHosts) UnmarshalYAML(py *yaml.Node) error {
+	shs.hs = host.Hosts{}
+	shsc := map[string]yaml.Node{}
 
-	if err := py.Decode(&hc); err != nil {
-		slog.Error("host decode gave suspicious contents")
+	if err := py.Decode(&shsc); err != nil {
+		return fmt.Errorf("failed to decode spec hosts")
 	}
 
-	if hc.Handler != "" {
-		t = hc.Handler
+	errss := []string{}
+
+	for id, shn := range shsc {
+		t := id
+		pc := struct {
+			Id      string `yaml:"id"`
+			Handler string `yaml:"handler"`
+		}{}
+
+		if err := shn.Decode(&pc); err != nil {
+			slog.Debug("Decode of host gave suspiscious results")
+		}
+
+		if pc.Handler != "" {
+			t = pc.Handler
+		}
+		if pc.Id != "" {
+			id = pc.Id
+		}
+
+		p, err := host.DecodeHost(t, id, shn.Decode)
+		if err != nil {
+			errss = append(errss, fmt.Sprintf("%s: %s", id, err.Error()))
+			continue
+		}
+
+		shs.hs[id] = p
 	}
 
-	h, err := host.DecodeHost(t, py.Decode)
-	if err != nil {
-		return fmt.Errorf("host decode failed: %s", err.Error())
+	if len(errss) > 0 {
+		return fmt.Errorf("Error decoding Spec hosts: %s", strings.Join(errss, "\n"))
 	}
 
-	sh.host = h
 	return nil
 }

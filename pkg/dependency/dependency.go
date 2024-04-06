@@ -3,13 +3,14 @@ package dependency
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 )
 
 var (
-	ErrDependencyNotMatched        = errors.New("dependency not met")                         // No handler satisfied this dependency
-	ErrDependencyShouldHaveHandled = errors.New("dependency not met but it should have been") // This type of dependency is handled, and should have ben handled, but a failure occured.  Don't try any other handler
-	ErrDependencyNotHandled        = errors.New("dependency not handled")                     // This type of dependency is not handled so somebody else should handle it (often requivalent to a nil error)
+	ErrDependencyNotMatched        = errors.New("dependency not met")                             // No handler satisfied this dependency
+	ErrDependencyShouldHaveHandled = errors.New("dependency not handled but it should have been") // This type of dependency is handled, and should have ben handled, but a failure occured.  Don't try any other handler
+	ErrDependencyNotHandled        = errors.New("dependency not handled by any provider")         // This type of dependency is not handled so somebody else should handle it (often requivalent to a nil error)
 )
 
 // FullfillsDependencies components that can meet dependency needs
@@ -48,43 +49,49 @@ type Dependency interface {
 	//   when it is needed.  Each requirement will have its own interface for individual types of
 	//   requirements.
 	Validate(context.Context) error
-	// List the IDs of Requirement.Requirers() which depend on this dependency
-	Requirers() []string
+	// Met is the dependency fullfilled, or is it still blocked/waiting for fulfillment
+	Met(context.Context) error
 }
 
 // --- Dependency and Requirement helper functions
 
-// MatchRequirements Build a dependency for a requirement
+// GetRequirementDependency Build a dependency for a requirement
 //
 //		Find a Handler which can handle the Requirement, and make it produce a Dependency.
 //		Associate the Dependency with the Requirement, but return it as well so that it
 //		can be collected.
 //
 //	    NOTE: WE DO NOT TELL THE REQUIREMENT ABOUT THE DEPENDENCY - YOU NEED TO DO THAT
-func MatchRequirements(ctx context.Context, r Requirement, fds []FullfillsDependencies) (Dependency, error) {
+func GetRequirementDependency(ctx context.Context, r Requirement, fds []FullfillsDependencies) (Dependency, error) {
+	if len(fds) == 0 {
+		return nil, fmt.Errorf("%w; no dependency handlers providers for requirement %s", ErrDependencyNotHandled, r.Id())
+	}
+
 	for _, fd := range fds {
 		if fd == nil {
 			continue // stupidity check
 		}
 
 		d, err := fd.Provides(ctx, r)
+
+		// it is allowed to return no error, and no dependency,
+		// which just means that the req wasn't handled
+		if d == nil && err == nil {
+			err = ErrDependencyNotHandled
+		}
+
 		if err == nil {
-			slog.Error("Dependency generator succeeded", slog.Any("handler", fd), slog.Any("requirement", r))
 			return d, nil // successful dependency creation
 		}
-		slog.Error("fulfiller err", slog.Any("error", err), slog.Any("fulfiller", fd))
 
 		if errors.Is(err, ErrDependencyShouldHaveHandled) {
-			slog.Debug("Dependency generator failed, stopping", slog.Any("handler", fd), slog.Any("requirement", r))
 			return d, err // Handler says that it should have handled it, but couldn't, so return an error
 		}
 
 		if !errors.Is(err, ErrDependencyNotHandled) {
-			slog.Debug("Skipping, as Dependency generate produced an unknown error", slog.String("error", err.Error()))
+			slog.WarnContext(ctx, fmt.Sprintf("dependency: Unknown Dependency generation error: (%s) %s", r.Id(), err.Error()), slog.String("error", err.Error()))
 		}
-
-		continue // Handler error means we should try others
 	}
 
-	return nil, ErrDependencyNotMatched
+	return nil, ErrDependencyNotHandled
 }

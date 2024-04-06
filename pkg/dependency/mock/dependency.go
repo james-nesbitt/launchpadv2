@@ -22,19 +22,20 @@ func (mpd fillDep) Provides(ctx context.Context, r dependency.Requirement) (depe
 	return mpd.d, mpd.err
 }
 
-func Dependency(id, description string, validate error) dependency.Dependency {
+func Dependency(id, description string, validate error, met error) dependency.Dependency {
 	return dep{
 		id: id,
 		d:  description,
 		v:  validate,
+		m:  met,
 	}
 }
 
 type dep struct {
 	id string
-	d  string   // describe
-	v  error    // validate
-	rs []string // requires
+	d  string // describe
+	v  error  // validate
+	m  error  // met
 }
 
 func (md dep) Id() string {
@@ -46,6 +47,6 @@ func (md dep) Describe() string {
 func (md dep) Validate(context.Context) error {
 	return md.v
 }
-func (md dep) Requirers() []string {
-	return md.rs
+func (md dep) Met(context.Context) error {
+	return md.m
 }

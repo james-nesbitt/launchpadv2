@@ -14,16 +14,16 @@ var (
 
 var (
 	// ProductDecoders handlers which can build Product components based on a key type
-	ProductDecoders = map[string]func(func(interface{}) error) (component.Component, error){}
+	ProductDecoders = map[string]func(string, func(interface{}) error) (component.Component, error){}
 )
 
 // RegisterDecoder register a new host decoder
-func RegisterDecoder(k string, d func(func(interface{}) error) (component.Component, error)) {
+func RegisterDecoder(k string, d func(string, func(interface{}) error) (component.Component, error)) {
 	ProductDecoders[k] = d
 }
 
 // DecodeKnownProduct Component of a specific from a decoder such as a yaml decoder
-func DecodeKnownProduct(t string, d func(interface{}) error) (component.Component, error) {
+func DecodeKnownProduct(t string, id string, d func(interface{}) error) (component.Component, error) {
 	if len(ProductDecoders) == 0 {
 		return nil, ErrNoProductDecodersRegistered
 	}
@@ -34,5 +34,5 @@ func DecodeKnownProduct(t string, d func(interface{}) error) (component.Componen
 		return nil, fmt.Errorf("%w; Product '%s' has no registered product builder", ErrProductDecoderNotRegistered, t)
 	}
 
-	return dph(d)
+	return dph(id, d)
 }

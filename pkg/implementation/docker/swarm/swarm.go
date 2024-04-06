@@ -1,17 +1,19 @@
 package swarm
 
-import "context"
-
-// ProvidesImplementation indicates that a kubernetes implementation can be created
-type ProvidesImplementation interface {
-	ImplementDockerSwarm(context.Context) (Swarm, error)
-}
+import "github.com/Mirantis/launchpad/pkg/implementation/docker"
 
 // NewSwarm constructor
-func NewSwarm() Swarm {
-	return Swarm{}
+func NewSwarm(config Config) *Swarm {
+	return &Swarm{
+		config: config,
+	}
 }
 
 // Swarm implementation
 type Swarm struct {
+	config Config
+}
+
+func (s Swarm) ValidateVersion(version docker.Version) error {
+	return nil
 }

@@ -7,9 +7,11 @@ import (
 
 func init() {
 	// Register the Mock Products as a decodable product
-	product.RegisterDecoder("mock", func(d func(interface{}) error) (component.Component, error) {
+	product.RegisterDecoder("mock", func(id string, d func(interface{}) error) (component.Component, error) {
 		var p prod
 		err := d(&p)
+		p.name = id
+
 		return &p, err
 	})
 }

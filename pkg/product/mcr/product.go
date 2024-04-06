@@ -2,17 +2,25 @@ package mcr
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/Mirantis/launchpad/pkg/component"
-	"github.com/Mirantis/launchpad/pkg/host"
-	"github.com/Mirantis/launchpad/pkg/implementation/docker"
-	"github.com/Mirantis/launchpad/pkg/implementation/docker/swarm"
-	"github.com/Mirantis/launchpad/pkg/phase"
+	"github.com/Mirantis/launchpad/pkg/dependency"
+)
+
+const (
+	ComponentType = "mcr"
+)
+
+var (
+	// MCRHostRoles roles that MCR considers targets for installation on
+	// Other products like MKE add roles to this list.
+	MCRHostRoles = []string{"mcr"}
 )
 
 // NewMCR constructor for MCR from config.
-func NewMCR(c Config) MCR {
-	return MCR{
+func NewMCR(id string, c Config) *MCR {
+	return &MCR{
+		id:     id,
 		config: c,
 		state:  State{},
 	}
@@ -20,13 +28,21 @@ func NewMCR(c Config) MCR {
 
 // MCR product implementation.
 type MCR struct {
+	id string
+
+	// host roles req
+	rhr dependency.Requirement
+
 	config Config
 	state  State
 }
 
 // Name for the component
-func (_ MCR) Name() string {
-	return "MCR"
+func (p MCR) Name() string {
+	if p.id == ComponentType {
+		return p.id
+	}
+	return fmt.Sprintf("%s:%s", ComponentType, p.id)
 }
 
 // Debug product debug.
@@ -34,27 +50,7 @@ func (_ MCR) Debug() interface{} {
 	return nil
 }
 
-// Provides a list of string labels which this Component provides,
-func (_ MCR) Provides() []string {
-	return []string{}
-}
-
 // Validate that the cluster meets the needs of the Product
-func (_ MCR) Validate(context.Context, host.Hosts, component.Components) ([]string, error) {
-	return []string{}, nil
-}
-
-// Actions to run for a particular string phase
-func (_ MCR) Actions(context.Context, string) (phase.Actions, error) {
-	return phase.Actions{}, nil
-}
-
-// ImplementDocker
-func (_ MCR) ImplementDocker(context.Context) (docker.Docker, error) {
-	return docker.NewDocker(), nil
-}
-
-// ImplementDockerSwarm
-func (_ MCR) ImplementDockerSwarm(context.Context) (swarm.Swarm, error) {
-	return swarm.NewSwarm(), nil
+func (_ MCR) Validate(context.Context) error {
+	return nil
 }

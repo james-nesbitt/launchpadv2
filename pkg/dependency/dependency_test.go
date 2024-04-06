@@ -21,7 +21,7 @@ func Test_MockValidate(t *testing.T) {
 		),
 	}
 	pds := []dependency.FullfillsDependencies{
-		mock.FullfillsDependencies(mock.Dependency("my-dep", "", nil), nil),
+		mock.FullfillsDependencies(mock.Dependency("my-dep", "", nil, nil), nil),
 	}
 
 	for _, hd := range hds {
@@ -48,11 +48,11 @@ func Test_MatchRequirements_Success(t *testing.T) {
 	fds := []dependency.FullfillsDependencies{
 		mock.FullfillsDependencies(nil, dependency.ErrDependencyNotHandled),
 		mock.FullfillsDependencies(nil, dependency.ErrDependencyNotHandled),
-		mock.FullfillsDependencies(mock.Dependency("this-one", "", nil), nil),         // this handler should get used
-		mock.FullfillsDependencies(mock.Dependency("not-this-one", "", nil), testerr), // this handler should not get used
+		mock.FullfillsDependencies(mock.Dependency("this-one", "", nil, nil), nil),         // this handler should get used
+		mock.FullfillsDependencies(mock.Dependency("not-this-one", "", nil, nil), testerr), // this handler should not get used
 	}
 
-	d, err := dependency.MatchRequirements(ctx, r, fds)
+	d, err := dependency.GetRequirementDependency(ctx, r, fds)
 	if errors.Is(err, testerr) {
 		t.Error("dependency handler was not used")
 	}
@@ -79,9 +79,9 @@ func Test_MatchRequirements_ShouldFail(t *testing.T) {
 		mock.FullfillsDependencies(nil, testerr),                                   // this handler should not get used
 	}
 
-	_, err := dependency.MatchRequirements(ctx, r, fds)
+	_, err := dependency.GetRequirementDependency(ctx, r, fds)
 	if !errors.Is(err, dependency.ErrDependencyShouldHaveHandled) {
-		t.Error("empty dependency handlers did not give expected NotMet error")
+		t.Error("empty dependency handlers did not give expected ShouldHaveHandled error")
 	}
 }
 
@@ -90,8 +90,8 @@ func Test_MatchRequirements_Empty(t *testing.T) {
 	r := mock.Requirement("mock", "", nil)      // only needed as an argument. fds do all of the work
 	fds := []dependency.FullfillsDependencies{} // empty list of handlers/fullfillers
 
-	_, err := dependency.MatchRequirements(ctx, r, fds)
-	if !errors.Is(err, dependency.ErrDependencyNotMatched) {
-		t.Error("empty dependency handlers did not give expected NotMet error")
+	_, err := dependency.GetRequirementDependency(ctx, r, fds)
+	if !errors.Is(err, dependency.ErrDependencyNotHandled) {
+		t.Error("empty dependency handlers did not give expected NotHandled error")
 	}
 }

@@ -21,6 +21,11 @@ type Host struct {
 	state *State
 }
 
+// Id unique ID for the host
+func (h Host) Id() string {
+	return h.Config.Id
+}
+
 // HasRole answer boolean if a host has a role
 func (h Host) HasRole(role string) bool {
 	return h.Config.Role == role

@@ -35,7 +35,7 @@ type req struct {
 	d           dependency.Dependency
 }
 
-func (mr req) Requirer() string {
+func (mr req) Id() string {
 	return mr.id
 }
 

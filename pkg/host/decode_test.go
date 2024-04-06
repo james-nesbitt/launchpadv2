@@ -9,8 +9,9 @@ import (
 )
 
 func Test_DecodeHost(t *testing.T) {
-	host.RegisterDecoder("dummy", func(func(interface{}) error) (host.Host, error) {
+	host.RegisterDecoder("dummy", func(id string, _ func(interface{}) error) (host.Host, error) {
 		h := mock.NewHost(
+			id,
 			[]string{"test"},
 			nil,
 		)
@@ -21,11 +22,14 @@ func Test_DecodeHost(t *testing.T) {
 		return nil
 	}
 
-	dh, err := host.DecodeHost("dummy", dhd)
+	dh, err := host.DecodeHost("dummy", "one", dhd)
 	if err != nil {
 		t.Errorf("DummyHost decode returned an unepected error: %s", err.Error())
 	}
 
+	if dh.Id() != "one" {
+		t.Errorf("host decode has the wrong id: %s", dh.Id())
+	}
 	if !dh.HasRole("test") {
 		t.Errorf("host decode missing expected role: %+v", dh)
 	}

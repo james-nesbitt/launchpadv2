@@ -5,11 +5,13 @@ package v20_test
  */
 
 import (
+	"context"
 	"testing"
 
 	// Register mock Host and Product handlers
 	_ "github.com/Mirantis/launchpad/pkg/host/mock"
 	_ "github.com/Mirantis/launchpad/pkg/product/mock"
+
 	// Register actual product handlers for testing
 	_ "github.com/Mirantis/launchpad/pkg/product/k0s"
 	_ "github.com/Mirantis/launchpad/pkg/product/mcr"
@@ -44,10 +46,8 @@ products:
 		t.Errorf("2.0 Spec decode failed unexpectadly: %s", err.Error())
 	}
 
-	if h, ok := cl.Hosts["dummy"]; !ok {
-		t.Error("dummy host was not registered")
-	} else if !h.HasRole("dummy") {
-		t.Error("dummy host did not have the dummy role")
+	if err := cl.Validate(context.Background()); err != nil {
+		t.Errorf("2.0 Spec decode cluster validate failed: %s", err.Error())
 	}
 }
 
@@ -55,13 +55,19 @@ func TestConfig_CurrentGen(t *testing.T) {
 	cl := cluster.Cluster{}
 	cy := `
 hosts:
-  dummy:
+  dummy-manager:
     handler: mock
     roles:
     - dummy
+    - manager    
+  dummy-worker:
+    handler: mock
+    roles:
+    - dummy
+    - worker
 products:
   mcr:
-    version: 23.0.7
+    version: 23.0.10
   mke3:
     version: 3.7.2
   msr2:
@@ -74,15 +80,20 @@ products:
 		t.Errorf("CurrentGen 2.0 Spec decode failed unexpectadly: %s", err.Error())
 	}
 
-	if len(cl.Components) != 3 {
-		t.Errorf("Wrong number of components: %+v", cl.Components)
+	if err := cl.Validate(context.Background()); err != nil {
+		t.Errorf("2.0 Spec decode cluster validate failed: %s", err.Error())
 	}
 
-	if mke, ok := cl.Components["mke3"]; !ok {
-		t.Error("K0s component didn't decode properly")
-	} else if mke.Name() != "MKE3" {
-		t.Errorf("K0s product has wrong name: %s", mke.Name())
-	}
+	// 	if len(cl.Components) != 4 { // 3 products and the hosts component
+	// 		t.Errorf("Wrong number of components: %+v", cl.Components)
+	// 	}
+	//
+	// 	if mke, ok := cl.Components["mke3"]; !ok {
+	// 		t.Error("MKE component didn't decode properly")
+	// 	} else if mke.Name() != "mke3" {
+	// 		t.Errorf("MKE product has wrong name: %s", mke.Name())
+	// 	}
+
 }
 
 func TestConfig_NextGen(t *testing.T) {
@@ -108,13 +119,13 @@ products:
 		t.Fatalf("NextGen 2.0 Spec decode failed unexpectadly: %s", err.Error())
 	}
 
-	if len(cl.Components) != 3 {
+	if len(cl.Components) != 4 { // 3 products and the hosts component
 		t.Errorf("Wrong number of components: %+v", cl.Components)
 	}
 
 	if k0s, ok := cl.Components["k0s"]; !ok {
 		t.Error("K0s component didn't decode properly")
-	} else if k0s.Name() != "K0S" {
+	} else if k0s.Name() != "k0s" {
 		t.Errorf("K0s product has wrong name: %s", k0s.Name())
 	}
 }

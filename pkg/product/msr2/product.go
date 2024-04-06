@@ -3,14 +3,17 @@ package msr2
 import (
 	"context"
 
-	"github.com/Mirantis/launchpad/pkg/component"
-	"github.com/Mirantis/launchpad/pkg/host"
-	"github.com/Mirantis/launchpad/pkg/phase"
+	"github.com/Mirantis/launchpad/pkg/dependency"
+)
+
+const (
+	ComponentType = "msr2"
 )
 
 // NewMSR2 constructor for MSR2 from config.
-func NewMSR2(c Config) MSR2 {
-	return MSR2{
+func NewMSR2(id string, c Config) *MSR2 {
+	return &MSR2{
+		id:     id,
 		config: c,
 		state:  State{},
 	}
@@ -18,13 +21,19 @@ func NewMSR2(c Config) MSR2 {
 
 // MSR2 product implementation.
 type MSR2 struct {
+	id     string
 	config Config
 	state  State
+
+	mke3r dependency.Requirement
 }
 
 // Name for the component
-func (_ MSR2) Name() string {
-	return "MSR2"
+func (p MSR2) Name() string {
+	if p.id == ComponentType {
+		return p.id
+	}
+	return p.id
 }
 
 // Debug product debug.
@@ -32,17 +41,7 @@ func (_ MSR2) Debug() interface{} {
 	return nil
 }
 
-// Provides a list of string labels which this Component provides,
-func (_ MSR2) Provides() []string {
-	return []string{}
-}
-
 // Validate that the cluster meets the needs of the Product
-func (_ MSR2) Validate(context.Context, host.Hosts, component.Components) ([]string, error) {
-	return []string{}, nil
-}
-
-// Actions to run for a particular string phase
-func (_ MSR2) Actions(context.Context, string) (phase.Actions, error) {
-	return phase.Actions{}, nil
+func (_ MSR2) Validate(context.Context) error {
+	return nil
 }

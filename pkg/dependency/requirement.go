@@ -32,14 +32,19 @@ func (rs Requirements) UnMatched(ctx context.Context) Requirements {
 
 // Requirement dependency definition from the perspective of the requirer
 type Requirement interface {
-	// Requirer identify the requirer with a string, which may be used for correlation in the future
-	Requirer() string
+	// Id unique identifier for the requirement
+	Id() string
 	// Describe the Requirements for labelling/auditing
 	Describe() string
 	// Match with a Dependency
 	Match(Dependency) error
 	// Matched has been Matched. If not matched return nil
 	Matched(context.Context) Dependency
+}
+
+type OptionalRequirement interface {
+	// Optoinal if no error is returned
+	Optional() error
 }
 
 // CollectRequirements from a set of HasDependencies

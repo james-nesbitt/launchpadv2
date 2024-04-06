@@ -12,12 +12,12 @@ func init() {
 
 }
 
-func DecodeMCRComponent(d func(interface{}) error) (component.Component, error) {
+func DecodeMCRComponent(id string, d func(interface{}) error) (component.Component, error) {
 	c := Config{}
 
 	if err := d(&c); err != nil {
 		return nil, fmt.Errorf("Failure to unmarshal product 'MCR' : %w", err)
 	}
 
-	return NewMCR(c), nil
+	return NewMCR(id, c), nil
 }

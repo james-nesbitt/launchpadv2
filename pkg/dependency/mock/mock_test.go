@@ -24,6 +24,7 @@ func Test_MockSanity(t *testing.T) {
 		"handler-first",
 		"handle the first dependency",
 		nil,
+		nil,
 	)
 
 	if d.Describe() != "handle the first dependency" {
@@ -37,5 +38,9 @@ func Test_MockSanity(t *testing.T) {
 		t.Errorf("Requirement that ws just matched thinks that it isn't matched: %+v", r)
 	} else if d.Id() != rd.Id() {
 		t.Error("Matched requirement returned the wrong dependency")
+	}
+
+	if err := d.Met(ctx); err != nil {
+		t.Errorf("Dependency returned unexpected error: %s", err.Error())
 	}
 }

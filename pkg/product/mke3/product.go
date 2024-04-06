@@ -3,16 +3,23 @@ package mke3
 import (
 	"context"
 
-	"github.com/Mirantis/launchpad/pkg/component"
-	"github.com/Mirantis/launchpad/pkg/host"
-	"github.com/Mirantis/launchpad/pkg/implementation/kubernetes"
-	"github.com/Mirantis/launchpad/pkg/phase"
-	"github.com/Mirantis/launchpad/pkg/product/mke3/implementation"
+	"github.com/Mirantis/launchpad/pkg/dependency"
+	"github.com/Mirantis/launchpad/pkg/product/mcr"
 )
 
+const (
+	ComponentType = "mke3"
+)
+
+func init() {
+	// Add MKE roles to the MCR role list as we need MCR on all nodes
+	mcr.MCRHostRoles = append(mcr.MCRHostRoles, []string{"manager", "worker"}...)
+}
+
 // NewMKE3 constructor for MKE3 from config.
-func NewMKE3(c Config) MKE3 {
-	return MKE3{
+func NewMKE3(id string, c Config) *MKE3 {
+	return &MKE3{
+		id:     id,
 		config: c,
 		state:  State{},
 	}
@@ -20,13 +27,19 @@ func NewMKE3(c Config) MKE3 {
 
 // MKE3 product implementation.
 type MKE3 struct {
+	id     string
 	config Config
 	state  State
+
+	dhr dependency.Requirement
 }
 
 // Name for the component
-func (_ MKE3) Name() string {
-	return "MKE3"
+func (p MKE3) Name() string {
+	if p.id == ComponentType {
+		return p.id
+	}
+	return p.id
 }
 
 // Debug product debug.
@@ -34,27 +47,7 @@ func (_ MKE3) Debug() interface{} {
 	return nil
 }
 
-// Provides a list of string labels which this Component provides,
-func (_ MKE3) Provides() []string {
-	return []string{}
-}
-
 // Validate that the cluster meets the needs of the Product
-func (_ MKE3) Validate(context.Context, host.Hosts, component.Components) ([]string, error) {
-	return []string{}, nil
-}
-
-// Actions to run for a particular string phase
-func (_ MKE3) Actions(context.Context, string) (phase.Actions, error) {
-	return phase.Actions{}, nil
-}
-
-// ImplementKubernetes
-func (_ MKE3) ImplementKubernetes(context.Context) (kubernetes.Kubernetes, error) {
-	return kubernetes.NewKubernetes(), nil
-}
-
-// ImplementK0sApi
-func (_ MKE3) ImplementK0SApi(context.Context) (implementation.API, error) {
-	return implementation.NewAPI(), nil
+func (_ MKE3) Validate(context.Context) error {
+	return nil
 }

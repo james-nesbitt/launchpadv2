@@ -2,36 +2,36 @@ package mock_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/Mirantis/launchpad/pkg/component"
 	mockcomponent "github.com/Mirantis/launchpad/pkg/component/mock"
 	"github.com/Mirantis/launchpad/pkg/dependency"
 	mockdependency "github.com/Mirantis/launchpad/pkg/dependency/mock"
-	"github.com/Mirantis/launchpad/pkg/phase"
 )
 
 func Test_MockSanity(t *testing.T) {
+	debug := "test"
+	validate := errors.New("an error")
+
 	var mc component.Component = mockcomponent.NewComponentWDependencies(
 		"one",
-		phase.Actions{},
+		debug,
+		validate,
 		dependency.Requirements{
-			mockdependency.Requirement(
-				"first",
-				"handled as the first",
-				nil,
-			),
+			mockdependency.Requirement("first", "handled as the first", nil),
 		},
-		mockdependency.Dependency(
-			"only",
-			"should get used for all requirements",
-			nil,
-		),
+		mockdependency.Dependency("only", "should get used for all requirements", nil, nil),
 		dependency.ErrDependencyNotHandled,
 	)
 
 	if mc.Name() != "one" {
 		t.Errorf("Unexpected component name: %s", mc.Name())
+	}
+
+	if err := mc.Validate(context.Background()); !errors.Is(err, validate) {
+		t.Errorf("wrong errors returned: %s", err.Error())
 	}
 }
 
@@ -39,19 +39,12 @@ func Test_MockDependencySanity(t *testing.T) {
 	ctx := context.Background()
 	mc := mockcomponent.NewComponentWDependencies(
 		"one",
-		phase.Actions{},
+		nil,
+		nil,
 		dependency.Requirements{
-			mockdependency.Requirement(
-				"first",
-				"handled as the first",
-				nil,
-			),
+			mockdependency.Requirement("first", "handled as the first", nil),
 		},
-		mockdependency.Dependency(
-			"only",
-			"should get used for all requirements",
-			nil,
-		),
+		mockdependency.Dependency("only", "should get used for all requirements", nil, nil),
 		dependency.ErrDependencyNotHandled,
 	)
 

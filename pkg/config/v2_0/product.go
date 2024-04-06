@@ -32,6 +32,7 @@ func (scs *SpecProducts) UnmarshalYAML(py *yaml.Node) error {
 	for id, spn := range spsc {
 		t := id
 		pc := struct {
+			Id      string `yaml:"id"`
 			Handler string `yaml:"handler"`
 		}{}
 
@@ -42,8 +43,11 @@ func (scs *SpecProducts) UnmarshalYAML(py *yaml.Node) error {
 		if pc.Handler != "" {
 			t = pc.Handler
 		}
+		if pc.Id != "" {
+			id = pc.Id
+		}
 
-		p, err := product.DecodeKnownProduct(t, spn.Decode)
+		p, err := product.DecodeKnownProduct(t, id, spn.Decode)
 		if err != nil {
 			errss = append(errss, fmt.Sprintf("%s: %s", id, err.Error()))
 			continue

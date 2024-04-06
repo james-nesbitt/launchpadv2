@@ -1,15 +1,13 @@
 package docker
 
-import "context"
-
-// ProvidesImplementation indicates that it can create a Docker ImplementationDocker
-type ProvidesImplementation interface {
-	ImplementDocker(context.Context) (Docker, error)
+type Version struct {
+	Version string
+	Plugins []string
 }
 
 // NewDocker Implementation
-func NewDocker() Docker {
-	return Docker{}
+func NewDocker() *Docker {
+	return &Docker{}
 }
 
 // Docker host level Docker implementation

@@ -10,8 +10,9 @@ import (
 
 // ---  host ---
 
-func NewHost(roles []string, decodeerror error) host.Host {
+func NewHost(id string, roles []string, decodeerror error) host.Host {
 	return ho{
+		id:          id,
 		Roles:       roles,
 		DecodeError: decodeerror,
 	}
@@ -19,8 +20,13 @@ func NewHost(roles []string, decodeerror error) host.Host {
 
 // Host a host type that does nothing, but can be used as a substitute when needed
 type ho struct {
+	id          string
 	Roles       []string `yaml:"roles"`
 	DecodeError error
+}
+
+func (h ho) Id() string {
+	return h.id
 }
 
 func (h ho) Exec(ctx context.Context, cmd string, inr io.Reader) (string, string, error) {

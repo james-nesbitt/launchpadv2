@@ -39,7 +39,7 @@ func (p *MSR2) getMK3(ctx context.Context) (*mke3.MKE3, error) {
 // Requires declare that we need a HostsRoles dependency
 func (p *MSR2) Requires(_ context.Context) dependency.Requirements {
 	p.mke3r = mke3.NewMKE3Requirement(
-		fmt.Sprintf("%s:%s", ComponentType, mke3.ComponentType),
+		p.Name(),
 		fmt.Sprintf("%s: relies on MKE for enzi", ComponentType),
 		mke3.MKE3DependencyConfig{},
 	)

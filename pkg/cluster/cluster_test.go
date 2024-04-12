@@ -17,7 +17,7 @@ func Test_ClusterComponentValidation(t *testing.T) {
 	ctx := context.Background()
 	e := errors.New("validation error")
 	cp := mockcomponent.NewComponent(
-		"one",
+		"mock",
 		nil,
 		e,
 	)
@@ -28,7 +28,7 @@ func Test_ClusterComponentValidation(t *testing.T) {
 
 	cl := cluster.Cluster{
 		Components: component.Components{
-			"one": cp,
+			"mock": cp,
 		},
 	}
 
@@ -75,5 +75,9 @@ func Test_ClusterDependencyValidation(t *testing.T) {
 
 	if err := cl.Validate(ctx); err != nil {
 		t.Errorf("unexpected error occured in validation: %s \n %+v", err.Error(), cl)
+	}
+
+	if cl_d := cl.Debug(ctx); cl_d == nil {
+		t.Errorf("cluster debug was empty: %+v", cl_d)
 	}
 }

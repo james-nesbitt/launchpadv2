@@ -41,3 +41,7 @@ func (h ho) HasRole(rs string) bool {
 	}
 	return false
 }
+
+func (h ho) IsWindows() bool {
+	return false
+}

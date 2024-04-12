@@ -1,17 +1,16 @@
 package implementation
 
-import "context"
-
-// ProvidesImplementation indicates that it can create a API ImplementationAPI
-type ProvidesImplementation interface {
-	ImplementK0SAPI(context.Context) (API, error)
+type Config struct {
 }
 
 // NewAPI Implementation
-func NewAPI() API {
-	return API{}
+func NewAPI(c Config) API {
+	return API{
+		config: c,
+	}
 }
 
 // API host level API implementation
 type API struct {
+	config Config
 }

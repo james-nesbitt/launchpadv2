@@ -34,7 +34,7 @@ the expected functionality.
 3. Component F received Requirement A-Rx and decides that it can fullfill it, so it
    returns Dependency Dx
 4. Component F also receives Requirement B-Rx which it can also fullfill, so it
-   returns again Dependency Dx
+   returns again Dependency Dx, or returns a new Dx_2
 5. Dependency Dx can be asked if it is Valid: "Do you think that you can provide 
    functionality X"
 6. Component A asks Dependency Dx to fullfill functionality X by first converting

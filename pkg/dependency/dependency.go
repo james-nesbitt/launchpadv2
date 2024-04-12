@@ -8,6 +8,7 @@ import (
 )
 
 var (
+	ErrDependencyWrongType         = errors.New("recieved the wrong type of dependency")          // something wads given the wrong kind of dependency
 	ErrDependencyNotMatched        = errors.New("dependency not met")                             // No handler satisfied this dependency
 	ErrDependencyShouldHaveHandled = errors.New("dependency not handled but it should have been") // This type of dependency is handled, and should have ben handled, but a failure occured.  Don't try any other handler
 	ErrDependencyNotHandled        = errors.New("dependency not handled by any provider")         // This type of dependency is not handled so somebody else should handle it (often requivalent to a nil error)
@@ -24,6 +25,14 @@ type FullfillsDependencies interface {
 
 // Dependencies set of Dependency items
 type Dependencies []Dependency
+
+func (ds Dependencies) Ids() []string {
+	ids := []string{}
+	for _, d := range ds {
+		ids = append(ids, d.Id())
+	}
+	return ids
+}
 
 // UnMet dependency requirements set
 func (ds Dependencies) Invalid(ctx context.Context) Dependencies {

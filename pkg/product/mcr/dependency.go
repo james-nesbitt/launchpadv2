@@ -15,7 +15,7 @@ import (
 // Requires declare that we need a HostsRoles dependency
 func (p *MCR) Requires(_ context.Context) dependency.Requirements {
 	p.rhr = host.NewHostsRolesRequirement(
-		fmt.Sprintf("%s:%s", p.id, host.RequiresHostsRolesType),
+		p.Name(),
 		fmt.Sprintf("MCR '%s' needs hosts as installation targets, using roles: %s", p.id, strings.Join(MCRHostRoles, ",")),
 		host.HostsRolesFilter{
 			Roles: MCRHostRoles,

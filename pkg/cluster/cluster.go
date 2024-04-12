@@ -25,7 +25,7 @@ type Cluster struct {
 }
 
 // Validate the cluster configuration
-func (cl Cluster) Validate(ctx context.Context) error {
+func (cl *Cluster) Validate(ctx context.Context) error {
 	cerrs := []error{}
 
 	// Dependency checking

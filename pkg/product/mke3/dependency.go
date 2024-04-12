@@ -23,7 +23,7 @@ func (p MKE3) ValidateMKE3DependencyConfig(dc MKE3DependencyConfig) error {
 // Requires declare that we need a HostsRoles dependency
 func (p *MKE3) Requires(_ context.Context) dependency.Requirements {
 	p.dhr = dockerhost.NewDockerHostsRequirement(
-		fmt.Sprintf("%s:%s", ComponentType, dockerhost.ImplementationType),
+		p.Name(),
 		fmt.Sprintf("%s: Needs docker hosts to install on", ComponentType),
 		docker.Version{},
 	)

@@ -5,6 +5,7 @@ go 1.21.4
 require (
 	github.com/k0sproject/rig/v2 v2.0.0-alpha.1
 	github.com/spf13/cobra v1.8.0
+	github.com/yourbasic/graph v0.0.0-20210606180040-8ecfec1c2869
 	gopkg.in/yaml.v3 v3.0.1
 )
 

@@ -1,10 +1,17 @@
 package implementation
 
+type Config struct {
+	Version string
+}
+
 // NewAPI Implementation
-func NewAPI() API {
-	return API{}
+func NewAPI(c Config) *API {
+	return &API{
+		config: c,
+	}
 }
 
 // API host level API implementation
 type API struct {
+	config Config
 }

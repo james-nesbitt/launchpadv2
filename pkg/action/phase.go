@@ -1,29 +1,48 @@
 package action
 
 import (
-	"context"
-
 	"github.com/Mirantis/launchpad/pkg/dependency"
 )
 
-type ProvidesPhases interface {
-	CommandPhases(ctx context.Context, command string) (dependency.Dependencies, PhaseGenerator)
-}
-
-type PhaseGenerator func(ctx context.Context) Phases
-
 type Phases []Phase
 
-type Phase interface {
-	Validate(context.Context) error
-	Run(context.Context) error
-	Rollback(context.Context) error
+func OrderPhases(psp *Phases, reverse bool) error {
+	os := orderables{}
+	for _, p := range *psp {
+		os = append(os, orderable{
+			requires: p.Requires.Ids(),
+			provides: p.Provides.Ids(),
+		})
+	}
+
+	oso, err := os.order(reverse)
+	if err != nil {
+		return err
+	}
+
+	ops := Phases{}
+	for _, oi := range oso {
+		p := (*psp)[oi]
+		ops = append(ops, p)
+	}
+	*psp = ops
+
+	return nil
 }
 
-type PhaseHasDependencies interface {
-	RequiresDependencies(context.Context) dependency.Dependencies
+type Phase struct {
+	Id string
+
+	Provides dependency.Dependencies
+	Requires dependency.Dependencies
 }
 
-type PhaseFullfillsDependencies interface {
-	FullfillsDependencies(context.Context, dependency.Dependency) bool
+func PhaseSteps(p *Phase) (Steps, error) {
+	ss := Steps{}
+
+	if err := OrderSteps(&ss, false); err != nil {
+		return ss, err
+	}
+
+	return ss, nil
 }

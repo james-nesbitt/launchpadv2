@@ -45,6 +45,10 @@ func (h *Host) Exec(ctx context.Context, cmd string, inr io.Reader) (string, str
 		&errs,
 	)
 
+	if cerr := h.Connect(ctx); cerr != nil {
+		return outs.String(), errs.String(), cerr
+	}
+
 	w, serr := h.StartProcess(ctx, cmd, inr, outw, errw)
 	if serr != nil {
 		return outs.String(), errs.String(), serr

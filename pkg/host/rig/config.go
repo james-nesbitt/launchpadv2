@@ -6,6 +6,6 @@ import "github.com/k0sproject/rig/v2"
 type Config struct {
 	rig.ClientWithConfig `yaml:",inline" json:",inline"`
 
-	Id   string `yaml:"id" json:"id"`
-	Role string `yaml:"role" json:"role"`
+	Id    string   `yaml:"id" json:"id"`
+	Roles []string `yaml:"roles" json:"role"`
 }

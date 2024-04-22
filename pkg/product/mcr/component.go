@@ -12,9 +12,10 @@ const (
 )
 
 var (
-	// MCRHostRoles roles that MCR considers targets for installation on
-	// Other products like MKE add roles to this list.
-	MCRHostRoles = []string{"mcr"}
+	// MCRManagerHostRoles the Host roles accepted for managers
+	MCRManagerHostRoles = []string{"manager"}
+	// MCRWorkerHostRoles the Host roles accepted for workers
+	MCRWorkerHostRoles = []string{"worker"}
 )
 
 // NewMCR constructor for MCR from config.
@@ -31,7 +32,12 @@ type MCR struct {
 	id string
 
 	// host roles req
-	rhr dependency.Requirement
+	mrhr dependency.Requirement // manager hosts requirement
+	wrhr dependency.Requirement // worker hosts requirement
+
+	// dependencies given out
+	dhd dependency.Dependency // docker (host) dependency
+	dsd dependency.Dependency // docker-swarm dependency
 
 	config Config
 	state  State

@@ -23,7 +23,7 @@ func Test_MockSanity(t *testing.T) {
 			mockdependency.Requirement("first", "handled as the first", nil),
 		},
 		mockdependency.Dependency("only", "should get used for all requirements", nil, nil),
-		dependency.ErrDependencyNotHandled,
+		dependency.ErrNotHandled,
 	)
 
 	if mc.Name() != "one" {
@@ -45,7 +45,7 @@ func Test_MockDependencySanity(t *testing.T) {
 			mockdependency.Requirement("first", "handled as the first", nil),
 		},
 		mockdependency.Dependency("only", "should get used for all requirements", nil, nil),
-		dependency.ErrDependencyNotHandled,
+		dependency.ErrNotHandled,
 	)
 
 	var mcr dependency.HasDependencies = mc

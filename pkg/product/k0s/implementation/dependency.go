@@ -31,6 +31,14 @@ func NewRequiresK0s(id string, desc string, config K0sDependencyConfig) *reqK0s 
 	}
 }
 
+func NewK0sDependency(id string, desc string, factory func(context.Context) (*API, error)) *k0sDep {
+	return &k0sDep{
+		id:      id,
+		desc:    desc,
+		factory: factory,
+	}
+}
+
 type reqK0s struct {
 	id   string
 	desc string
@@ -70,7 +78,12 @@ func (r reqK0s) RequiresK0s(_ context.Context) K0sDependencyConfig {
 	return r.config
 }
 
-type depK0s struct {
+// KubernetesDependency Kubernetes providing Dependency
+type K0sDependency interface {
+	K0s(ctx context.Context) *API
+}
+
+type k0sDep struct {
 	id   string
 	desc string
 
@@ -78,22 +91,27 @@ type depK0s struct {
 }
 
 // Id unique identifier for the dependency
-func (d depK0s) Id() string {
+func (d k0sDep) Id() string {
 	return d.id
 }
 
 // Descibe the dependency
-func (d depK0s) Describe() string {
+func (d k0sDep) Describe() string {
 	return d.desc
 }
 
+// Validate the dependency
+func (d k0sDep) Validate(_ context.Context) error {
+	return nil
+}
+
 // Met has the dependency been met by the fullfilling backend
-func (d depK0s) Met(ctx context.Context) error {
+func (d k0sDep) Met(ctx context.Context) error {
 	_, err := d.factory(ctx)
 	return err
 }
 
 // ProvidesK0s fullfill the K0s API dependency
-func (d depK0s) ProvidesK0s(ctx context.Context) (*API, error) {
+func (d k0sDep) ProvidesK0s(ctx context.Context) (*API, error) {
 	return d.factory(ctx)
 }

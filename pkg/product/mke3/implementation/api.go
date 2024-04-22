@@ -15,3 +15,7 @@ func NewAPI(c Config) *API {
 type API struct {
 	config Config
 }
+
+func (a API) Version() string {
+	return a.config.Version
+}

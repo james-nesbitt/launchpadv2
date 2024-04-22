@@ -23,7 +23,7 @@ func (shs *SpecHosts) UnmarshalYAML(py *yaml.Node) error {
 	shsc := map[string]yaml.Node{}
 
 	if err := py.Decode(&shsc); err != nil {
-		return fmt.Errorf("failed to decode spec hosts")
+		return fmt.Errorf("failed to decode spec hosts: %s", err.Error())
 	}
 
 	errss := []string{}

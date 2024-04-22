@@ -1,6 +1,6 @@
 module github.com/Mirantis/launchpad
 
-go 1.21.4
+go 1.22.2
 
 require (
 	github.com/k0sproject/rig/v2 v2.0.0-alpha.1

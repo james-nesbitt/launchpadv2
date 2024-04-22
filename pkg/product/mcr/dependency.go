@@ -14,41 +14,33 @@ import (
 
 // Requires declare that we need a HostsRoles dependency
 func (p *MCR) Requires(_ context.Context) dependency.Requirements {
-	p.rhr = host.NewHostsRolesRequirement(
-		p.Name(),
-		fmt.Sprintf("MCR '%s' needs hosts as installation targets, using roles: %s", p.id, strings.Join(MCRHostRoles, ",")),
-		host.HostsRolesFilter{
-			Roles: MCRHostRoles,
-			Min:   1,
-			Max:   0,
-		},
-	)
-
-	return dependency.Requirements{p.rhr}
-}
-
-func (p *MCR) getHosts(ctx context.Context) (*host.Hosts, error) {
-	if p.rhr == nil {
-		return nil, fmt.Errorf("%s: Missing Hosts dependency", ComponentType)
+	if p.mrhr == nil {
+		p.mrhr = host.NewHostsRolesRequirement(
+			fmt.Sprintf("%s:%s:manager", host.HostsComponentType, p.Name()),
+			fmt.Sprintf("MCR '%s' needs at least one manager host as installation targets, using roles: %s", p.id, strings.Join(MCRManagerHostRoles, ",")),
+			host.HostsRolesFilter{
+				Roles: MCRManagerHostRoles,
+				Min:   1,
+				Max:   0,
+			},
+		)
+	}
+	if p.wrhr == nil {
+		p.wrhr = host.NewHostsRolesRequirement(
+			fmt.Sprintf("%s:%s:worker", host.HostsComponentType, p.Name()),
+			fmt.Sprintf("MCR '%s' accepts any number of worker hosts as installation targets, using roles: %s", p.id, strings.Join(MCRWorkerHostRoles, ",")),
+			host.HostsRolesFilter{
+				Roles: MCRWorkerHostRoles,
+				Min:   0,
+				Max:   0,
+			},
+		)
 	}
 
-	d := p.rhr.Matched(ctx)
-	if d == nil {
-		return nil, fmt.Errorf("%s: Hosts dependency not Matched", ComponentType)
+	return dependency.Requirements{
+		p.mrhr,
+		p.wrhr,
 	}
-
-	if err := d.Met(ctx); err != nil {
-		return nil, fmt.Errorf("%s: Host dependency not Met: %w", ComponentType, err)
-	}
-
-	rhd, ok := d.(host.HostsDependency)
-	if !ok {
-		return nil, fmt.Errorf("%s: Hosts dependency wrong type: %+v", ComponentType, d)
-	}
-
-	hs := rhd.ProduceHosts(ctx)
-
-	return hs, nil
 }
 
 // Provides dependencies
@@ -61,50 +53,80 @@ func (p *MCR) Provides(ctx context.Context, r dependency.Requirement) (dependenc
 
 		v := dhr.NeedsDockerHost(ctx)
 
-		dhd := dockerhost.NewDockerHostsDependency(
-			fmt.Sprintf("%s:%s", ComponentType, dockerhost.ImplementationType),
-			fmt.Sprintf("Docker hosts for requirement: %s", r.Describe()),
-			func(ctx context.Context) (*dockerhost.DockerHosts, error) {
-				dh, err := p.getDockerHosts(ctx, v)
-				if err != nil {
-					return nil, err
-				}
+		if p.dhd == nil {
+			p.dhd = dockerhost.NewDockerHostsDependency(
+				fmt.Sprintf("%s:%s", ComponentType, dockerhost.ImplementationType),
+				fmt.Sprintf("Docker hosts for requirement: %s", r.Describe()),
+				func(ctx context.Context) (*dockerhost.DockerHosts, error) {
+					dh, err := p.getDockerHosts(ctx, v)
+					if err != nil {
+						return nil, err
+					}
 
-				return dh, nil
-			},
-		)
+					return dh, nil
+				},
+			)
+		}
 
-		return dhd, nil
+		return p.dhd, nil
 	}
 	if dsr, ok := r.(swarm.DockerSwarmRequirement); ok {
 		// DockerSwarm dependency
 
 		v := dsr.NeedsDockerSwarm(ctx)
 
-		dsd := swarm.NewDockerSwarmDependency(
-			fmt.Sprintf("%s:%s", ComponentType, "DockerSwarm"),
-			fmt.Sprintf("Docker Swarm for requirement: %s", r.Describe()),
-			func(ctx context.Context) (*swarm.Swarm, error) {
-				cfg := swarm.Config{}
-				s := swarm.NewSwarm(cfg)
+		if p.dsd == nil {
+			p.dsd = swarm.NewDockerSwarmDependency(
+				fmt.Sprintf("%s:%s", ComponentType, "DockerSwarm"),
+				fmt.Sprintf("Docker Swarm for requirement: %s", r.Describe()),
+				func(ctx context.Context) (*swarm.Swarm, error) {
+					cfg := swarm.Config{}
+					s := swarm.NewSwarm(cfg)
 
-				if err := s.ValidateVersion(v); err != nil {
-					return nil, err
-				}
+					if err := s.ValidateVersion(v); err != nil {
+						return nil, err
+					}
 
-				return s, nil
-			},
-		)
+					return s, nil
+				},
+			)
+		}
 
-		return dsd, nil
+		return p.dsd, nil
 	}
 
 	return nil, nil
 }
 
 func (p *MCR) getDockerHosts(ctx context.Context, version docker.Version) (*dockerhost.DockerHosts, error) {
-	hs, err := p.getHosts(ctx)
-	if err != nil {
+	hs := host.Hosts{}
+
+	addRequirementHosts := func(r dependency.Requirement) error {
+		if r == nil {
+			return fmt.Errorf("no requirement provided")
+		}
+
+		d := r.Matched(ctx)
+		if d == nil {
+			return fmt.Errorf("no hosts dependency matched for requirement")
+		}
+
+		hd, ok := d.(host.HostsDependency)
+		if !ok {
+			return fmt.Errorf("wrong dependency type")
+		}
+
+		for id, h := range *hd.ProduceHosts(ctx) {
+			hs[id] = h
+		}
+
+		return nil
+	}
+
+	if err := addRequirementHosts(p.mrhr); err != nil {
+		return nil, err
+	}
+	if err := addRequirementHosts(p.wrhr); err != nil {
 		return nil, err
 	}
 

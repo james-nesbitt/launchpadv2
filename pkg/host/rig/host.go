@@ -28,7 +28,13 @@ func (h Host) Id() string {
 
 // HasRole answer boolean if a host has a role
 func (h Host) HasRole(role string) bool {
-	return h.Config.Role == role
+	for _, r := range h.Config.Roles {
+		if r == role {
+			return true
+		}
+	}
+
+	return false
 }
 
 // Exec a command

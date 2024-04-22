@@ -4,17 +4,11 @@ import (
 	"context"
 
 	"github.com/Mirantis/launchpad/pkg/dependency"
-	"github.com/Mirantis/launchpad/pkg/product/mcr"
 )
 
 const (
 	ComponentType = "mke3"
 )
-
-func init() {
-	// Add MKE roles to the MCR role list as we need MCR on all nodes
-	mcr.MCRHostRoles = append(mcr.MCRHostRoles, []string{"manager", "worker"}...)
-}
 
 // NewMKE3 constructor for MKE3 from config.
 func NewMKE3(id string, c Config) *MKE3 {
@@ -31,7 +25,10 @@ type MKE3 struct {
 	config Config
 	state  State
 
-	dhr dependency.Requirement
+	dhr dependency.Requirement // Docker hosts dependency
+
+	k8sd dependency.Dependency
+	mked dependency.Dependency
 }
 
 // Name for the component

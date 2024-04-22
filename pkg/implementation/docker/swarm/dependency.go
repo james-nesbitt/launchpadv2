@@ -85,7 +85,7 @@ func (dhd dockerSwarmDep) Describe() string {
 
 func (dhd dockerSwarmDep) Validate(context.Context) error {
 	if dhd.factory == nil {
-		return dependency.ErrDependencyShouldHaveHandled
+		return dependency.ErrShouldHaveHandled
 	}
 
 	return nil

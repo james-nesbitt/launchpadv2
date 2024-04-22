@@ -15,12 +15,15 @@ func NewHostsComponent(id string, hosts Hosts) *HostsComponent {
 	return &HostsComponent{
 		id:    id,
 		hosts: hosts,
+		deps:  dependency.Dependencies{},
 	}
 }
 
 type HostsComponent struct {
 	id    string
 	hosts Hosts
+
+	deps dependency.Dependencies
 }
 
 func (hc HostsComponent) Name() string {
@@ -47,7 +50,7 @@ func (hc *HostsComponent) Provides(ctx context.Context, req dependency.Requireme
 		f := rhr.RequireHostsRoles(ctx)
 
 		d := NewHostsDependency(
-			fmt.Sprintf("%s:%s", hc.id, RequiresHostsRolesType),
+			fmt.Sprintf("%s:%s:%s", hc.id, RequiresHostsRolesType, req.Id()),
 			req.Describe(),
 			func(ctx context.Context) (*Hosts, error) {
 				h, err := hc.hosts.FilterRoles(f)
@@ -55,7 +58,7 @@ func (hc *HostsComponent) Provides(ctx context.Context, req dependency.Requireme
 			},
 		)
 
-		// @TODO should we early validate the requirement?
+		hc.deps = append(hc.deps, d)
 
 		return d, nil
 	}

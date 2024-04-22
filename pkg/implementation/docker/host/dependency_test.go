@@ -16,7 +16,7 @@ func Test_DependencySanity(t *testing.T) {
 		Version: "23.0.9",
 	}
 	dh := dockerhost.NewDockerHosts(
-		&host.Hosts{},
+		host.Hosts{},
 		v,
 	)
 

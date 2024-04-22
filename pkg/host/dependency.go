@@ -3,6 +3,10 @@ package host
 import (
 	"context"
 	"errors"
+	"fmt"
+
+	"github.com/Mirantis/launchpad/pkg/action"
+	"github.com/Mirantis/launchpad/pkg/dependency"
 )
 
 var (
@@ -25,6 +29,8 @@ type hostsDep struct {
 	id       string
 	describe string
 	factory  func(context.Context) (*Hosts, error)
+
+	events action.Events
 }
 
 // Id uniquely identify the Dependency
@@ -60,4 +66,18 @@ func (hd hostsDep) Met(ctx context.Context) error {
 func (hd hostsDep) ProduceHosts(ctx context.Context) *Hosts {
 	hs, _ := hd.factory(ctx)
 	return hs
+}
+
+func (hd *hostsDep) DeliversEvents(ctx context.Context) action.Events {
+	if hd.events == nil {
+		hd.events = action.Events{
+			dependency.EventKeyActivated: &action.Event{
+				Id: fmt.Sprintf("%s:%s", hd.Id(), dependency.EventKeyActivated),
+			},
+			dependency.EventKeyDeActivated: &action.Event{
+				Id: fmt.Sprintf("%s:%s", hd.Id(), dependency.EventKeyDeActivated),
+			},
+		}
+	}
+	return hd.events
 }

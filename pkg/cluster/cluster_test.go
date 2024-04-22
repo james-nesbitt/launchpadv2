@@ -50,7 +50,7 @@ func Test_ClusterDependencyValidation(t *testing.T) {
 					mockdependency.Requirement("first", "handled as the first", nil),
 				},
 				nil,
-				dependency.ErrDependencyNotHandled,
+				dependency.ErrNotHandled,
 			),
 			"two": mockcomponent.NewComponentWDependencies(
 				"two",
@@ -60,7 +60,7 @@ func Test_ClusterDependencyValidation(t *testing.T) {
 					mockdependency.Requirement("second", "handled as the second", nil),
 				},
 				nil,
-				dependency.ErrDependencyNotHandled,
+				dependency.ErrNotHandled,
 			),
 			"three": mockcomponent.NewComponentWDependencies(
 				"three",

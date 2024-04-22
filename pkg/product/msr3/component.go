@@ -1,4 +1,4 @@
-package msr2
+package msr3
 
 import (
 	"context"
@@ -7,29 +7,29 @@ import (
 )
 
 const (
-	ComponentType = "msr2"
+	ComponentType = "msr3"
 )
 
-// NewMSR2 constructor for MSR2 from config.
-func NewMSR2(id string, c Config) *MSR2 {
-	return &MSR2{
+// NewMSR3 constructor for MSR3 from config.
+func NewMSR3(id string, c Config) *MSR3 {
+	return &MSR3{
 		id:     id,
 		config: c,
 		state:  State{},
 	}
 }
 
-// MSR2 product implementation.
-type MSR2 struct {
+// MSR3 product implementation.
+type MSR3 struct {
 	id     string
 	config Config
 	state  State
 
-	mke3r dependency.Requirement
+	k8sr dependency.Requirement
 }
 
 // Name for the component
-func (p MSR2) Name() string {
+func (p MSR3) Name() string {
 	if p.id == ComponentType {
 		return p.id
 	}
@@ -37,11 +37,11 @@ func (p MSR2) Name() string {
 }
 
 // Debug product debug.
-func (_ MSR2) Debug() interface{} {
+func (_ MSR3) Debug() interface{} {
 	return nil
 }
 
 // Validate that the cluster meets the needs of the Product
-func (_ MSR2) Validate(context.Context) error {
+func (_ MSR3) Validate(context.Context) error {
 	return nil
 }

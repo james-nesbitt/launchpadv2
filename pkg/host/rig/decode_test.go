@@ -1,3 +1,6 @@
+//go:build rig_integration
+// +build rig_integration
+
 package righost_test
 
 import (
@@ -9,28 +12,7 @@ import (
 )
 
 var (
-	rigHostsYaml = `
-one:
-  role: manager
-  ssh:
-    address: 44.199.212.106
-    user: ubuntu
-    keyPath: /home/jnesbitt/Documents/Mirantis/infra/lp2/ssh-keys/jn-lp2-common.pem
-two:
-  role: worker
-  ssh:
-    address: 18.235.0.25
-    user: ubuntu
-    keyPath: /home/jnesbitt/Documents/Mirantis/infra/lp2/ssh-keys/jn-lp2-common.pem
-three:
-  role: worker
-  winRM:
-    address: 34.236.242.90
-    user: Administrator
-    password: t2estp@ss!
-    useHTTPS: true
-    insecure: true
-`
+	rigHostsYaml = "" // FILL THIS WITH A TEST ARGUMENT
 )
 
 func Test_RigDecode_Integration(t *testing.T) {

@@ -1,48 +1,16 @@
 package action
 
 import (
-	"github.com/Mirantis/launchpad/pkg/dependency"
+	"context"
 )
 
-type Phases []Phase
-
-func OrderPhases(psp *Phases, reverse bool) error {
-	os := orderables{}
-	for _, p := range *psp {
-		os = append(os, orderable{
-			requires: p.Requires.Ids(),
-			provides: p.Provides.Ids(),
-		})
-	}
-
-	oso, err := os.order(reverse)
-	if err != nil {
-		return err
-	}
-
-	ops := Phases{}
-	for _, oi := range oso {
-		p := (*psp)[oi]
-		ops = append(ops, p)
-	}
-	*psp = ops
-
-	return nil
-}
-
-type Phase struct {
-	Id string
-
-	Provides dependency.Dependencies
-	Requires dependency.Dependencies
-}
-
-func PhaseSteps(p *Phase) (Steps, error) {
-	ss := Steps{}
-
-	if err := OrderSteps(&ss, false); err != nil {
-		return ss, err
-	}
-
-	return ss, nil
+// Phase an executable action in a command
+//
+//	NOTE that Phases get sorted based on events, but you can use the events
+//	  interfaces for that.
+type Phase interface {
+	// Uniquely identify the phase
+	Id() string
+	// Execute the phase
+	Run(context.Context) error
 }

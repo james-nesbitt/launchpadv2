@@ -2,7 +2,13 @@ package dependency
 
 import (
 	"context"
+	"errors"
 	"log/slog"
+)
+
+var (
+	ErrRequirementNotCreated = errors.New("requirement not created") // A requirement exists but was never initialized (is nil)
+	ErrRequirementNotMatched = errors.New("requirement not matched") // a Requirement exists but has no Dependency Matched (is nil)
 )
 
 // HasDependencies can determine its dependencies

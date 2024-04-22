@@ -5,7 +5,7 @@ import (
 	"github.com/Mirantis/launchpad/pkg/implementation/docker"
 )
 
-func NewDockerHosts(hosts *host.Hosts, version docker.Version) *DockerHosts {
+func NewDockerHosts(hosts host.Hosts, version docker.Version) *DockerHosts {
 	return &DockerHosts{
 		hosts:   hosts,
 		version: version,
@@ -13,6 +13,6 @@ func NewDockerHosts(hosts *host.Hosts, version docker.Version) *DockerHosts {
 }
 
 type DockerHosts struct {
-	hosts   *host.Hosts
+	hosts   host.Hosts
 	version docker.Version
 }

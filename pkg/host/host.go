@@ -1,17 +1,15 @@
 package host
 
-// NewHost Host constructor from HostConfig
-func NewHost(hc HostConfig) Host {
-	return Host{config: hc}
-}
+import (
+	"context"
+	"io"
+)
 
-// Host definition for one cluster target
-type Host struct {
-	config       HostConfig
-	anotherthing string
-}
+type Host interface {
+	Id() string
+	HasRole(string) bool
 
-// HasRole answer boolean if a host has a role
-func (h Host) HasRole(role string) bool {
-	return h.config.Role == role
+	Exec(ctx context.Context, cmd string, inr io.Reader) (string, string, error)
+
+	IsWindows() bool
 }

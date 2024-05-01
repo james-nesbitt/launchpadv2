@@ -10,7 +10,7 @@ import (
 	"github.com/Mirantis/launchpad/pkg/action"
 	_ "github.com/Mirantis/launchpad/pkg/config/v2_0"
 	// Register Host handlers
-	//_ "github.com/Mirantis/launchpad/pkg/host/mock"
+	_ "github.com/Mirantis/launchpad/pkg/host/mock"
 	_ "github.com/Mirantis/launchpad/pkg/host/rig"
 	// Register actual product handlers for testing
 	_ "github.com/Mirantis/launchpad/pkg/product/k0s"
@@ -104,4 +104,3 @@ func Test_NextGenResetCommand(t *testing.T) {
 	}
 
 }
-

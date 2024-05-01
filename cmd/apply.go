@@ -1,5 +1,5 @@
 /*
-Copyright © 2023 NAME HERE <EMAIL ADDRESS>
+Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 */
 package cmd
 
@@ -15,9 +15,9 @@ import (
 	"github.com/Mirantis/launchpad/pkg/config"
 )
 
-// statusCmd represents the status command.
-var statusCmd = &cobra.Command{
-	Use:   "status",
+// applyCmd represents the apply command
+var applyCmd = &cobra.Command{
+	Use:   "apply",
 	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
@@ -47,7 +47,7 @@ to quickly create a Cobra application.`,
 			return fmt.Errorf("cluster validation error: %s", valerr.Error())
 		}
 
-		sc, err := cl.Command(ctx, action.CommandKeyDiscover)
+		sc, err := cl.Command(ctx, action.CommandKeyApply)
 		if err != nil {
 			return fmt.Errorf("cluster command build error: %s", err.Error())
 		}
@@ -65,15 +65,15 @@ to quickly create a Cobra application.`,
 }
 
 func init() {
-	rootCmd.AddCommand(statusCmd)
+	rootCmd.AddCommand(applyCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// statusCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// applyCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// statusCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// applyCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

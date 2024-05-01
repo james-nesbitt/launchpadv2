@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// NewRigHostHost Host constructor from HostConfig
+// NewRigHostHost Host constructor from HostConfig.
 func NewHost(hc *Config) Host {
 	return Host{
 		Config: hc,
@@ -15,18 +15,18 @@ func NewHost(hc *Config) Host {
 	}
 }
 
-// Host definition for one cluster target
+// Host definition for one cluster target.
 type Host struct {
 	*Config
 	state *State
 }
 
-// Id unique ID for the host
+// Id unique ID for the host.
 func (h Host) Id() string {
 	return h.Config.Id
 }
 
-// HasRole answer boolean if a host has a role
+// HasRole answer boolean if a host has a role.
 func (h Host) HasRole(role string) bool {
 	for _, r := range h.Config.Roles {
 		if r == role {
@@ -37,7 +37,7 @@ func (h Host) HasRole(role string) bool {
 	return false
 }
 
-// Exec a command
+// Exec a command.
 func (h *Host) Exec(ctx context.Context, cmd string, inr io.Reader) (string, string, error) {
 	outs := strings.Builder{}
 	outw := io.MultiWriter(
@@ -67,11 +67,11 @@ func (h *Host) Exec(ctx context.Context, cmd string, inr io.Reader) (string, str
 	return outs.String(), errs.String(), nil
 }
 
-// RigHostState state for the host
+// RigHostState state for the host.
 type State struct {
 }
 
-// LogCmdLogger write slogs
+// LogCmdLogger write slogs.
 type LogCmdLogger struct {
 	level string
 }

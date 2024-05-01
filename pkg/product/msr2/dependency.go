@@ -10,13 +10,13 @@ import (
 	mke3implementation "github.com/Mirantis/launchpad/pkg/product/mke3/implementation"
 )
 
-// Requires declare that we need a HostsRoles dependency
+// Requires declare that we need a HostsRoles dependency.
 func (c *MSR2) Requires(_ context.Context) dependency.Requirements {
 	if c.dhr == nil {
 		c.dhr = dockerhost.NewDockerHostsRequirement(
 			fmt.Sprintf("%s:%s", c.Name(), dockerhost.ImplementationType),
 			fmt.Sprintf("%s: Needs docker hosts to install on", ComponentType),
-			docker.Version{}, // <--- Put in here some limitaitons on what docker version are acceptable
+			docker.Version{}, // <--- Put in here some limitation on what docker version are acceptable
 		)
 	}
 	if c.mke3r == nil {

@@ -66,7 +66,7 @@ func Test_DependencySanity(t *testing.T) {
 	}
 
 	if err := r.Match(dd); err != nil {
-		t.Errorf("DockerHost requirment returned an error when matched: %s", err.Error())
+		t.Errorf("DockerHost requirement returned an error when matched: %s", err.Error())
 	}
 
 	// 6. The source of the requirement will retrieve the dependency from the requiremnt,

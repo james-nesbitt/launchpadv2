@@ -13,17 +13,17 @@ const (
 )
 
 var (
-	// ErrDependencyWrongType something was given the wrong kind of dependency
-	ErrDependencyWrongType = errors.New("recieved the wrong type of dependency")
-	// ErrDependencyNotMatched No handler satisfied this dependency
+	// ErrDependencyWrongType something was given the wrong kind of dependency.
+	ErrDependencyWrongType = errors.New("received the wrong type of dependency")
+	// ErrDependencyNotMatched No handler satisfied this dependency.
 	ErrDependencyNotMatched = errors.New("dependency not met")
-	// ErrShouldHaveHandled This type of dependency is handled, and should have ben handled, but a failure occured.  Don't try any other handler
+	// ErrShouldHaveHandled This type of dependency is handled, and should have ben handled, but a failure occured.  Don't try any other handler.
 	ErrShouldHaveHandled = errors.New("dependency not handled but it should have been")
-	// ErrNotHandled type of dependency is not handled so somebody else should handle it (often requivalent to a nil error)
+	// ErrNotHandled type of dependency is not handled so somebody else should handle it (often requivalent to a nil error).
 	ErrNotHandled = errors.New("dependency not handled by any provider")
 )
 
-// FullfillsDependencies components that can meet dependency needs
+// FullfillsDependencies components that can meet dependency needs.
 type FullfillsDependencies interface {
 	// ProvidesDependency a dependency for some type of Requirements.
 	// - if the error .Is(ErrDependencyNotHandled) then  Provider doesn't handle such requirement
@@ -32,7 +32,7 @@ type FullfillsDependencies interface {
 	Provides(context.Context, Requirement) (Dependency, error)
 }
 
-// Dependencies set of Dependency items
+// Dependencies set of Dependency items.
 type Dependencies []Dependency
 
 func NewDependencies(dsa ...Dependency) Dependencies {
@@ -70,7 +70,7 @@ func (ds Dependencies) Ids() []string {
 	return ids
 }
 
-// UnMet dependency requirements set
+// UnMet dependency requirements set.
 func (ds Dependencies) Invalid(ctx context.Context) Dependencies {
 	uds := Dependencies{}
 
@@ -96,18 +96,18 @@ func (ds Dependencies) Intersect(ds2 Dependencies) Dependencies {
 	return icd
 }
 
-// Dependency response to a Dependency Requirement which can fullfill it
+// Dependency response to a Dependency Requirement which can fullfill it.
 type Dependency interface {
 	// Id uniquely identify the Dependency
 	Id() string
 	// Describe the dependency for logging and auditing
-	Describe() string // Validate the the dependency thinks it has what it needs to fullfill it
-	// Validate the the dependency thinks it has what it needs to fullfill it
+	Describe() string // Validate the the dependency thinks it has what it needs to fulfill it
+	// Validate the the dependency thinks it has what it needs to fulfill it
 	//   Validation does not meet the dependency, it only confirms that the dependency can be met
 	//   when it is needed.  Each requirement will have its own interface for individual types of
 	//   requirements.
 	Validate(context.Context) error
-	// Met is the dependency fullfilled, or is it still blocked/waiting for fulfillment
+	// Met is the dependency fulfilled, or is it still blocked/waiting for fulfillment
 	Met(context.Context) error
 }
 

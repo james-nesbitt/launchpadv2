@@ -19,12 +19,12 @@ var (
 
 type Steps []Step
 
-// Add a Step to the set of Steps
+// Add a Step to the set of Steps.
 func (ss *Steps) Add(sa Step) {
 	*ss = append(*ss, sa)
 }
 
-// Merge two Steps together
+// Merge two Steps together.
 func (ss *Steps) Merge(ssa Steps) {
 	*ss = append(*ss, ssa...)
 }
@@ -33,13 +33,13 @@ func (ss Steps) Order() (Steps, error) {
 	return Steps{}, nil
 }
 
-// Step in a stepped Phase
+// Step in a stepped Phase.
 type Step interface {
 	Id() string
 	Run(context.Context) error
 }
 
-// NewSteppedPhase create an empty phase with steps that can optionally be ordered
+// NewSteppedPhase create an empty phase with steps that can optionally be ordered.
 func NewSteppedPhase(id string, orderable bool) steppedPhase {
 	return steppedPhase{
 		id:        id,
@@ -51,7 +51,7 @@ func NewSteppedPhase(id string, orderable bool) steppedPhase {
 	}
 }
 
-// steppedPhase a phase which runs a sequence of steps
+// steppedPhase a phase which runs a sequence of steps.
 type steppedPhase struct {
 	id        string
 	orderable bool // if true then the steps will be ordered before running

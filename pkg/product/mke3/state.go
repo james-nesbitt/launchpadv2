@@ -1,5 +1,5 @@
 package mke3
 
-// State
+// State.
 type State struct {
 }

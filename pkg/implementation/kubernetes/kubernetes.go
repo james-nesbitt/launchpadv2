@@ -9,19 +9,19 @@ type Version struct {
 	APIs    []string
 }
 
-// NewKubernetes constructor
+// NewKubernetes constructor.
 func NewKubernetes(config Config) *Kubernetes {
 	return &Kubernetes{
 		config: config,
 	}
 }
 
-// Kubernetes implementation
+// Kubernetes implementation.
 type Kubernetes struct {
 	config Config
 }
 
-// IsValidaKubernetesVersion is the k8s version an acceptable value for this code base
+// IsValidaKubernetesVersion is the k8s version an acceptable value for this code base.
 func IsValidKubernetesVersion(_ Version) error {
 	return nil
 }

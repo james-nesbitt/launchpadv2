@@ -15,7 +15,7 @@ import (
 	"github.com/Mirantis/launchpad/pkg/config"
 )
 
-// resetCmd represents the reset command
+// resetCmd represents the reset command.
 var resetCmd = &cobra.Command{
 	Use:   "reset",
 	Short: "A brief description of your command",
@@ -40,7 +40,7 @@ to quickly create a Cobra application.`,
 
 		cl, umerr := config.ConfigFromYamllBytes(yb)
 		if umerr != nil {
-			return fmt.Errorf("Error occured unarshalling yaml: %s \nYAML:\b%s", umerr.Error(), yb)
+			return fmt.Errorf("Error occurred unarshalling yaml: %s \nYAML:\b%s", umerr.Error(), yb)
 		}
 
 		if valerr := cl.Validate(ctx); valerr != nil {

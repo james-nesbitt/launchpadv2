@@ -11,7 +11,7 @@ import (
 	"github.com/Mirantis/launchpad/pkg/product/mke3/implementation"
 )
 
-// Requires declare that we need a HostsRoles dependency
+// Requires declare that we need a HostsRoles dependency.
 func (c *MKE3) Requires(_ context.Context) dependency.Requirements {
 	if c.dhr == nil {
 		c.dhr = dockerhost.NewDockerHostsRequirement(
@@ -26,7 +26,7 @@ func (c *MKE3) Requires(_ context.Context) dependency.Requirements {
 	}
 }
 
-// Provides dependencies
+// Provides dependencies.
 func (c *MKE3) Provides(ctx context.Context, r dependency.Requirement) (dependency.Dependency, error) {
 	if mke3r, ok := r.(implementation.MKE3Requirement); ok {
 		// MKE3 dependency
@@ -72,7 +72,7 @@ func (c *MKE3) Provides(ctx context.Context, r dependency.Requirement) (dependen
 	return nil, nil
 }
 
-// ValidateDependencyConfig validate that the dependency configuration can be met
+// ValidateDependencyConfig validate that the dependency configuration can be met.
 func (c MKE3) ValidateMKE3DependencyConfig(dc implementation.MKE3DependencyConfig) error {
 	return nil
 }

@@ -10,11 +10,11 @@ import (
 )
 
 const (
-	// Apply command means ensure that resources are in place
+	// Apply command means ensure that resources are in place.
 	CommandKeyApply = "apply"
-	// Reset command means ensure that resources are removed
+	// Reset command means ensure that resources are removed.
 	CommandKeyReset = "reset"
-	// Discover command means discover what resources are in place (state)
+	// Discover command means discover what resources are in place (state).
 	CommandKeyDiscover = "discover"
 )
 
@@ -64,7 +64,7 @@ type Command struct {
 	Phases Phases
 }
 
-// Validate the command
+// Validate the command.
 func (cmd *Command) Validate(ctx context.Context) error {
 	errs := []error{}
 
@@ -100,7 +100,7 @@ func (cmd *Command) Validate(ctx context.Context) error {
 	return nil
 }
 
-// Run execute the command
+// Run execute the command.
 func (cmd *Command) Run(ctx context.Context) error {
 	po, oerr := cmd.Phases.Order(ctx)
 	if oerr != nil {

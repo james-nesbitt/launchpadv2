@@ -8,7 +8,7 @@ import (
 	"github.com/Mirantis/launchpad/pkg/cluster"
 )
 
-// ConfigBase interpretation for what type of config is being handled
+// ConfigBase interpretation for what type of config is being handled.
 type ConfigBase struct {
 	APIVersion string     `yaml:"apiVersion" validate:"eq=launchpad.mirantis.com/v2.0"`
 	Kind       string     `yaml:"kind" validate:"eq=cluster"`
@@ -21,7 +21,7 @@ type ConfigMeta struct {
 	Name string `yaml:"name" validate:"required"`
 }
 
-// ConfigFromYamllBytes convert bytes of yaml to a cluster object
+// ConfigFromYamllBytes convert bytes of yaml to a cluster object.
 func ConfigFromYamllBytes(b []byte) (cluster.Cluster, error) {
 	var cl cluster.Cluster
 	var cb ConfigBase

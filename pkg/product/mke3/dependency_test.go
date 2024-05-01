@@ -11,7 +11,7 @@ import (
 	mke3implementation "github.com/Mirantis/launchpad/pkg/product/mke3/implementation"
 )
 
-// Prove that the MKE3 Requirement and Dependency are valid and can be matched
+// Prove that the MKE3 Requirement and Dependency are valid and can be matched.
 func Test_DependencySanity(t *testing.T) {
 	ctx := context.Background()
 
@@ -92,7 +92,7 @@ func Test_ProvidesMKE3(t *testing.T) {
 	}
 }
 
-// Prove that the MKE3 component can handle K8s requirements
+// Prove that the MKE3 component can handle K8s requirements.
 func Test_ProvidesK8s(t *testing.T) {
 	ctx := context.Background()
 

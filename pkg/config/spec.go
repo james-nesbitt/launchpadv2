@@ -13,16 +13,16 @@ var (
 )
 
 var (
-	// SpecDecoders function handlers which can convert an interface decoder into a type of Spec for the string key. Used in DecodeSpec, and allows overrides for injection and testing
+	// SpecDecoders function handlers which can convert an interface decoder into a type of Spec for the string key. Used in DecodeSpec, and allows overrides for injection and testing.
 	SpecDecoders = map[string]func(*cluster.Cluster, func(interface{}) error) error{}
 )
 
-// RegisterSpecDecoder
+// RegisterSpecDecoder.
 func RegisterSpecDecoder(t string, d func(*cluster.Cluster, func(interface{}) error) error) {
 	SpecDecoders[t] = d
 }
 
-// DecodeSpec create a Spec from the registered decode functions
+// DecodeSpec create a Spec from the registered decode functions.
 func DecodeSpec(t string, cl *cluster.Cluster, d func(interface{}) error) error {
 	if len(SpecDecoders) == 0 {
 		return ErrNoDecodersRegistered

@@ -11,7 +11,7 @@ var (
 	ErrRequirementNotMatched = errors.New("requirement not matched") // a Requirement exists but has no Dependency Matched (is nil)
 )
 
-// HasDependencies can determine its dependencies
+// HasDependencies can determine its dependencies.
 type HasDependencies interface {
 	// Requires a set of Requirements indicating what dependency Requirements are needed
 	// - if the set is empty, then no requirements are needed
@@ -20,10 +20,10 @@ type HasDependencies interface {
 
 // --- Dependency requirement definitiond ---
 
-// Requirements set
+// Requirements set.
 type Requirements []Requirement
 
-// UnMatched requirements subset of all Requirements that are not Matched
+// UnMatched requirements subset of all Requirements that are not Matched.
 func (rs Requirements) UnMatched(ctx context.Context) Requirements {
 	urs := Requirements{}
 
@@ -36,7 +36,7 @@ func (rs Requirements) UnMatched(ctx context.Context) Requirements {
 	return urs
 }
 
-// Requirement dependency definition from the perspective of the requirer
+// Requirement dependency definition from the perspective of the requirer.
 type Requirement interface {
 	// Id unique identifier for the requirement
 	Id() string
@@ -53,7 +53,7 @@ type OptionalRequirement interface {
 	Optional() error
 }
 
-// CollectRequirements from a set of HasDependencies
+// CollectRequirements from a set of HasDependencies.
 func CollectRequirements(ctx context.Context, hds []HasDependencies) Requirements {
 	rs := Requirements{}
 	for _, hd := range hds {

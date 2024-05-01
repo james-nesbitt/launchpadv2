@@ -6,7 +6,7 @@ import (
 	"github.com/Mirantis/launchpad/pkg/product/k0s/implementation"
 )
 
-// ValidateK0sDependencyConfig validate a K0s API client request configuration
+// ValidateK0sDependencyConfig validate a K0s API client request configuration.
 func (p K0S) ValidateK0sDependencyConfig(dc implementation.K0sDependencyConfig) error {
 	return nil
 }

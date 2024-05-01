@@ -38,7 +38,7 @@ func Test_PhasesAddMerge(t *testing.T) {
 		t.Errorf("phases merge result in the right number of phases: %+v", phs)
 	}
 
-	phs.Add(actionmock.NewPhase("four", nil, nil, nil, nil, nil)) // repeast id
+	phs.Add(actionmock.NewPhase("four", nil, nil, nil, nil, nil)) // repeats id
 
 	if len(phs) != 4 {
 		t.Errorf("phases add with a repeat didn't result in the correct number of phases: %+v", phs)
@@ -112,7 +112,7 @@ func Test_PhasesOrder(t *testing.T) {
 	}
 }
 
-// helper for pretty printing a Phase relationship to make testing easier
+// helper for pretty printing a Phase relationship to make testing easier.
 func phasePrint(ctx context.Context, p action.Phase) string {
 	pp := struct {
 		Id       string

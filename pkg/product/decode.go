@@ -13,16 +13,16 @@ var (
 )
 
 var (
-	// ProductDecoders handlers which can build Product components based on a key type
+	// ProductDecoders handlers which can build Product components based on a key type.
 	ProductDecoders = map[string]func(string, func(interface{}) error) (component.Component, error){}
 )
 
-// RegisterDecoder register a new host decoder
+// RegisterDecoder register a new host decoder.
 func RegisterDecoder(k string, d func(string, func(interface{}) error) (component.Component, error)) {
 	ProductDecoders[k] = d
 }
 
-// DecodeKnownProduct Component of a specific from a decoder such as a yaml decoder
+// DecodeKnownProduct Component of a specific from a decoder such as a yaml decoder.
 func DecodeKnownProduct(t string, id string, d func(interface{}) error) (component.Component, error) {
 	if len(ProductDecoders) == 0 {
 		return nil, ErrNoProductDecodersRegistered

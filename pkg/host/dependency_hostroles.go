@@ -31,28 +31,28 @@ type hostsRolesRequirement struct {
 	dep dependency.Dependency
 }
 
-// Requirer identify the requirer with a string, which may be used for correlation in the future
+// Requirer identify the requirer with a string, which may be used for correlation in the future.
 func (hrr hostsRolesRequirement) Id() string {
 	return hrr.id
 }
 
-// Describe the Requirements for labelling/auditing
+// Describe the Requirements for labelling/auditing.
 func (hrr hostsRolesRequirement) Describe() string {
 	return hrr.des
 }
 
-// Match with a Dependency
+// Match with a Dependency.
 func (hrr *hostsRolesRequirement) Match(dep dependency.Dependency) error {
 	hrr.dep = dep
 	return nil
 }
 
-// Matched has been Matched. If not matched return nil
+// Matched has been Matched. If not matched return nil.
 func (hrr hostsRolesRequirement) Matched(_ context.Context) dependency.Dependency {
 	return hrr.dep
 }
 
-// RequiresHostsRoles
+// RequiresHostsRoles.
 func (hrr hostsRolesRequirement) RequireHostsRoles(context.Context) HostsRolesFilter {
 	return hrr.filter
 }

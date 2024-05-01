@@ -1,4 +1,4 @@
 package msr2
 
-// State
+// State.
 type State struct{}

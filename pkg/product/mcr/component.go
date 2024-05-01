@@ -12,9 +12,9 @@ const (
 )
 
 var (
-	// MCRManagerHostRoles the Host roles accepted for managers
+	// MCRManagerHostRoles the Host roles accepted for managers.
 	MCRManagerHostRoles = []string{"manager"}
-	// MCRWorkerHostRoles the Host roles accepted for workers
+	// MCRWorkerHostRoles the Host roles accepted for workers.
 	MCRWorkerHostRoles = []string{"worker"}
 )
 
@@ -43,7 +43,7 @@ type MCR struct {
 	state  State
 }
 
-// Name for the component
+// Name for the component.
 func (p MCR) Name() string {
 	if p.id == ComponentType {
 		return p.id
@@ -56,7 +56,7 @@ func (_ MCR) Debug() interface{} {
 	return nil
 }
 
-// Validate that the cluster meets the needs of the Product
+// Validate that the cluster meets the needs of the Product.
 func (_ MCR) Validate(context.Context) error {
 	return nil
 }

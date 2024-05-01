@@ -17,7 +17,7 @@ func init() {
 	config.RegisterSpecDecoder(ID, Decode)
 }
 
-// Decode a cluster from the spec
+// Decode a cluster from the spec.
 func Decode(cl *cluster.Cluster, d func(interface{}) error) error {
 	var cs Spec
 

@@ -15,7 +15,7 @@ import (
 	"github.com/Mirantis/launchpad/pkg/config"
 )
 
-// applyCmd represents the apply command
+// applyCmd represents the apply command.
 var applyCmd = &cobra.Command{
 	Use:   "apply",
 	Short: "A brief description of your command",
@@ -40,7 +40,7 @@ to quickly create a Cobra application.`,
 
 		cl, umerr := config.ConfigFromYamllBytes(yb)
 		if umerr != nil {
-			return fmt.Errorf("Error occured unarshalling yaml: %s \nYAML:\b%s", umerr.Error(), yb)
+			return fmt.Errorf("Error occurred unarshalling yaml: %s \nYAML:\b%s", umerr.Error(), yb)
 		}
 
 		if valerr := cl.Validate(ctx); valerr != nil {

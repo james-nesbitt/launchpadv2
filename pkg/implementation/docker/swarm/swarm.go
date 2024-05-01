@@ -2,14 +2,14 @@ package swarm
 
 import "github.com/Mirantis/launchpad/pkg/implementation/docker"
 
-// NewSwarm constructor
+// NewSwarm constructor.
 func NewSwarm(config Config) *Swarm {
 	return &Swarm{
 		config: config,
 	}
 }
 
-// Swarm implementation
+// Swarm implementation.
 type Swarm struct {
 	config Config
 }

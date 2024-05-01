@@ -6,7 +6,7 @@ import (
 	"github.com/Mirantis/launchpad/pkg/implementation/kubernetes"
 )
 
-// ValidateK8sDependencyConfig validate a Kubernetes client request configuration
+// ValidateK8sDependencyConfig validate a Kubernetes client request configuration.
 func (p K0S) ValidateK8sDependencyConfig(kc kubernetes.Version) error {
 	return nil
 }

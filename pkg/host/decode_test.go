@@ -15,7 +15,7 @@ func Test_DecodeHost(t *testing.T) {
 			[]string{"test"},
 			nil,
 		)
-		return host.Host(h), nil
+		return h, nil
 	})
 
 	dhd := func(dh interface{}) error {

@@ -17,7 +17,7 @@ var (
 	ErrDependencyWrongType = errors.New("received the wrong type of dependency")
 	// ErrDependencyNotMatched No handler satisfied this dependency.
 	ErrDependencyNotMatched = errors.New("dependency not met")
-	// ErrShouldHaveHandled This type of dependency is handled, and should have ben handled, but a failure occured.  Don't try any other handler.
+	// ErrShouldHaveHandled This type of dependency is handled, and should have ben handled, but a failure occurred.  Don't try any other handler.
 	ErrShouldHaveHandled = errors.New("dependency not handled but it should have been")
 	// ErrNotHandled type of dependency is not handled so somebody else should handle it (often requivalent to a nil error).
 	ErrNotHandled = errors.New("dependency not handled by any provider")
@@ -48,9 +48,7 @@ func (ds *Dependencies) Add(nds ...Dependency) {
 }
 
 func (ds *Dependencies) Merge(nds Dependencies) {
-	for _, nd := range nds {
-		*ds = append(*ds, nd)
-	}
+	*ds = append(*ds, nds...)
 }
 
 func (ds Dependencies) Get(id string) Dependency {
@@ -96,7 +94,7 @@ func (ds Dependencies) Intersect(ds2 Dependencies) Dependencies {
 	return icd
 }
 
-// Dependency response to a Dependency Requirement which can fullfill it.
+// Dependency response to a Dependency Requirement which can fulfill it.
 type Dependency interface {
 	// Id uniquely identify the Dependency
 	Id() string

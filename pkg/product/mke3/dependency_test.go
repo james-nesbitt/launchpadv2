@@ -15,8 +15,9 @@ import (
 func Test_DependencySanity(t *testing.T) {
 	ctx := context.Background()
 
-	apic := mke3implementation.Config{Version: "3.7.7"}
-	dc := mke3implementation.MKE3DependencyConfig{Version: apic.Version}
+	v := "3.7.7"
+	apic := mke3implementation.Config{Version: v}
+	dc := mke3implementation.MKE3DependencyConfig{Version: v}
 
 	r := mke3implementation.NewMKE3Requirement(
 		"test",

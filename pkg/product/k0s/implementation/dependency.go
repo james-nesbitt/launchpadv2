@@ -48,7 +48,7 @@ type reqK0s struct {
 	dep dependency.Dependency
 }
 
-// Id unique identifier for the requrement.
+// Id unique identifier for the requirement.
 func (r reqK0s) Id() string {
 	return r.id
 }
@@ -111,7 +111,7 @@ func (d k0sDep) Met(ctx context.Context) error {
 	return err
 }
 
-// ProvidesK0s fullfill the K0s API dependency.
+// ProvidesK0s fulfill the K0s API dependency.
 func (d k0sDep) ProvidesK0s(ctx context.Context) (*API, error) {
 	return d.factory(ctx)
 }

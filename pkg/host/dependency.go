@@ -33,17 +33,17 @@ type hostsDep struct {
 	events action.Events
 }
 
-// Id uniquely identify the Dependency
+// Id uniquely identify the Dependency.
 func (hd hostsDep) Id() string {
 	return hd.id
 }
 
-// Describe the dependency for logging and auditing
+// Describe the dependency for logging and auditing.
 func (hd hostsDep) Describe() string {
 	return hd.describe
 }
 
-// Validate the the dependency thinks it has what it needs to fullfill it
+// Validate the the dependency thinks it has what it needs to fulfill it
 //
 //	Validation does not meet the dependency, it only confirms that the dependency can be met
 //	when it is needed.  Each requirement will have its own interface for individual types of
@@ -56,13 +56,13 @@ func (hd hostsDep) Validate(context.Context) error {
 	return nil
 }
 
-// Met is the dependency fullfilled, or is it still blocked/waiting for fulfillment
+// Met is the dependency fullfilled, or is it still blocked/waiting for fulfillment.
 func (hd hostsDep) Met(ctx context.Context) error {
 	_, err := hd.factory(ctx)
 	return err
 }
 
-// ProduceHosts is the dependency fullfilled, or is it still blocked/waiting for fulfillment
+// ProduceHosts is the dependency fullfilled, or is it still blocked/waiting for fulfillment.
 func (hd hostsDep) ProduceHosts(ctx context.Context) *Hosts {
 	hs, _ := hd.factory(ctx)
 	return hs

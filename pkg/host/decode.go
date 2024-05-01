@@ -11,16 +11,16 @@ var (
 )
 
 var (
-	// HostDecoders function handlers which can convert an interface decoder into a type of Host for the string key. Used in DecodeHost, and allows overrides for injection and testing
+	// HostDecoders function handlers which can convert an interface decoder into a type of Host for the string key. Used in DecodeHost, and allows overrides for injection and testing.
 	HostDecoders = map[string]func(string, func(interface{}) error) (Host, error){}
 )
 
-// RegisterDecoder register a new host decoder
+// RegisterDecoder register a new host decoder.
 func RegisterDecoder(k string, d func(string, func(interface{}) error) (Host, error)) {
 	HostDecoders[k] = d
 }
 
-// DecodeHost create a Host from the registered decode functions
+// DecodeHost create a Host from the registered decode functions.
 func DecodeHost(t string, id string, d func(interface{}) error) (Host, error) {
 	if len(HostDecoders) == 0 {
 		return nil, ErrNoHostDecodersRegistered

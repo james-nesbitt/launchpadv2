@@ -37,7 +37,7 @@ type label struct {
 	after       []int
 }
 
-// Sort orderables by returning the index reorder
+// Sort orderables by returning the index reorder.
 func Sort(os Orderables) (Orderables, error) {
 	ls := labels{}
 
@@ -59,7 +59,7 @@ func Sort(os Orderables) (Orderables, error) {
 
 	g := graph.New(len(os))
 
-	// for any label, add an aedge between the deliveres and the after/before elements
+	// for any label, add an aedge between the delivers and the after/before elements
 
 	rerrs := []error{}
 	for k, l := range ls {

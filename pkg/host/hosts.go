@@ -9,17 +9,17 @@ var (
 	ErrHostsFilterInsufficient = errors.New("not enough matching hosts to filter")
 )
 
-// Hosts collection of Host objects for a cluster
+// Hosts collection of Host objects for a cluster.
 type Hosts map[string]Host
 
-// HostsRolesFilter filter a Hosts set based on filter arguments
+// HostsRolesFilter filter a Hosts set based on filter arguments.
 type HostsRolesFilter struct {
 	Roles []string
 	Min   int
 	Max   int
 }
 
-// FilterRoles filter hosts down to matching roles, enforcing a minimum and accepting a maximum count
+// FilterRoles filter hosts down to matching roles, enforcing a minimum and accepting a maximum count.
 func (hs Hosts) FilterRoles(filter HostsRolesFilter) (Hosts, error) {
 	fhs := Hosts{}
 

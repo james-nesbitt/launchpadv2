@@ -9,7 +9,7 @@ import (
 	"github.com/Mirantis/launchpad/pkg/dependency"
 )
 
-// DeliversEvents this action delivers events
+// DeliversEvents this action delivers events.
 type DeliversEvents interface {
 	DeliversEvents(context.Context) Events
 }
@@ -22,7 +22,7 @@ type RequiresEvents interface {
 	RequiresEvents(context.Context) (before Events, after Events)
 }
 
-// DependencyDeliversEvents add events of a certain key from a map of dependencies to a set of Events
+// DependencyDeliversEvents add events of a certain key from a map of dependencies to a set of Events.
 func DependencyDeliversEvents(ctx context.Context, eventKeys []string, deps map[string]dependency.Dependency, delivers Events) error {
 	// collect all events for all delivered dependencies
 	errs := []error{}
@@ -100,7 +100,7 @@ func DependencyRequiresEvents(ctx context.Context, reqs map[string]dependency.Re
 	return nil
 }
 
-// NewEvents from a list of Event instances
+// NewEvents from a list of Event instances.
 func NewEvents(ne ...*Event) Events {
 	es := Events{}
 	es.Add(ne...)

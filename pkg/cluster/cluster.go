@@ -17,7 +17,7 @@ var (
 	ErrClusterDependenciesNotMet = errors.New("cluster dependencies not met")
 )
 
-// Cluster function handler for the complete cluster
+// Cluster function handler for the complete cluster.
 type Cluster struct {
 	Components component.Components
 
@@ -25,7 +25,7 @@ type Cluster struct {
 	dependencies dependency.Dependencies
 }
 
-// Validate the cluster configuration
+// Validate the cluster configuration.
 func (cl *Cluster) Validate(ctx context.Context) error {
 	cerrs := []error{}
 
@@ -61,7 +61,7 @@ func (cl *Cluster) Validate(ctx context.Context) error {
 	return nil
 }
 
-// Command build a command using the dependencies and components from the cluster
+// Command build a command using the dependencies and components from the cluster.
 func (cl *Cluster) Command(ctx context.Context, key string) (*action.Command, error) {
 	cmd := action.NewEmptyCommand(key)
 
@@ -137,7 +137,7 @@ func (cl *Cluster) matchRequirements(ctx context.Context) error {
 		for _, ur := range urs {
 			slog.ErrorContext(ctx, "UnMatched cluster dependency requirement", slog.Any("requirement", ur))
 		}
-		return fmt.Errorf("%w; Unmet depedencies: %+vv", ErrClusterDependenciesNotMet, urs)
+		return fmt.Errorf("%w; Unmet dependencies: %+vv", ErrClusterDependenciesNotMet, urs)
 	}
 	return nil
 }

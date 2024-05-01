@@ -5,16 +5,16 @@ type Version struct {
 	Plugins []string
 }
 
-// NewDocker Implementation
+// NewDocker Implementation.
 func NewDocker() *Docker {
 	return &Docker{}
 }
 
-// Docker host level Docker implementation
+// Docker host level Docker implementation.
 type Docker struct {
 	state State
 }
 
-// State for the docker implementation on hosts
+// State for the docker implementation on hosts.
 type State struct {
 }

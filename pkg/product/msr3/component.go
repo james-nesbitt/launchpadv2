@@ -28,7 +28,7 @@ type MSR3 struct {
 	k8sr dependency.Requirement
 }
 
-// Name for the component
+// Name for the component.
 func (p MSR3) Name() string {
 	if p.id == ComponentType {
 		return p.id
@@ -41,7 +41,7 @@ func (_ MSR3) Debug() interface{} {
 	return nil
 }
 
-// Validate that the cluster meets the needs of the Product
+// Validate that the cluster meets the needs of the Product.
 func (_ MSR3) Validate(context.Context) error {
 	return nil
 }

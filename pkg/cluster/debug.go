@@ -2,7 +2,7 @@ package cluster
 
 import "context"
 
-// Debug the cluster
+// Debug the cluster.
 func (cl *Cluster) Debug(ctx context.Context) interface{} {
 	cld := map[string]interface{}{}
 

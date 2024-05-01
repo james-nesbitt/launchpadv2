@@ -10,9 +10,9 @@ const (
 	// Command phase which is used to initialize any components, usually requireing no
 	//   interactions with a cluster
 	CommandPhaseInitialize = "initialize"
-	// Command phase which is used to discover state
+	// Command phase which is used to discover state.
 	CommandPhaseDiscover = "discover"
-	// Command phase which is used to finalize and cleanup
+	// Command phase which is used to finalize and cleanup.
 	CommandPhaseFinalize = "finalize"
 )
 

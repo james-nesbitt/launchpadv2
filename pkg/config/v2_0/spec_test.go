@@ -8,11 +8,11 @@ import (
 	"context"
 	"testing"
 
-	// Register mock Host and Product handlers
+	// Register mock Host and Product handlers.
 	_ "github.com/Mirantis/launchpad/pkg/host/mock"
 	_ "github.com/Mirantis/launchpad/pkg/product/mock"
 
-	// Register actual product handlers for testing
+	// Register actual product handlers for testing.
 	_ "github.com/Mirantis/launchpad/pkg/product/k0s"
 	_ "github.com/Mirantis/launchpad/pkg/product/mcr"
 	_ "github.com/Mirantis/launchpad/pkg/product/mke3"
@@ -43,7 +43,7 @@ products:
 	df := decode.DecodeTestYaml([]byte(sy))
 
 	if err := v2_0.Decode(&cl, df); err != nil {
-		t.Errorf("2.0 Spec decode failed unexpectadly: %s", err.Error())
+		t.Errorf("2.0 Spec decode failed unexpectedly: %s", err.Error())
 	}
 
 	if err := cl.Validate(context.Background()); err != nil {
@@ -77,7 +77,7 @@ products:
 	df := decode.DecodeTestYaml([]byte(cy))
 
 	if err := v2_0.Decode(&cl, df); err != nil {
-		t.Errorf("CurrentGen 2.0 Spec decode failed unexpectadly: %s", err.Error())
+		t.Errorf("CurrentGen 2.0 Spec decode failed unexpectedly: %s", err.Error())
 	}
 
 	if err := cl.Validate(context.Background()); err != nil {
@@ -116,7 +116,7 @@ products:
 	df := decode.DecodeTestYaml([]byte(cy))
 
 	if err := v2_0.Decode(&cl, df); err != nil {
-		t.Fatalf("NextGen 2.0 Spec decode failed unexpectadly: %s", err.Error())
+		t.Fatalf("NextGen 2.0 Spec decode failed unexpectedly: %s", err.Error())
 	}
 
 	if len(cl.Components) != 4 { // 3 products and the hosts component

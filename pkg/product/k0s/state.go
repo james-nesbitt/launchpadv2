@@ -1,5 +1,5 @@
 package k0s
 
-// State
+// State.
 type State struct {
 }

@@ -39,7 +39,7 @@ func Test_CommandHandlerSanity(t *testing.T) {
 	cmd := action.NewEmptyCommand("my-cmd")
 
 	if err := action.BuildCommand(ctx, cmd, []action.CommandHandler{ch1}); err != nil {
-		t.Errorf("error occured building command using mock handler: %s", err.Error())
+		t.Errorf("error occurred building command using mock handler: %s", err.Error())
 	}
 
 	if len(cmd.Phases) != 4 {

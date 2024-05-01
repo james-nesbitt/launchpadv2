@@ -10,7 +10,7 @@ import (
 const (
 	ComponentType = "k0s"
 
-	// HostRoles roles that MCR considers targets for installation on
+	// HostRoles roles that MCR considers targets for installation on.
 	ControllerHostRole = "controller"
 	WorkerHostRole     = "worker"
 )
@@ -40,7 +40,7 @@ type K0S struct {
 	state  State
 }
 
-// Name for the component
+// Name for the component.
 func (p K0S) Name() string {
 	if p.id == ComponentType {
 		return p.id

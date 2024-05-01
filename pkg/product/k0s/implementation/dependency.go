@@ -48,17 +48,17 @@ type reqK0s struct {
 	dep dependency.Dependency
 }
 
-// Id unique identifier for the requrement
+// Id unique identifier for the requrement.
 func (r reqK0s) Id() string {
 	return r.id
 }
 
-// Descibe the requirement
+// Descibe the requirement.
 func (r reqK0s) Describe() string {
 	return r.desc
 }
 
-// Match the requirement to a dependency
+// Match the requirement to a dependency.
 func (r *reqK0s) Match(d dependency.Dependency) error {
 	if _, ok := d.(ProvidesK0s); !ok {
 		return fmt.Errorf("%w: k0s did not receive a ProvidesK0s dependency: %+v", dependency.ErrDependencyWrongType, d)
@@ -68,17 +68,17 @@ func (r *reqK0s) Match(d dependency.Dependency) error {
 	return nil
 }
 
-// Matched return the matched dependency, or nil if none has been matched
+// Matched return the matched dependency, or nil if none has been matched.
 func (r *reqK0s) Matched(_ context.Context) dependency.Dependency {
 	return r.dep
 }
 
-// RequiresK0S indicated that we require k0s (API)
+// RequiresK0S indicated that we require k0s (API).
 func (r reqK0s) RequiresK0s(_ context.Context) K0sDependencyConfig {
 	return r.config
 }
 
-// KubernetesDependency Kubernetes providing Dependency
+// KubernetesDependency Kubernetes providing Dependency.
 type K0sDependency interface {
 	K0s(ctx context.Context) *API
 }
@@ -90,28 +90,28 @@ type k0sDep struct {
 	factory func(context.Context) (*API, error)
 }
 
-// Id unique identifier for the dependency
+// Id unique identifier for the dependency.
 func (d k0sDep) Id() string {
 	return d.id
 }
 
-// Descibe the dependency
+// Descibe the dependency.
 func (d k0sDep) Describe() string {
 	return d.desc
 }
 
-// Validate the dependency
+// Validate the dependency.
 func (d k0sDep) Validate(_ context.Context) error {
 	return nil
 }
 
-// Met has the dependency been met by the fullfilling backend
+// Met has the dependency been met by the fullfilling backend.
 func (d k0sDep) Met(ctx context.Context) error {
 	_, err := d.factory(ctx)
 	return err
 }
 
-// ProvidesK0s fullfill the K0s API dependency
+// ProvidesK0s fullfill the K0s API dependency.
 func (d k0sDep) ProvidesK0s(ctx context.Context) (*API, error) {
 	return d.factory(ctx)
 }

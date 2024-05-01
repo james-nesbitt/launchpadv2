@@ -1,5 +1,5 @@
 package msr3
 
-// State
+// State.
 type State struct {
 }

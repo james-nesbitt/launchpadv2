@@ -18,7 +18,7 @@ func NewHost(id string, roles []string, decodeerror error) host.Host {
 	}
 }
 
-// Host a host type that does nothing, but can be used as a substitute when needed
+// Host a host type that does nothing, but can be used as a substitute when needed.
 type ho struct {
 	id          string
 	Roles       []string `yaml:"roles"`

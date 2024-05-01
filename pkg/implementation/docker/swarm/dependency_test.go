@@ -64,7 +64,7 @@ func Test_DependencySanity(t *testing.T) {
 	}
 
 	if err := r.Match(d); err != nil {
-		t.Errorf("DockerSwarm requirment returned an error when matched: %s", err.Error())
+		t.Errorf("DockerSwarm requirement returned an error when matched: %s", err.Error())
 	}
 
 	// 6. The source of the requirement will retrieve the dependency from the requiremnt,

@@ -4,7 +4,7 @@ import (
 	"context"
 )
 
-// Component a cluster component which can provide phase actions
+// Component a cluster component which can provide phase actions.
 type Component interface {
 	// Name of the Component, which is used for logging and auditing
 	Name() string

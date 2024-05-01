@@ -12,7 +12,7 @@ import (
 	"github.com/Mirantis/launchpad/pkg/implementation/docker/swarm"
 )
 
-// Requires declare that we need a HostsRoles dependency
+// Requires declare that we need a HostsRoles dependency.
 func (p *MCR) Requires(_ context.Context) dependency.Requirements {
 	if p.mrhr == nil {
 		p.mrhr = host.NewHostsRolesRequirement(
@@ -43,7 +43,7 @@ func (p *MCR) Requires(_ context.Context) dependency.Requirements {
 	}
 }
 
-// Provides dependencies
+// Provides dependencies.
 func (p *MCR) Provides(ctx context.Context, r dependency.Requirement) (dependency.Dependency, error) {
 	if dhr, ok := r.(dockerhost.DockerHostsRequirement); ok {
 		// DockerHosts dependency

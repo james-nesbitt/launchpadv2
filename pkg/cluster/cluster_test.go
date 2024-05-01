@@ -74,7 +74,7 @@ func Test_ClusterDependencyValidation(t *testing.T) {
 	}
 
 	if err := cl.Validate(ctx); err != nil {
-		t.Errorf("unexpected error occured in validation: %s \n %+v", err.Error(), cl)
+		t.Errorf("unexpected error occurred in validation: %s \n %+v", err.Error(), cl)
 	}
 
 	if cl_d := cl.Debug(ctx); cl_d == nil {

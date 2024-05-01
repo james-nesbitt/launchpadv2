@@ -127,7 +127,7 @@ func (es Events) Contains(id string) bool {
 }
 
 func (es Events) Get(id string) *Event {
-	e, _ := es[id]
+	e, _ := es[id] //nolint:gosimple
 	return e
 }
 

@@ -9,7 +9,7 @@ func DecodeTestYaml(hyb []byte) func(interface{}) error {
 
 	go func() {
 		dhc := dummyContainer{yn: dyn}
-		yaml.Unmarshal(hyb, &dhc)
+		yaml.Unmarshal(hyb, &dhc) //nolint:errcheck
 	}()
 
 	py := <-dyn

@@ -56,13 +56,13 @@ func (hd hostsDep) Validate(context.Context) error {
 	return nil
 }
 
-// Met is the dependency fullfilled, or is it still blocked/waiting for fulfillment.
+// Met is the dependency fulfilled, or is it still blocked/waiting for fulfillment.
 func (hd hostsDep) Met(ctx context.Context) error {
 	_, err := hd.factory(ctx)
 	return err
 }
 
-// ProduceHosts is the dependency fullfilled, or is it still blocked/waiting for fulfillment.
+// ProduceHosts is the dependency fulfilled, or is it still blocked/waiting for fulfillment.
 func (hd hostsDep) ProduceHosts(ctx context.Context) *Hosts {
 	hs, _ := hd.factory(ctx)
 	return hs

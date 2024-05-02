@@ -59,13 +59,16 @@ func (c K0S) CommandBuild(ctx context.Context, cmd *action.Command) error {
 		cmd.Phases.Add(p)
 
 	case action.CommandKeyReset:
-		pd := stepped.NewSteppedPhase(CommandPhaseApply, rs, ds, []string{dependency.EventKeyActivated})
-		pd.Steps().Add(
-			&discoverStep{
-				id: c.Name(),
-			},
-		)
-		cmd.Phases.Add(pd)
+		if len(ds) > 0 { // only discover if something else needs us
+
+			pd := stepped.NewSteppedPhase(CommandPhaseApply, rs, ds, []string{dependency.EventKeyActivated})
+			pd.Steps().Add(
+				&discoverStep{
+					id: c.Name(),
+				},
+			)
+			cmd.Phases.Add(pd)
+		}
 
 		pr := stepped.NewSteppedPhase(CommandPhaseReset, rs, ds, []string{dependency.EventKeyDeActivated})
 		pr.Steps().Merge(stepped.Steps{

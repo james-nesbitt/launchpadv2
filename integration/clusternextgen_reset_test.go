@@ -44,6 +44,5 @@ func Test_NextGenResetCommand(t *testing.T) {
 
 	if err := cmd.Run(ctx); err != nil {
 		t.Errorf("cluster command [%s] execution failed: %s", cmd.Key, err.Error())
-	}
-
+	}	
 }

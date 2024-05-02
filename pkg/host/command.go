@@ -17,13 +17,13 @@ var (
 //
 //	For all commands, we effectively do discovery for the hosts
 func (hc *HostsComponent) CommandBuild(ctx context.Context, cmd *action.Command) error {
-	p := stepped.NewSteppedPhase(CommandKeyDiscover, dependency.Requirements{}, hc.deps, []string{dependency.EventKeyActivated})
-
-	p.Steps().Add(&discoverStep{
-		id: hc.id,
-	})
-
-	cmd.Phases.Add(p)
+	if len(hc.deps) > 0 { // only discover if something else needs us
+		p := stepped.NewSteppedPhase(CommandKeyDiscover, dependency.Requirements{}, hc.deps, []string{dependency.EventKeyActivated})
+		p.Steps().Add(&discoverStep{
+			id: hc.id,
+		})
+		cmd.Phases.Add(p)
+	}
 
 	return nil
 }

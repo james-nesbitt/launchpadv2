@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/Mirantis/launchpad/pkg/action"
 	"github.com/Mirantis/launchpad/pkg/dependency"
 )
 
@@ -30,7 +29,7 @@ type hostsDep struct {
 	describe string
 	factory  func(context.Context) (*Hosts, error)
 
-	events action.Events
+	events dependency.Events
 }
 
 // Id uniquely identify the Dependency.
@@ -68,13 +67,13 @@ func (hd hostsDep) ProduceHosts(ctx context.Context) *Hosts {
 	return hs
 }
 
-func (hd *hostsDep) DeliversEvents(ctx context.Context) action.Events {
+func (hd *hostsDep) DeliversEvents(ctx context.Context) dependency.Events {
 	if hd.events == nil {
-		hd.events = action.Events{
-			dependency.EventKeyActivated: &action.Event{
+		hd.events = dependency.Events{
+			dependency.EventKeyActivated: &dependency.Event{
 				Id: fmt.Sprintf("%s:%s", hd.Id(), dependency.EventKeyActivated),
 			},
-			dependency.EventKeyDeActivated: &action.Event{
+			dependency.EventKeyDeActivated: &dependency.Event{
 				Id: fmt.Sprintf("%s:%s", hd.Id(), dependency.EventKeyDeActivated),
 			},
 		}

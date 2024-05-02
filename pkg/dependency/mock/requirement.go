@@ -6,7 +6,7 @@ import (
 	"github.com/Mirantis/launchpad/pkg/dependency"
 )
 
-func HasDependencies(rs dependency.Requirements) dependency.HasDependencies {
+func RequiresDependencies(rs dependency.Requirements) hasDependencies {
 	return hasDependencies{
 		rs: rs,
 	}
@@ -16,7 +16,7 @@ type hasDependencies struct {
 	rs dependency.Requirements
 }
 
-func (mhc hasDependencies) Requires(ctx context.Context) dependency.Requirements {
+func (mhc hasDependencies) RequiresDependencies(ctx context.Context) dependency.Requirements {
 	return mhc.rs
 }
 

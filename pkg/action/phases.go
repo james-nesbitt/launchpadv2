@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/Mirantis/launchpad/pkg/action/order"
+	"github.com/Mirantis/launchpad/pkg/dependency"
 )
 
 const (
@@ -55,7 +56,7 @@ func (ps Phases) Order(ctx context.Context) ([]Phase, error) {
 
 	for _, p := range ps {
 		d := []string{}
-		if pds, ok := p.(DeliversEvents); ok {
+		if pds, ok := p.(dependency.DeliversEvents); ok {
 			for _, pd := range pds.DeliversEvents(ctx) {
 				d = append(d, pd.Id)
 			}
@@ -63,7 +64,7 @@ func (ps Phases) Order(ctx context.Context) ([]Phase, error) {
 
 		b := []string{}
 		a := []string{}
-		if res, ok := p.(RequiresEvents); ok {
+		if res, ok := p.(dependency.RequiresEvents); ok {
 			bes, aes := res.RequiresEvents(ctx)
 			for _, pd := range bes {
 				b = append(b, pd.Id)

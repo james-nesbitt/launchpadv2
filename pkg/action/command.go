@@ -22,21 +22,25 @@ var (
 	ErrCommandBuild = errors.New("failure building command")
 )
 
+// CommandHandler something that wants to participate in building a command.
 type CommandHandler interface {
 	// Build the command Phases and Events
 	CommandBuild(context.Context, *Command) error
 }
 
+// NewEmptyCommand create a new Commad that can now be built up.
 func NewEmptyCommand(key string) *Command {
 	return &Command{
 		Key:          key,
 		Dependencies: dependency.NewDependencies(),
-		Events:       Events{},
+		Events:       dependency.Events{},
 		Phases:       Phases{},
 	}
 }
 
 // BuildCommand from a number of handler.
+//
+// @NOTE this looks like it is not used (outside of testing).
 func BuildCommand(ctx context.Context, cmd *Command, handlers []CommandHandler) error {
 	cberrs := []error{}
 	for _, ch := range handlers {
@@ -55,12 +59,13 @@ func BuildCommand(ctx context.Context, cmd *Command, handlers []CommandHandler) 
 	return nil
 }
 
+// Command an executable component, typically built by Components.
 type Command struct {
 	Key string
 
 	Dependencies dependency.Dependencies
 
-	Events Events
+	Events dependency.Events
 	Phases Phases
 }
 
@@ -101,6 +106,8 @@ func (cmd *Command) Validate(ctx context.Context) error {
 }
 
 // Run execute the command.
+//
+// @NOTE you should runn all the builder before doing this.
 func (cmd *Command) Run(ctx context.Context) error {
 	po, oerr := cmd.Phases.Order(ctx)
 	if oerr != nil {

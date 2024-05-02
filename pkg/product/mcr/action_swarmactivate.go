@@ -19,6 +19,6 @@ func (s swarmActivateStep) Validate(_ context.Context) error {
 }
 
 func (s swarmActivateStep) Run(ctx context.Context) error {
-	slog.InfoContext(ctx, "running MCR swarm-activate step", slog.String("ID", s.id))
+	slog.InfoContext(ctx, "running MCR swarm-activate step", slog.String("ID", s.Id()))
 	return nil
 }

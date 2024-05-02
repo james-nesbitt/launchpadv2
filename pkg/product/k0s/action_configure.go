@@ -19,6 +19,6 @@ func (s configureK0sStep) Validate(_ context.Context) error {
 }
 
 func (s configureK0sStep) Run(ctx context.Context) error {
-	slog.InfoContext(ctx, "running k0s configure step", slog.String("ID", s.id))
+	slog.InfoContext(ctx, "running k0s configure step", slog.String("ID", s.Id()))
 	return nil
 }

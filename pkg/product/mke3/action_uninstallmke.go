@@ -15,6 +15,6 @@ func (s uninstallMKEStep) Id() string {
 }
 
 func (s uninstallMKEStep) Run(ctx context.Context) error {
-	slog.InfoContext(ctx, "running MKE3 uninstall step", slog.String("ID", s.id))
+	slog.InfoContext(ctx, "running MKE3 uninstall step", slog.String("ID", s.Id()))
 	return nil
 }

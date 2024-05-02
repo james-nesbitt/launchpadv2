@@ -15,6 +15,6 @@ func (s disconnectStep) Id() string {
 }
 
 func (s disconnectStep) Run(ctx context.Context) error {
-	slog.InfoContext(ctx, "running host disconnect step", slog.String("ID", s.id))
+	slog.InfoContext(ctx, "running host disconnect step", slog.String("ID", s.Id()))
 	return nil
 }

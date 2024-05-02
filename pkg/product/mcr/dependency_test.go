@@ -13,11 +13,11 @@ func Test_MCRDependencySanity(t *testing.T) {
 		mcr.Config{},
 	)
 
-	if _, ok := interface{}(mcrcl).(dependency.HasDependencies); !ok {
+	if _, ok := interface{}(mcrcl).(dependency.RequiresDependencies); !ok {
 		t.Errorf("MCR fails to advertise dependencies")
 	}
 
-	if _, ok := interface{}(mcrcl).(dependency.FullfillsDependencies); !ok {
+	if _, ok := interface{}(mcrcl).(dependency.ProvidesDependencies); !ok {
 		t.Errorf("MCR fails to advertise dependency fullfillment")
 	}
 }

@@ -15,11 +15,11 @@ import (
 // Requires declare requirements needed for this component
 //  1. at least one host with role "controller"
 //  2. any workers with role "worker" (optional)
-func (p K0S) Requires(_ context.Context) dependency.Requirements {
+func (p *K0S) RequiresDependencies(_ context.Context) dependency.Requirements {
 	if p.chr == nil {
 		p.chr = host.NewHostsRolesRequirement(
 			p.Name(),
-			fmt.Sprintf("MCR '%s' needs hosts as controller installation targets, using role: %s", p.id, ControllerHostRole),
+			fmt.Sprintf("K0S '%s' needs hosts as controller installation targets, using role: %s", p.id, ControllerHostRole),
 			host.HostsRolesFilter{
 				Roles: []string{ControllerHostRole},
 				Min:   1,
@@ -27,11 +27,10 @@ func (p K0S) Requires(_ context.Context) dependency.Requirements {
 			},
 		)
 	}
-
 	if p.whr == nil {
 		p.whr = host.NewHostsRolesRequirement(
 			p.Name(),
-			fmt.Sprintf("MCR '%s' needs hosts as worker installation targets, using role: %s", p.id, WorkerHostRole),
+			fmt.Sprintf("K0S '%s' needs hosts as worker installation targets, using role: %s", p.id, WorkerHostRole),
 			host.HostsRolesFilter{
 				Roles: []string{WorkerHostRole},
 				Min:   0,
@@ -51,7 +50,7 @@ func (p K0S) Requires(_ context.Context) dependency.Requirements {
 // Provides dependencies
 //  1. provide any Kubernetes dependencies if the versions match
 //  2. provide any k0S dependencies if the version match
-func (p *K0S) Provides(ctx context.Context, r dependency.Requirement) (dependency.Dependency, error) {
+func (p *K0S) ProvidesDependencies(ctx context.Context, r dependency.Requirement) (dependency.Dependency, error) {
 	if k8sr, ok := r.(kubeimpl.KubernetesRequirement); ok {
 		// Kubernetes dependency
 

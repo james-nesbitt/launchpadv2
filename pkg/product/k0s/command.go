@@ -2,10 +2,9 @@ package k0s
 
 import (
 	"context"
-	"errors"
-	"fmt"
 
 	"github.com/Mirantis/launchpad/pkg/action"
+	"github.com/Mirantis/launchpad/pkg/action/stepped"
 	"github.com/Mirantis/launchpad/pkg/dependency"
 )
 
@@ -18,14 +17,19 @@ const (
 	CommandPhaseKubernetesConf = "K0S Kubernetes Configuration"
 )
 
-func (c K0S) BuildCommand(ctx context.Context, cmd *action.Command) error {
+func (c K0S) CommandBuild(ctx context.Context, cmd *action.Command) error {
+	rs := dependency.Requirements{ // Requirements that we need
+		c.chr,
+		c.whr,
+	}
+	ds := dependency.Dependencies{ // Dependencies that our phases typically deliver
+		c.k8sd,
+		c.k0sd,
+	}
 
 	switch cmd.Key {
 	case action.CommandKeyDiscover:
-		p := action.NewSteppedPhase(CommandPhaseDiscover, false)
-
-		c.dependencyRequiresEvents(ctx, p.Before, p.After)
-
+		p := stepped.NewSteppedPhase(CommandPhaseDiscover, rs, ds, []string{dependency.EventKeyActivated})
 		p.Steps().Add(
 			&discoverStep{
 				id: c.Name(),
@@ -34,14 +38,8 @@ func (c K0S) BuildCommand(ctx context.Context, cmd *action.Command) error {
 		cmd.Phases.Add(p)
 
 	case action.CommandKeyApply:
-		p := action.NewSteppedPhase(CommandPhaseApply, false)
-
-		c.dependencyDeliversEvents(ctx, dependency.EventKeyActivated, p.Delivers)
-		if err := c.dependencyRequiresEvents(ctx, p.Before, p.After); err != nil {
-			return fmt.Errorf("MKE3 dependency generation error: %w", err)
-		}
-
-		p.Steps().Merge(action.Steps{
+		p := stepped.NewSteppedPhase(CommandPhaseApply, rs, ds, []string{dependency.EventKeyActivated})
+		p.Steps().Merge(stepped.Steps{
 			&discoverStep{
 				id: c.Name(),
 			},
@@ -61,10 +59,7 @@ func (c K0S) BuildCommand(ctx context.Context, cmd *action.Command) error {
 		cmd.Phases.Add(p)
 
 	case action.CommandKeyReset:
-		pd := action.NewSteppedPhase(CommandPhaseDiscover, false)
-
-		c.dependencyRequiresEvents(ctx, pd.Before, pd.After)
-
+		pd := stepped.NewSteppedPhase(CommandPhaseApply, rs, ds, []string{dependency.EventKeyActivated})
 		pd.Steps().Add(
 			&discoverStep{
 				id: c.Name(),
@@ -72,14 +67,8 @@ func (c K0S) BuildCommand(ctx context.Context, cmd *action.Command) error {
 		)
 		cmd.Phases.Add(pd)
 
-		pr := action.NewSteppedPhase(CommandPhaseReset, false)
-
-		c.dependencyDeliversEvents(ctx, dependency.EventKeyDeActivated, pr.Delivers)
-		if err := c.dependencyRequiresEvents(ctx, pr.Before, pr.After); err != nil {
-			return fmt.Errorf("MKE3 dependency generation error: %w", err)
-		}
-
-		pr.Steps().Merge(action.Steps{
+		pr := stepped.NewSteppedPhase(CommandPhaseReset, rs, ds, []string{dependency.EventKeyDeActivated})
+		pr.Steps().Merge(stepped.Steps{
 			&uninstallK0sStep{
 				id: c.Name(),
 			},
@@ -87,14 +76,8 @@ func (c K0S) BuildCommand(ctx context.Context, cmd *action.Command) error {
 		cmd.Phases.Add(pr)
 
 	case CommandKeyKubernetesConf:
-		p := action.NewSteppedPhase(CommandPhaseKubernetesConf, false)
-
-		c.dependencyDeliversEvents(ctx, dependency.EventKeyDeActivated, p.Delivers)
-		if err := c.dependencyRequiresEvents(ctx, p.Before, p.After); err != nil {
-			return fmt.Errorf("MKE3 dependency generation error: %w", err)
-		}
-
-		p.Steps().Merge(action.Steps{
+		p := stepped.NewSteppedPhase(CommandPhaseKubernetesConf, rs, dependency.Dependencies{}, []string{dependency.EventKeyActivated})
+		p.Steps().Merge(stepped.Steps{
 			&discoverStep{
 				id: c.Name(),
 			},
@@ -103,34 +86,6 @@ func (c K0S) BuildCommand(ctx context.Context, cmd *action.Command) error {
 			},
 		})
 		cmd.Phases.Add(p)
-	}
-
-	return nil
-}
-
-func (c K0S) dependencyDeliversEvents(ctx context.Context, eventKey string, delivers action.Events) error {
-	// collect all events for all delivered dependencies
-	ds := map[string]dependency.Dependency{
-		"kubernetes": c.k8sd,
-		"k0s":        c.k0sd,
-	}
-	err := action.DependencyDeliversEvents(ctx, []string{eventKey}, ds, delivers)
-	if err == nil || errors.Is(err, dependency.ErrNotHandled) {
-		return nil
-	}
-
-	return fmt.Errorf("failed to build delivered events; %w", err)
-}
-
-func (c K0S) dependencyRequiresEvents(ctx context.Context, before, after action.Events) error {
-	// collect all events (before and after) for required dependencies
-	rs := map[string]dependency.Requirement{
-		"controller-hosts": c.chr,
-		"worker-hosts":     c.whr,
-	}
-
-	if err := action.DependencyRequiresEvents(ctx, rs, before, after); err != nil {
-		return fmt.Errorf("%w; failed to build requires events", err)
 	}
 
 	return nil

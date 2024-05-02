@@ -48,9 +48,9 @@ func Test_MockDependencySanity(t *testing.T) {
 		dependency.ErrNotHandled,
 	)
 
-	var mcr dependency.HasDependencies = mc
+	var mcr dependency.RequiresDependencies = mc
 
-	rs := mcr.Requires(ctx)
+	rs := mcr.RequiresDependencies(ctx)
 
 	if len(rs) == 0 {
 		t.Errorf("Mock component didn't return any requirements: %+v", mc)
@@ -60,9 +60,9 @@ func Test_MockDependencySanity(t *testing.T) {
 		t.Errorf("Mock component returned wrong requirement: %+v", mc)
 	}
 
-	var mcd dependency.FullfillsDependencies = mc
+	var mcd dependency.ProvidesDependencies = mc
 
-	d, err := mcd.Provides(ctx, nil)
+	d, err := mcd.ProvidesDependencies(ctx, nil)
 	if err == nil {
 		t.Errorf("Mock returned an unexpected error: %+v", mc)
 	}

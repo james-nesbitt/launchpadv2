@@ -15,6 +15,6 @@ func (ds discoverStep) Id() string {
 }
 
 func (ds discoverStep) Run(ctx context.Context) error {
-	slog.InfoContext(ctx, "running host discover step", slog.String("ID", ds.id))
+	slog.InfoContext(ctx, "running host discover step", slog.String("ID", ds.Id()))
 	return nil
 }

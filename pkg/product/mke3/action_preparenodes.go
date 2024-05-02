@@ -15,6 +15,6 @@ func (s prepareNodesStep) Id() string {
 }
 
 func (s prepareNodesStep) Run(ctx context.Context) error {
-	slog.InfoContext(ctx, "running MKE3 prepare-nodes step", slog.String("ID", s.id))
+	slog.InfoContext(ctx, "running MKE3 prepare-nodes step", slog.String("ID", s.Id()))
 	return nil
 }

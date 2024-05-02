@@ -11,7 +11,7 @@ type MKE3DependencyConfig struct {
 	Version string
 }
 
-type MKE3Requirement interface {
+type RequiresMKE3 interface {
 	RequiresMKE3(context.Context) MKE3DependencyConfig
 }
 
@@ -41,7 +41,7 @@ func (mke3r mke3Req) Describe() string {
 }
 
 func (mke3r *mke3Req) Match(d dependency.Dependency) error {
-	if _, ok := d.(MKE3Dependency); !ok {
+	if _, ok := d.(ProvidesMKE3); !ok {
 		return fmt.Errorf("%w; MKE3 Requirement did not receive an MKE3 Dependency : %+v", dependency.ErrDependencyNotMatched, d)
 	}
 

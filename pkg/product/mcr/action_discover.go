@@ -19,6 +19,6 @@ func (s discoverStep) Validate(_ context.Context) error {
 }
 
 func (s discoverStep) Run(ctx context.Context) error {
-	slog.InfoContext(ctx, "running MCR discover step", slog.String("ID", s.id))
+	slog.InfoContext(ctx, "running MCR discover step", slog.String("ID", s.Id()))
 	return nil
 }

@@ -15,6 +15,6 @@ func (s downloadClientBundleStep) Id() string {
 }
 
 func (s downloadClientBundleStep) Run(ctx context.Context) error {
-	slog.InfoContext(ctx, "running MKE3 client-bundle generate step", slog.String("ID", s.id))
+	slog.InfoContext(ctx, "running MKE3 client-bundle generate step", slog.String("ID", s.Id()))
 	return nil
 }

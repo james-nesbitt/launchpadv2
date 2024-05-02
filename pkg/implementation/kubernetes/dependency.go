@@ -2,6 +2,9 @@ package kubernetes
 
 import (
 	"context"
+	"fmt"
+
+	"github.com/Mirantis/launchpad/pkg/dependency"
 )
 
 // KubernetesDependency Kubernetes providing Dependency.
@@ -23,6 +26,8 @@ type kubeDep struct {
 	desc string
 
 	factory func(context.Context) (*Kubernetes, error)
+
+	events dependency.Events
 }
 
 // Id.
@@ -46,6 +51,23 @@ func (kd kubeDep) Met(ctx context.Context) error {
 	return err
 }
 
+// DeliversEvents the events that this Dependency can deliver.
+func (kd *kubeDep) DeliversEvents(context.Context) dependency.Events {
+	if kd.events == nil {
+		kd.events = dependency.Events{
+			dependency.EventKeyActivated: &dependency.Event{
+				Id: fmt.Sprintf("%s:%s", kd.Id(), dependency.EventKeyActivated),
+			},
+			dependency.EventKeyDeActivated: &dependency.Event{
+				Id: fmt.Sprintf("%s:%s", kd.Id(), dependency.EventKeyDeActivated),
+			},
+		}
+	}
+
+	return kd.events
+}
+
+// Kubernetes API provide.
 func (kd *kubeDep) Kubernetes(ctx context.Context) *Kubernetes {
 	k, _ := kd.factory(ctx)
 	return k

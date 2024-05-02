@@ -19,6 +19,6 @@ func (s uninstallMCRStep) Validate(_ context.Context) error {
 }
 
 func (s uninstallMCRStep) Run(ctx context.Context) error {
-	slog.InfoContext(ctx, "running MCR uninstall step", slog.String("ID", s.id))
+	slog.InfoContext(ctx, "running MCR uninstall step", slog.String("ID", s.Id()))
 	return nil
 }

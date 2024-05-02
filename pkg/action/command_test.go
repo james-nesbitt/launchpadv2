@@ -23,7 +23,7 @@ func Test_CommandBuild(t *testing.T) {
 			dependency.Dependencies{
 				depmock.Dependency("A", "Dep A", nil, nil),
 			},
-			action.Events{},
+			dependency.Events{},
 			nil,
 		),
 		actionmock.NewCommandHandler(
@@ -35,7 +35,7 @@ func Test_CommandBuild(t *testing.T) {
 				depmock.Dependency("B", "Dep B", nil, nil),
 				depmock.Dependency("C", "Dep C", nil, nil),
 			},
-			action.Events{},
+			dependency.Events{},
 			nil,
 		),
 	}

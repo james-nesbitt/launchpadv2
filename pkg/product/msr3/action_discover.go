@@ -17,6 +17,6 @@ func (s discoverStep) Id() string {
 }
 
 func (s discoverStep) Run(ctx context.Context) error {
-	slog.InfoContext(ctx, "RUNNING MSR3 DISCOVER STEP", slog.String("ID", s.id))
+	slog.InfoContext(ctx, "RUNNING MSR3 DISCOVER STEP", slog.String("ID", s.Id()))
 	return nil
 }

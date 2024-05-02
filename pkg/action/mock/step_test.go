@@ -5,14 +5,15 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/Mirantis/launchpad/pkg/action"
 	"github.com/Mirantis/launchpad/pkg/action/mock"
+	"github.com/Mirantis/launchpad/pkg/action/stepped"
+	"github.com/Mirantis/launchpad/pkg/dependency"
 )
 
 func Test_StepSanity(t *testing.T) {
 	id := "test"
 	rerr := errors.New("a run error")
-	var s action.Step = mock.NewStep(id, action.Events{}, action.Events{}, action.Events{}, rerr)
+	var s stepped.Step = mock.NewStep(id, dependency.Events{}, dependency.Events{}, dependency.Events{}, rerr)
 
 	if s.Id() != id {
 		t.Errorf("mock step gave wrong id: %+v", s)

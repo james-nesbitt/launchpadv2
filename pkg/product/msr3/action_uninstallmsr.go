@@ -15,6 +15,6 @@ func (s uninstallMSRStep) Id() string {
 }
 
 func (s uninstallMSRStep) Run(ctx context.Context) error {
-	slog.InfoContext(ctx, "RUNNING MSR3 UNINSTALL STEP", slog.String("ID", s.id))
+	slog.InfoContext(ctx, "RUNNING MSR3 UNINSTALL STEP", slog.String("ID", s.Id()))
 	return nil
 }

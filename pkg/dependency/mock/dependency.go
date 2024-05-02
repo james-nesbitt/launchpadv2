@@ -6,7 +6,7 @@ import (
 	"github.com/Mirantis/launchpad/pkg/dependency"
 )
 
-func FullfillsDependencies(dep dependency.Dependency, err error) dependency.FullfillsDependencies {
+func ProvidesDependencies(dep dependency.Dependency, err error) fillDep {
 	return fillDep{
 		d:   dep,
 		err: err,
@@ -18,7 +18,7 @@ type fillDep struct {
 	err error
 }
 
-func (mpd fillDep) Provides(ctx context.Context, r dependency.Requirement) (dependency.Dependency, error) {
+func (mpd fillDep) ProvidesDependencies(ctx context.Context, r dependency.Requirement) (dependency.Dependency, error) {
 	return mpd.d, mpd.err
 }
 

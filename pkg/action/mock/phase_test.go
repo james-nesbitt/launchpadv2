@@ -7,6 +7,7 @@ import (
 
 	"github.com/Mirantis/launchpad/pkg/action"
 	"github.com/Mirantis/launchpad/pkg/action/mock"
+	"github.com/Mirantis/launchpad/pkg/dependency"
 )
 
 func Test_PhaseSanity(t *testing.T) {
@@ -20,9 +21,9 @@ func Test_PhaseSanity(t *testing.T) {
 		id,
 		func(_ context.Context) error { return runErr },
 		func(_ context.Context) error { return valErr },
-		action.NewEvents(&action.Event{Id: "A"}),
-		action.NewEvents(&action.Event{Id: "B"}, &action.Event{Id: "C"}),
-		action.NewEvents(),
+		dependency.NewEvents(&dependency.Event{Id: "A"}),
+		dependency.NewEvents(&dependency.Event{Id: "B"}, &dependency.Event{Id: "C"}),
+		dependency.NewEvents(),
 	)
 
 	var p action.Phase = mp
@@ -31,13 +32,13 @@ func Test_PhaseSanity(t *testing.T) {
 		t.Errorf("Phase returned wrong id: %+v", p)
 	}
 
-	if pde, ok := p.(action.DeliversEvents); !ok {
+	if pde, ok := p.(dependency.DeliversEvents); !ok {
 		t.Error("mock phase doesn't match DeliverEvents")
 	} else if des := pde.DeliversEvents(ctx); len(des) == 0 {
 		t.Errorf("mock phase doesn't contain expected Deliver event")
 	}
 
-	if pre, ok := p.(action.RequiresEvents); !ok {
+	if pre, ok := p.(dependency.RequiresEvents); !ok {
 		t.Error("mock phase doesn't match RequiresEvents")
 	} else if bes, aes := pre.RequiresEvents(ctx); len(aes) > 0 {
 		t.Errorf("mock phase gave after events when it shouldn't have: %+v", aes)

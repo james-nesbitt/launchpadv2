@@ -57,10 +57,10 @@ type compWDependencies struct {
 	provides error
 }
 
-func (cwd compWDependencies) Requires(context.Context) dependency.Requirements {
+func (cwd compWDependencies) RequiresDependencies(context.Context) dependency.Requirements {
 	return cwd.reqs
 }
 
-func (cwd compWDependencies) Provides(context.Context, dependency.Requirement) (dependency.Dependency, error) {
+func (cwd compWDependencies) ProvidesDependencies(context.Context, dependency.Requirement) (dependency.Dependency, error) {
 	return cwd.dep, cwd.provides
 }

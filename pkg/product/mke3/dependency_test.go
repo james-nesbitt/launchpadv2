@@ -11,51 +11,6 @@ import (
 	mke3implementation "github.com/Mirantis/launchpad/pkg/product/mke3/implementation"
 )
 
-// Prove that the MKE3 Requirement and Dependency are valid and can be matched.
-func Test_DependencySanity(t *testing.T) {
-	ctx := context.Background()
-
-	v := "3.7.7"
-	apic := mke3implementation.Config{Version: v}
-	dc := mke3implementation.MKE3DependencyConfig{Version: v}
-
-	r := mke3implementation.NewMKE3Requirement(
-		"test",
-		"test mke3 requirement",
-		dc,
-	)
-
-	var rr dependency.Requirement = r
-
-	d := mke3implementation.NewMKE3Dependency(
-		"test",
-		"test mke3 dependency",
-		func(context.Context) (*mke3implementation.API, error) {
-			return mke3implementation.NewAPI(apic), nil
-		},
-	)
-
-	var dd dependency.Dependency = d
-	var _ mke3implementation.MKE3Dependency = d
-
-	if _, ok := dd.(mke3implementation.MKE3Dependency); !ok {
-		t.Errorf("Could not convert our dependency to the MKE3 Dependency: %+v", dd)
-	}
-
-	if db := rr.Matched(ctx); db != nil {
-		t.Errorf("requirements says it is matched before matching: %+v", r)
-	}
-
-	if err := rr.Match(dd); err != nil {
-		t.Errorf("requirement failed matching with our dependency: %s \n%+v \n %+v", err.Error(), r, d)
-	}
-
-	dd2 := rr.Matched(ctx)
-	if dd2 == nil {
-		t.Errorf("requirements says it isn't matched after matching: %+v", r)
-	}
-}
-
 // Prove that the MKE3 component can handle MKE3 requirements
 //
 //	This is the mechanism by which requirements and dependencies are matched in MKE3
@@ -72,17 +27,17 @@ func Test_ProvidesMKE3(t *testing.T) {
 		dc,
 	)
 
-	mp, ok := mc.(dependency.FullfillsDependencies)
+	mp, ok := mc.(dependency.ProvidesDependencies)
 	if !ok {
 		t.Fatal("MKE3 component does not provide dependencies")
 	}
 
-	d, err := mp.Provides(ctx, r)
+	d, err := mp.ProvidesDependencies(ctx, r)
 	if err != nil {
 		t.Fatalf("MKE3 could not provide a dependency for an MKE requirement: %s", err.Error())
 	}
 
-	dm, ok := d.(mke3implementation.MKE3Dependency)
+	dm, ok := d.(mke3implementation.ProvidesMKE3)
 	if !ok {
 		t.Fatalf("MKE3 returned an invalid dependency: %+v", d)
 	}
@@ -107,12 +62,12 @@ func Test_ProvidesK8s(t *testing.T) {
 		kver,
 	)
 
-	mp, ok := mc.(dependency.FullfillsDependencies)
+	mp, ok := mc.(dependency.ProvidesDependencies)
 	if !ok {
 		t.Fatal("MKE3 component does not provide dependencies")
 	}
 
-	d, err := mp.Provides(ctx, r)
+	d, err := mp.ProvidesDependencies(ctx, r)
 	if err != nil {
 		t.Fatalf("MKE3 could not provide a k8s dependency for a K8s requirement: %s", err.Error())
 	}

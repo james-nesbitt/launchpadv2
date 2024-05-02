@@ -15,6 +15,6 @@ func (s installMSRStep) Id() string {
 }
 
 func (s installMSRStep) Run(ctx context.Context) error {
-	slog.InfoContext(ctx, "RUNNING MSR INSTALL STEP", slog.String("ID", s.id))
+	slog.InfoContext(ctx, "RUNNING MSR INSTALL STEP", slog.String("ID", s.Id()))
 	return nil
 }

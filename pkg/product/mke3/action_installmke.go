@@ -15,6 +15,6 @@ func (s installMKEStep) Id() string {
 }
 
 func (s installMKEStep) Run(ctx context.Context) error {
-	slog.InfoContext(ctx, "running MKE3 install step", slog.String("ID", s.id))
+	slog.InfoContext(ctx, "running MKE3 install step", slog.String("ID", s.Id()))
 	return nil
 }

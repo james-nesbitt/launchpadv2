@@ -1,23 +1,23 @@
-package action_test
+package dependency_test
 
 import (
 	"testing"
 
-	"github.com/Mirantis/launchpad/pkg/action"
+	"github.com/Mirantis/launchpad/pkg/dependency"
 )
 
 func Test_EventAddMerge(t *testing.T) {
-	es := action.Events{}
+	es := dependency.Events{}
 
-	es.Add(&action.Event{Id: "one"})
+	es.Add(&dependency.Event{Id: "one"})
 
 	if !es.Contains("one") {
 		t.Errorf("events says it doesn't contain an added event: %+v", es)
 	}
 
-	esa := action.Events{
-		"two":   &action.Event{Id: "two"},
-		"three": &action.Event{Id: "three"},
+	esa := dependency.Events{
+		"two":   &dependency.Event{Id: "two"},
+		"three": &dependency.Event{Id: "three"},
 	}
 
 	es.Merge(esa)
@@ -28,13 +28,13 @@ func Test_EventAddMerge(t *testing.T) {
 }
 
 func Test_EventContains(t *testing.T) {
-	es := action.Events{}
+	es := dependency.Events{}
 
 	if es.Contains("aaaa") {
 		t.Errorf("empty events says it contains an event: %+v", es)
 	}
 
-	es.Add(&action.Event{Id: "add"})
+	es.Add(&dependency.Event{Id: "add"})
 
 	if !es.Contains("add") {
 		t.Errorf("events says it doesn't contain an added event: %+v", es)

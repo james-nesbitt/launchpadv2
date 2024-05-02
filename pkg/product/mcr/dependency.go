@@ -13,7 +13,7 @@ import (
 )
 
 // Requires declare that we need a HostsRoles dependency.
-func (p *MCR) Requires(_ context.Context) dependency.Requirements {
+func (p *MCR) RequiresDependencies(_ context.Context) dependency.Requirements {
 	if p.mrhr == nil {
 		p.mrhr = host.NewHostsRolesRequirement(
 			fmt.Sprintf("%s:%s:manager", host.HostsComponentType, p.Name()),
@@ -44,7 +44,7 @@ func (p *MCR) Requires(_ context.Context) dependency.Requirements {
 }
 
 // Provides dependencies.
-func (p *MCR) Provides(ctx context.Context, r dependency.Requirement) (dependency.Dependency, error) {
+func (p *MCR) ProvidesDependencies(ctx context.Context, r dependency.Requirement) (dependency.Dependency, error) {
 	if dhr, ok := r.(dockerhost.DockerHostsRequirement); ok {
 		// DockerHosts dependency
 		//

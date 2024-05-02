@@ -39,11 +39,11 @@ func Test_HostComponentDependencies(t *testing.T) {
 
 	hc := host.NewHostsComponent(id, hs)
 
-	var hcpd dependency.FullfillsDependencies = hc
+	var hcpd dependency.ProvidesDependencies = hc
 
 	r := host.NewHostsRolesRequirement("dummy", "dummy hosts requirement", host.HostsRolesFilter{Roles: []string{"manager", "worker"}, Min: 1, Max: 0})
 
-	d, err := hcpd.Provides(context.Background(), r)
+	d, err := hcpd.ProvidesDependencies(context.Background(), r)
 	if err != nil {
 		t.Errorf("host component Provides returned an error on empty requirement: %s : %+v", err.Error(), d)
 	}

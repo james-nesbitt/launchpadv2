@@ -3,10 +3,10 @@ package mock
 import (
 	"context"
 
-	"github.com/Mirantis/launchpad/pkg/action"
+	"github.com/Mirantis/launchpad/pkg/dependency"
 )
 
-func NewStep(id string, delivers action.Events, requiresBefore action.Events, requiresAfter action.Events, runError error) step {
+func NewStep(id string, delivers dependency.Events, requiresBefore dependency.Events, requiresAfter dependency.Events, runError error) step {
 	return step{
 		id:   id,
 		des:  delivers,
@@ -18,9 +18,9 @@ func NewStep(id string, delivers action.Events, requiresBefore action.Events, re
 
 type step struct {
 	id   string
-	resb action.Events
-	resa action.Events
-	des  action.Events
+	resb dependency.Events
+	resa dependency.Events
+	des  dependency.Events
 	rerr error
 }
 
@@ -28,11 +28,11 @@ func (s step) Id() string {
 	return s.id
 }
 
-func (s step) DeliversEvents(_ context.Context) action.Events {
+func (s step) DeliversEvents(_ context.Context) dependency.Events {
 	return s.des
 }
 
-func (s step) RequiresEvents(_ context.Context) (action.Events, action.Events) {
+func (s step) RequiresEvents(_ context.Context) (dependency.Events, dependency.Events) {
 	return s.resb, s.resa
 }
 

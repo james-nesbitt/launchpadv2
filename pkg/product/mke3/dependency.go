@@ -12,7 +12,9 @@ import (
 )
 
 // Requires declare that we need a HostsRoles dependency.
-func (c *MKE3) Requires(_ context.Context) dependency.Requirements {
+//
+// @NOTE This should actually be a docker-swarm dependency.
+func (c *MKE3) RequiresDependencies(_ context.Context) dependency.Requirements {
 	if c.dhr == nil {
 		c.dhr = dockerhost.NewDockerHostsRequirement(
 			fmt.Sprintf("%s:%s", c.Name(), dockerhost.ImplementationType),
@@ -27,8 +29,8 @@ func (c *MKE3) Requires(_ context.Context) dependency.Requirements {
 }
 
 // Provides dependencies.
-func (c *MKE3) Provides(ctx context.Context, r dependency.Requirement) (dependency.Dependency, error) {
-	if mke3r, ok := r.(implementation.MKE3Requirement); ok {
+func (c *MKE3) ProvidesDependencies(ctx context.Context, r dependency.Requirement) (dependency.Dependency, error) {
+	if mke3r, ok := r.(implementation.RequiresMKE3); ok {
 		// MKE3 dependency
 		dc := mke3r.RequiresMKE3(ctx)
 
@@ -73,6 +75,10 @@ func (c *MKE3) Provides(ctx context.Context, r dependency.Requirement) (dependen
 }
 
 // ValidateDependencyConfig validate that the dependency configuration can be met.
+//
+// @NOTE use this function to detemine if this MKE3 Component can match the Dependency Config,
+//
+//	including checking Version, and Capability.
 func (c MKE3) ValidateMKE3DependencyConfig(dc implementation.MKE3DependencyConfig) error {
 	return nil
 }

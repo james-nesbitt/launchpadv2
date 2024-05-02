@@ -2,6 +2,8 @@ package msr4
 
 import (
 	"context"
+
+	"github.com/Mirantis/launchpad/pkg/dependency"
 )
 
 const (
@@ -22,6 +24,8 @@ type MSR4 struct {
 	id     string
 	config Config
 	state  State
+
+	k8sr dependency.Requirement
 }
 
 // Name for the component.

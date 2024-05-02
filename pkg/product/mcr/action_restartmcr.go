@@ -19,6 +19,6 @@ func (s restartMCRStep) Validate(_ context.Context) error {
 }
 
 func (s restartMCRStep) Run(ctx context.Context) error {
-	slog.InfoContext(ctx, "running MCR restart step", slog.String("ID", s.id))
+	slog.InfoContext(ctx, "running MCR restart step", slog.String("ID", s.Id()))
 	return nil
 }

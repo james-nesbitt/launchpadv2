@@ -99,18 +99,18 @@ func (cl *Cluster) matchRequirements(ctx context.Context) error {
 	cl.dependencies = dependency.Dependencies{}
 
 	// Collect all the things that provide dependencies
-	fds := map[string]dependency.FullfillsDependencies{}
+	fds := map[string]dependency.ProvidesDependencies{}
 
 	for _, c := range cl.Components {
-		if fd, ok := c.(dependency.FullfillsDependencies); ok {
+		if fd, ok := c.(dependency.ProvidesDependencies); ok {
 			slog.DebugContext(ctx, fmt.Sprintf("including component '%s' as a dependency provider", c.Name()), slog.Any("component", c))
 			fds[c.Name()] = fd
 		}
 	}
 
 	for _, cc := range cl.Components {
-		if hd, ok := cc.(dependency.HasDependencies); ok {
-			for _, r := range hd.Requires(ctx) {
+		if hd, ok := cc.(dependency.RequiresDependencies); ok {
+			for _, r := range hd.RequiresDependencies(ctx) {
 				if d := r.Matched(ctx); d != nil {
 					slog.DebugContext(ctx, "cluster: requirement already matched", slog.Any("requirement", r))
 				}

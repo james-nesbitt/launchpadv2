@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Mirantis/launchpad/pkg/action"
 	"github.com/Mirantis/launchpad/pkg/dependency"
 	"github.com/Mirantis/launchpad/pkg/implementation/docker"
 )
@@ -76,7 +75,7 @@ type dockerHostsDep struct {
 
 	factory func(context.Context) (*DockerHosts, error)
 
-	events action.Events
+	events dependency.Events
 }
 
 func (dhd dockerHostsDep) Id() string {
@@ -105,13 +104,13 @@ func (dhd dockerHostsDep) ProvidesDockerHost(ctx context.Context) *DockerHosts {
 	return d
 }
 
-func (dhd dockerHostsDep) DeliversEvents(context.Context) action.Events {
+func (dhd dockerHostsDep) DeliversEvents(context.Context) dependency.Events {
 	if dhd.events == nil {
-		dhd.events = action.Events{
-			dependency.EventKeyActivated: &action.Event{
+		dhd.events = dependency.Events{
+			dependency.EventKeyActivated: &dependency.Event{
 				Id: fmt.Sprintf("%s:%s", dhd.Id(), dependency.EventKeyActivated),
 			},
-			dependency.EventKeyDeActivated: &action.Event{
+			dependency.EventKeyDeActivated: &dependency.Event{
 				Id: fmt.Sprintf("%s:%s", dhd.Id(), dependency.EventKeyDeActivated),
 			},
 		}

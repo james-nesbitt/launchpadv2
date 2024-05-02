@@ -7,7 +7,7 @@ import (
 	"github.com/Mirantis/launchpad/pkg/dependency"
 )
 
-func NewCommandHandler(phases action.Phases, dependencies dependency.Dependencies, events action.Events, buildErr error) cmdHandler {
+func NewCommandHandler(phases action.Phases, dependencies dependency.Dependencies, events dependency.Events, buildErr error) cmdHandler {
 	return cmdHandler{
 		ps:  phases,
 		ds:  dependencies,
@@ -19,7 +19,7 @@ func NewCommandHandler(phases action.Phases, dependencies dependency.Dependencie
 type cmdHandler struct {
 	ds  dependency.Dependencies
 	ps  action.Phases
-	es  action.Events
+	es  dependency.Events
 	err error
 }
 

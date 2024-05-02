@@ -3,9 +3,9 @@ package host
 import (
 	"testing"
 
-	"github.com/Mirantis/launchpad/pkg/action"
+	"github.com/Mirantis/launchpad/pkg/action/stepped"
 )
 
 func Test_ActionSanity(t *testing.T) {
-	var _ action.Step = discoverStep{}
+	var _ stepped.Step = discoverStep{}
 }

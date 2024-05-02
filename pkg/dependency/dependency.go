@@ -24,12 +24,12 @@ var (
 )
 
 // FullfillsDependencies components that can meet dependency needs.
-type FullfillsDependencies interface {
+type ProvidesDependencies interface {
 	// ProvidesDependency a dependency for some type of Requirements.
 	// - if the error .Is(ErrDependencyNotHandled) then  Provider doesn't handle such requirement
 	// - if the error .Is(ErrDependencyShouldHaveHandled) then the Provider could not
 	//   be met, but it should have. No other provider should try to meet it.
-	Provides(context.Context, Requirement) (Dependency, error)
+	ProvidesDependencies(context.Context, Requirement) (Dependency, error)
 }
 
 // Dependencies set of Dependency items.
@@ -118,7 +118,7 @@ type Dependency interface {
 //		can be collected.
 //
 //	    NOTE: WE DO NOT TELL THE REQUIREMENT ABOUT THE DEPENDENCY - YOU NEED TO DO THAT
-func GetRequirementDependency(ctx context.Context, r Requirement, fds map[string]FullfillsDependencies) (Dependency, error) {
+func GetRequirementDependency(ctx context.Context, r Requirement, fds map[string]ProvidesDependencies) (Dependency, error) {
 	if len(fds) == 0 {
 		return nil, fmt.Errorf("%w; no dependency handlers providers for requirement %s", ErrNotHandled, r.Id())
 	}
@@ -129,7 +129,7 @@ func GetRequirementDependency(ctx context.Context, r Requirement, fds map[string
 			continue // stupidity check
 		}
 
-		d, err := fd.Provides(ctx, r)
+		d, err := fd.ProvidesDependencies(ctx, r)
 
 		// it is allowed to return no error, and no dependency,
 		// which just means that the req wasn't handled

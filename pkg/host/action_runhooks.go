@@ -15,6 +15,6 @@ func (s runHooksStep) Id() string {
 }
 
 func (s runHooksStep) Run(ctx context.Context) error {
-	slog.InfoContext(ctx, "running host hooks", slog.String("ID", s.id))
+	slog.InfoContext(ctx, "running host hooks", slog.String("ID", s.Id()))
 	return nil
 }

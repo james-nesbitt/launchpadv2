@@ -7,6 +7,7 @@ import (
 
 	"github.com/Mirantis/launchpad/pkg/action"
 	actionmock "github.com/Mirantis/launchpad/pkg/action/mock"
+	"github.com/Mirantis/launchpad/pkg/dependency"
 )
 
 func Test_PhasesAddMerge(t *testing.T) {
@@ -71,12 +72,12 @@ func Test_PhasesOrder(t *testing.T) {
 	ctx := context.Background()
 
 	// create a bunch of events which we will share across the phases
-	ea := action.Event{Id: "A"}
-	eb := action.Event{Id: "B"}
-	ec := action.Event{Id: "C"}
-	ed := action.Event{Id: "D"}
-	ee := action.Event{Id: "E"}
-	ef := action.Event{Id: "F"}
+	ea := dependency.Event{Id: "A"}
+	eb := dependency.Event{Id: "B"}
+	ec := dependency.Event{Id: "C"}
+	ed := dependency.Event{Id: "D"}
+	ee := dependency.Event{Id: "E"}
+	ef := dependency.Event{Id: "F"}
 
 	// Create a bunch of phases with relationships that create an explicit order:
 	//  - no event free phases (as they end up in random order, so not testable)
@@ -87,15 +88,15 @@ func Test_PhasesOrder(t *testing.T) {
 	//     - Before means that the event must run before this Phase (thereforce the Phase that delivers the event comes before)
 	//     - After means that the event must run after this Phase (therefore the Phase that delivers the event comes after)
 	ps := action.NewPhases(
-		actionmock.NewPhase("6", nil, nil, action.NewEvents(&ee, &ef), action.NewEvents(&ed), nil),
-		actionmock.NewPhase("3", nil, nil, action.NewEvents(&eb), action.NewEvents(&ea), nil),
-		actionmock.NewPhase("5", nil, nil, action.NewEvents(&ec, &ed), action.NewEvents(&ea, &eb), nil),
-		actionmock.NewPhase("7", nil, nil, action.NewEvents(&ef), action.NewEvents(&ec, &ee), nil),
-		actionmock.NewPhase("1", nil, nil, action.NewEvents(&ea), nil, action.NewEvents(&eb)),
-		actionmock.NewPhase("4", nil, nil, nil, action.NewEvents(&eb), action.NewEvents(&ed, &ee)),
-		actionmock.NewPhase("8", nil, nil, nil, action.NewEvents(&ef), nil),
-		actionmock.NewPhase("0", nil, nil, nil, nil, action.NewEvents(&ea, &eb)),
-		actionmock.NewPhase("2", nil, nil, action.NewEvents(&ea, &eb), nil, nil),
+		actionmock.NewPhase("6", nil, nil, dependency.NewEvents(&ee, &ef), dependency.NewEvents(&ed), nil),
+		actionmock.NewPhase("3", nil, nil, dependency.NewEvents(&eb), dependency.NewEvents(&ea), nil),
+		actionmock.NewPhase("5", nil, nil, dependency.NewEvents(&ec, &ed), dependency.NewEvents(&ea, &eb), nil),
+		actionmock.NewPhase("7", nil, nil, dependency.NewEvents(&ef), dependency.NewEvents(&ec, &ee), nil),
+		actionmock.NewPhase("1", nil, nil, dependency.NewEvents(&ea), nil, dependency.NewEvents(&eb)),
+		actionmock.NewPhase("4", nil, nil, nil, dependency.NewEvents(&eb), dependency.NewEvents(&ed, &ee)),
+		actionmock.NewPhase("8", nil, nil, nil, dependency.NewEvents(&ef), nil),
+		actionmock.NewPhase("0", nil, nil, nil, nil, dependency.NewEvents(&ea, &eb)),
+		actionmock.NewPhase("2", nil, nil, dependency.NewEvents(&ea, &eb), nil, nil),
 	)
 
 	ops, err := ps.Order(ctx)
@@ -126,7 +127,7 @@ func phasePrint(ctx context.Context, p action.Phase) string {
 		After:    []string{},
 	}
 
-	if pd, ok := p.(action.DeliversEvents); ok {
+	if pd, ok := p.(dependency.DeliversEvents); ok {
 		for _, e := range pd.DeliversEvents(ctx) {
 			pp.Delivers = append(pp.Delivers, e.Id)
 		}
@@ -134,7 +135,7 @@ func phasePrint(ctx context.Context, p action.Phase) string {
 		pp.Delivers = append(pp.Delivers, "none")
 	}
 
-	if pr, ok := p.(action.RequiresEvents); ok {
+	if pr, ok := p.(dependency.RequiresEvents); ok {
 		bes, aes := pr.RequiresEvents(ctx)
 		for _, be := range bes {
 			pp.Before = append(pp.Before, be.Id)

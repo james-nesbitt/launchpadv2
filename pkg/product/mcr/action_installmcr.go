@@ -19,6 +19,6 @@ func (s installMCRStep) Validate(_ context.Context) error {
 }
 
 func (s installMCRStep) Run(ctx context.Context) error {
-	slog.InfoContext(ctx, "running MCR install step", slog.String("ID", s.id))
+	slog.InfoContext(ctx, "running MCR install step", slog.String("ID", s.Id()))
 	return nil
 }

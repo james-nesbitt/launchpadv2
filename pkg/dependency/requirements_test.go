@@ -20,11 +20,11 @@ func Test_CollectRequirements(t *testing.T) {
 		mock.Requirement("four", "four", nil),
 	}
 
-	hds := []dependency.HasDependencies{
-		mock.HasDependencies(rs[0:2]),                   // the first two
-		mock.HasDependencies(dependency.Requirements{}), // empty
-		mock.HasDependencies(rs[2:3]),                   // the third
-		mock.HasDependencies(rs[3:]),                    // the rest
+	hds := []dependency.RequiresDependencies{
+		mock.RequiresDependencies(rs[0:2]),                   // the first two
+		mock.RequiresDependencies(dependency.Requirements{}), // empty
+		mock.RequiresDependencies(rs[2:3]),                   // the third
+		mock.RequiresDependencies(rs[3:]),                    // the rest
 	}
 
 	crs := dependency.CollectRequirements(ctx, hds)

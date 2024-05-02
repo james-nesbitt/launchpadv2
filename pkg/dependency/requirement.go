@@ -12,10 +12,10 @@ var (
 )
 
 // HasDependencies can determine its dependencies.
-type HasDependencies interface {
+type RequiresDependencies interface {
 	// Requires a set of Requirements indicating what dependency Requirements are needed
 	// - if the set is empty, then no requirements are needed
-	Requires(context.Context) Requirements
+	RequiresDependencies(context.Context) Requirements
 }
 
 // --- Dependency requirement definitiond ---
@@ -54,14 +54,14 @@ type OptionalRequirement interface {
 }
 
 // CollectRequirements from a set of HasDependencies.
-func CollectRequirements(ctx context.Context, hds []HasDependencies) Requirements {
+func CollectRequirements(ctx context.Context, hds []RequiresDependencies) Requirements {
 	rs := Requirements{}
 	for _, hd := range hds {
 		if hd == nil {
 			continue // stupidity check
 		}
 
-		for _, r := range hd.Requires(ctx) {
+		for _, r := range hd.RequiresDependencies(ctx) {
 			slog.Debug("Dependency requirement received", slog.Any("handler", hd), slog.Any("requirement", r))
 			rs = append(rs, r)
 		}

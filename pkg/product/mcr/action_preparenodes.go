@@ -19,6 +19,6 @@ func (s prepareMCRNodesStep) Validate(_ context.Context) error {
 }
 
 func (s prepareMCRNodesStep) Run(ctx context.Context) error {
-	slog.InfoContext(ctx, "running MCR prepare-nodes step", slog.String("ID", s.id))
+	slog.InfoContext(ctx, "running MCR prepare-nodes step", slog.String("ID", s.Id()))
 	return nil
 }

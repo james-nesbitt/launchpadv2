@@ -45,7 +45,7 @@ func (hc HostsComponent) Validate(_ context.Context) error {
 }
 
 // Provides a dependency for some type of Requirements.
-func (hc *HostsComponent) Provides(ctx context.Context, req dependency.Requirement) (dependency.Dependency, error) {
+func (hc *HostsComponent) ProvidesDependencies(ctx context.Context, req dependency.Requirement) (dependency.Dependency, error) {
 	if rhr, ok := req.(RequiresHostsRoles); ok {
 		f := rhr.RequireHostsRoles(ctx)
 

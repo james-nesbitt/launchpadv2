@@ -7,6 +7,8 @@ import (
 )
 
 type configureMCRStep struct {
+	baseStep
+
 	id string
 }
 

@@ -5,75 +5,24 @@ import (
 	"fmt"
 
 	"github.com/Mirantis/launchpad/pkg/dependency"
-	"github.com/Mirantis/launchpad/pkg/implementation/docker"
 )
-
-const (
-	ImplementationType = "docker-hosts"
-)
-
-type DockerHostsRequirement interface {
-	NeedsDockerHost(context.Context) docker.Version
-}
-
-func NewDockerHostsRequirement(id string, desc string, version docker.Version) *dockerHostsReq {
-	return &dockerHostsReq{
-		id:   id,
-		desc: desc,
-		ver:  version,
-	}
-}
 
 type DockerHostsDependency interface {
-	ProvidesDockerHost(ctx context.Context) *DockerHosts
+	ProvidesDockerHost(context.Context) Hosts
 }
 
-func NewDockerHostsDependency(id string, description string, factory func(context.Context) (*DockerHosts, error)) *dockerHostsDep {
+func NewDockerHostsDependency(id string, description string, factory func(context.Context) (Hosts, error)) *dockerHostsDep {
 	return &dockerHostsDep{
 		id:      id,
 		desc:    description,
 		factory: factory}
 }
 
-type dockerHostsReq struct {
-	id   string
-	desc string
-
-	ver docker.Version
-
-	dep dependency.Dependency
-}
-
-func (dhr dockerHostsReq) Id() string {
-	return dhr.id
-}
-
-func (dhr dockerHostsReq) Describe() string {
-	return dhr.desc
-}
-
-func (dhr *dockerHostsReq) Match(dep dependency.Dependency) error {
-	if _, ok := dep.(DockerHostsDependency); !ok {
-		return dependency.ErrDependencyNotMatched
-	}
-
-	dhr.dep = dep
-	return nil
-}
-
-func (dhr dockerHostsReq) Matched(context.Context) dependency.Dependency {
-	return dhr.dep
-}
-
-func (dhr dockerHostsReq) NeedsDockerHost(_ context.Context) docker.Version {
-	return dhr.ver
-}
-
 type dockerHostsDep struct {
 	id   string
 	desc string
 
-	factory func(context.Context) (*DockerHosts, error)
+	factory func(context.Context) (Hosts, error)
 
 	events dependency.Events
 }
@@ -99,7 +48,7 @@ func (dhd dockerHostsDep) Met(ctx context.Context) error {
 	return err
 }
 
-func (dhd dockerHostsDep) ProvidesDockerHost(ctx context.Context) *DockerHosts {
+func (dhd dockerHostsDep) ProvidesDockerHost(ctx context.Context) Hosts {
 	d, _ := dhd.factory(ctx)
 	return d
 }

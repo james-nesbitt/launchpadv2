@@ -28,7 +28,7 @@ func DecodeHost(t string, id string, d func(interface{}) error) (Host, error) {
 
 	hd, ok := HostDecoders[t]
 	if !ok {
-		return nil, fmt.Errorf("%w: %s", ErrUnknownHostDecodeType, t)
+		return nil, fmt.Errorf("%w: %s, only %+v", ErrUnknownHostDecodeType, t, HostDecoders)
 	}
 
 	return hd(id, d)

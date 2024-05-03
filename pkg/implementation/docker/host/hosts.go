@@ -1,26 +1,38 @@
-package host
+package dockerhost
 
 import (
 	"context"
 	"errors"
 	"log/slog"
 	"sync"
+
+	"github.com/Mirantis/launchpad/pkg/host"
 )
 
-// Hosts collection of Host objects for a cluster.
-type Hosts map[string]Host
-
-// NewHosts Hosts constructer.
-func NewHosts(hs ...Host) Hosts {
-	nhs := Hosts{}
-	for _, h := range hs {
-		nhs[h.Id()] = h
-	}
-	return nhs
+type HostsOptions struct {
+	SudoDocker bool
 }
 
+func NewDockerHosts(hosts host.Hosts, opts HostsOptions) Hosts {
+	dhs := Hosts{}
+
+	for k, h := range hosts {
+		dh := &Host{Host: h}
+
+		if opts.SudoDocker {
+			dh.SudoDocker = true
+		}
+
+		dhs[k] = dh
+	}
+
+	return dhs
+}
+
+type Hosts map[string]*Host
+
 // Add Hosts objects to the Hosts set.
-func (hs Hosts) Add(ahs ...Host) {
+func (hs Hosts) Add(ahs ...*Host) {
 	for _, ah := range ahs {
 		if ah == nil {
 			continue
@@ -40,13 +52,13 @@ func (hs Hosts) Merge(ahs Hosts) {
 }
 
 // Get Host from the Hosts set if it exists, or return nil.
-func (hs Hosts) Get(id string) Host {
+func (hs Hosts) Get(id string) *Host {
 	h, _ := hs[id] //nolint: gosimple
 	return h
 }
 
 // Each Hosts in the set gets the function applied in parallel.
-func (hs Hosts) Each(ctx context.Context, f func(context.Context, Host) error) error {
+func (hs Hosts) Each(ctx context.Context, f func(context.Context, *Host) error) error {
 	errs := []error{}
 
 	wg := sync.WaitGroup{}
@@ -54,7 +66,7 @@ func (hs Hosts) Each(ctx context.Context, f func(context.Context, Host) error) e
 
 	for _, h := range hs {
 		wg.Add(1)
-		go func(ctx context.Context, h Host) {
+		go func(ctx context.Context, h *Host) {
 			err := f(ctx, h)
 			if err != nil {
 				errs = append(errs, err) // @TODO lock this when writing
@@ -64,7 +76,7 @@ func (hs Hosts) Each(ctx context.Context, f func(context.Context, Host) error) e
 	}
 
 	go func() {
-		slog.DebugContext(ctx, "host.Hosts.Each() waiting")
+		slog.Debug("dockerhosts.Each()")
 		wg.Wait()
 		cancel()
 	}()
@@ -72,9 +84,9 @@ func (hs Hosts) Each(ctx context.Context, f func(context.Context, Host) error) e
 	select {
 	case <-fctx.Done():
 		// Done
-		slog.DebugContext(ctx, "hosts.Hosts.Each() finished")
+		slog.Debug("dockerhosts.Each finished")
 	case <-ctx.Done():
-		slog.WarnContext(ctx, "hosts.Hosts.Each() context ended before function calls", slog.Any("hosts", hs))
+		slog.WarnContext(ctx, "dockerhosts.Each() context ended before function calls", slog.Any("hosts", hs))
 		cancel()
 	}
 

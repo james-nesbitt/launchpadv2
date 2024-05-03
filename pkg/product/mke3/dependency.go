@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/Mirantis/launchpad/pkg/dependency"
-	"github.com/Mirantis/launchpad/pkg/implementation/docker"
+	dockerimplementation "github.com/Mirantis/launchpad/pkg/implementation/docker"
 	dockerhost "github.com/Mirantis/launchpad/pkg/implementation/docker/host"
 	"github.com/Mirantis/launchpad/pkg/implementation/kubernetes"
 	"github.com/Mirantis/launchpad/pkg/product/mke3/implementation"
@@ -19,7 +19,7 @@ func (c *MKE3) RequiresDependencies(_ context.Context) dependency.Requirements {
 		c.dhr = dockerhost.NewDockerHostsRequirement(
 			fmt.Sprintf("%s:%s", c.Name(), dockerhost.ImplementationType),
 			fmt.Sprintf("%s: Needs docker hosts to install on", ComponentType),
-			docker.Version{},
+			dockerimplementation.Version{},
 		)
 	}
 

@@ -75,6 +75,7 @@ func (sp SteppedPhase) Run(ctx context.Context) error {
 	for _, s := range ss {
 		slog.InfoContext(ctx, fmt.Sprintf("-- STEP: %s", s.Id()), slog.Any("step", s))
 		if err := s.Run(ctx); err != nil {
+			slog.ErrorContext(ctx, fmt.Sprintf("Step %s error, exiting: %s", s.Id(), err.Error()), slog.Any("step", s))
 			return err
 		}
 	}

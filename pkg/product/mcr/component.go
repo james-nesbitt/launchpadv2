@@ -32,8 +32,8 @@ type MCR struct {
 	id string
 
 	// host roles req
-	mrhr dependency.Requirement // manager hosts requirement
-	wrhr dependency.Requirement // worker hosts requirement
+	mhr dependency.Requirement // manager hosts requirement
+	whr dependency.Requirement // worker hosts requirement
 
 	// dependencies given out
 	dhd dependency.Dependency // docker (host) dependency

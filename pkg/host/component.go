@@ -3,6 +3,7 @@ package host
 import (
 	"context"
 	"fmt"
+	"log/slog"
 
 	"github.com/Mirantis/launchpad/pkg/dependency"
 )
@@ -52,11 +53,12 @@ func (hc *HostsComponent) ProvidesDependencies(ctx context.Context, req dependen
 		d := NewHostsDependency(
 			fmt.Sprintf("%s:%s:%s", hc.id, RequiresHostsRolesType, req.Id()),
 			req.Describe(),
-			func(ctx context.Context) (*Hosts, error) {
-				h, err := hc.hosts.FilterRoles(f)
-				return &h, err
+			func(ctx context.Context) (Hosts, error) {
+				hs, err := hc.hosts.FilterRoles(f)
+				return hs, err
 			},
 		)
+		slog.DebugContext(ctx, fmt.Sprintf("%s added a HostDependency '%s'for Requirement '%s'", HostsComponentType, d.Id(), req.Id()), slog.Any("dependency", d), slog.Any("requirement", req))
 
 		hc.deps = append(hc.deps, d)
 

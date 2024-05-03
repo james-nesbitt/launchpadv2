@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/Mirantis/launchpad/pkg/dependency"
-	"github.com/Mirantis/launchpad/pkg/implementation/docker"
+	dockerimplementation "github.com/Mirantis/launchpad/pkg/implementation/docker"
 )
 
 const (
@@ -12,10 +12,10 @@ const (
 )
 
 type DockerSwarmRequirement interface {
-	NeedsDockerSwarm(context.Context) docker.Version
+	NeedsDockerSwarm(context.Context) dockerimplementation.Version
 }
 
-func NewDockerSwarmRequirement(id string, desc string, version docker.Version) *dockerSwarmReq {
+func NewDockerSwarmRequirement(id string, desc string, version dockerimplementation.Version) *dockerSwarmReq {
 	return &dockerSwarmReq{
 		id:   id,
 		desc: desc,
@@ -38,7 +38,7 @@ type dockerSwarmReq struct {
 	id   string
 	desc string
 
-	ver docker.Version
+	ver dockerimplementation.Version
 
 	dep dependency.Dependency
 }
@@ -64,7 +64,7 @@ func (dhr dockerSwarmReq) Matched(context.Context) dependency.Dependency {
 	return dhr.dep
 }
 
-func (dhr dockerSwarmReq) NeedsDockerSwarm(_ context.Context) docker.Version {
+func (dhr dockerSwarmReq) NeedsDockerSwarm(_ context.Context) dockerimplementation.Version {
 	return dhr.ver
 }
 

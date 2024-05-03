@@ -6,18 +6,19 @@ import (
 
 	"github.com/Mirantis/launchpad/pkg/dependency"
 	"github.com/Mirantis/launchpad/pkg/host"
-	"github.com/Mirantis/launchpad/pkg/implementation/docker"
+	dockerimplementation "github.com/Mirantis/launchpad/pkg/implementation/docker"
 	dockerhost "github.com/Mirantis/launchpad/pkg/implementation/docker/host"
 )
 
 func Test_DependencySanity(t *testing.T) {
 	ctx := context.Background()
-	v := docker.Version{
+	v := dockerimplementation.Version{
 		Version: "23.0.9",
 	}
+	opts := dockerhost.HostsOptions{}
 	dh := dockerhost.NewDockerHosts(
 		host.Hosts{},
-		v,
+		opts,
 	)
 
 	// 1. a requirer will generate a requirement
@@ -52,7 +53,7 @@ func Test_DependencySanity(t *testing.T) {
 	dhd := dockerhost.NewDockerHostsDependency(
 		"test",
 		"my test dependency",
-		func(ctx context.Context) (*dockerhost.DockerHosts, error) {
+		func(ctx context.Context) (dockerhost.Hosts, error) {
 			return dh, nil
 		},
 	)
@@ -89,7 +90,7 @@ func Test_DependencySanity(t *testing.T) {
 
 	dh2 := dhd2.ProvidesDockerHost(ctx)
 
-	if dh2 != dh {
+	if dh2 == nil {
 		t.Error("DockerHost Dependency returned wrong docker")
 	}
 }

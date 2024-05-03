@@ -53,9 +53,7 @@ func Test_HostComponentDependencies(t *testing.T) {
 		t.Fatalf("hosts roles requirement is wrong type: %+v", d)
 	}
 
-	hs2p := phd.ProduceHosts(ctx)
-	hs2 := *hs2p
-
+	hs2 := phd.ProduceHosts(ctx)
 	if len(hs2) != 3 {
 		t.Errorf("wrong number of hosts returned: %+v", hs2)
 	}

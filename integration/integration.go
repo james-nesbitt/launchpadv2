@@ -70,4 +70,7 @@ spec:
     msr4:
       version: 4.0.0
 `
+
+	IntegrationTestYamlDoNotCommit = ``
+
 )

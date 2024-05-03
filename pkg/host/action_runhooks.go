@@ -4,14 +4,19 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+
+	"github.com/Mirantis/launchpad/pkg/dependency"
 )
 
 type runHooksStep struct {
 	id string
+
+	hook string
+	ds   dependency.Dependencies
 }
 
 func (s runHooksStep) Id() string {
-	return fmt.Sprintf("%s:discover", s.id)
+	return fmt.Sprintf("%s:runhooks:%s", s.id, s.hook)
 }
 
 func (s runHooksStep) Run(ctx context.Context) error {

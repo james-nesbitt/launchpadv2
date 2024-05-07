@@ -21,9 +21,9 @@ import (
 	"github.com/Mirantis/launchpad/pkg/config"
 )
 
-func Test_LegacyApplyCommand(t *testing.T) {
+func Test_LegacyDiscoverCommand(t *testing.T) {
 	ctx := context.Background()
-	y := integration.IntegrationTestYamlLegacy
+	y := integration.IntegrationTestYamlDoNotCommit
 
 	cl, err := config.ConfigFromYamllBytes([]byte(y))
 	if err != nil {
@@ -40,13 +40,12 @@ func Test_LegacyApplyCommand(t *testing.T) {
 	}
 
 	if err := cmd.Validate(ctx); err != nil {
-		t.Errorf("cluster command [%s] validation failed: %s", cmd.Key, err.Error())
+		t.Fatalf("cluster command [%s] validation failed: %s", cmd.Key, err.Error())
 	}
 
 	if err := cmd.Run(ctx); err != nil {
 		t.Errorf("cluster command [%s] execution failed: %s", cmd.Key, err.Error())
 	}
 
-
-	t.Error("DEBUG")
+	t.Error("DEBUG HERE")
 }

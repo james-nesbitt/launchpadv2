@@ -5,13 +5,13 @@ import (
 	"testing"
 
 	"github.com/Mirantis/launchpad/pkg/dependency"
-	"github.com/Mirantis/launchpad/pkg/implementation/docker"
+	dockerimplementation "github.com/Mirantis/launchpad/pkg/implementation/docker"
 	"github.com/Mirantis/launchpad/pkg/implementation/docker/swarm"
 )
 
 func Test_DependencySanity(t *testing.T) {
 	ctx := context.Background()
-	v := docker.Version{
+	v := dockerimplementation.Version{
 		Version: "23.0.9",
 	}
 	cfg := swarm.Config{}

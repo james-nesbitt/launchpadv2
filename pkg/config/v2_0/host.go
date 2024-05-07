@@ -1,9 +1,9 @@
 package v20
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
-	"strings"
 
 	"gopkg.in/yaml.v3"
 
@@ -26,37 +26,38 @@ func (shs *SpecHosts) UnmarshalYAML(py *yaml.Node) error {
 		return fmt.Errorf("failed to decode spec hosts: %s", err.Error())
 	}
 
-	errss := []string{}
+	errs := []error{}
 
+	if len(shsc) == 0 {
+		errs = append(errs, fmt.Errorf("no hosts were found when decoding the cluster"))
+	}
 	for id, shn := range shsc {
-		t := id
 		pc := struct {
-			Id      string `yaml:"id"`
-			Handler string `yaml:"handler"`
+			Id      string   `yaml:"id"`
+			Handler string   `yaml:"handler"`
+			Roles   []string `yaml:"roles"`
 		}{}
 
 		if err := shn.Decode(&pc); err != nil {
 			slog.Debug("Decode of host gave suspiscious results")
 		}
 
-		if pc.Handler != "" {
-			t = pc.Handler
-		}
-		if pc.Id != "" {
-			id = pc.Id
-		}
-
-		p, err := host.DecodeHost(t, id, shn.Decode)
-		if err != nil {
-			errss = append(errss, fmt.Sprintf("%s: %s", id, err.Error()))
+		if pc.Handler == "" {
+			errs = append(errs, fmt.Errorf("no 'handler' specified for host '%s'", id))
 			continue
 		}
 
-		shs.hs[id] = p
+		h, err := host.DecodeHost(pc.Handler, id, shn.Decode)
+		if err != nil {
+			errs = append(errs, fmt.Errorf("%s: %s", id, err.Error()))
+			continue
+		}
+
+		shs.hs[id] = h
 	}
 
-	if len(errss) > 0 {
-		return fmt.Errorf("Error decoding Spec hosts: %s", strings.Join(errss, "\n"))
+	if len(errs) > 0 {
+		return fmt.Errorf("2.0 host: Error decoding Spec hosts: %s", errors.Join(errs...).Error())
 	}
 
 	return nil

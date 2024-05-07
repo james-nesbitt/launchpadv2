@@ -2,22 +2,24 @@ package mcr
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"log/slog"
 	"strings"
 
 	"github.com/Mirantis/launchpad/pkg/dependency"
 	"github.com/Mirantis/launchpad/pkg/host"
-	"github.com/Mirantis/launchpad/pkg/implementation/docker"
+	dockerimplementation "github.com/Mirantis/launchpad/pkg/implementation/docker"
 	dockerhost "github.com/Mirantis/launchpad/pkg/implementation/docker/host"
 	"github.com/Mirantis/launchpad/pkg/implementation/docker/swarm"
 )
 
 // Requires declare that we need a HostsRoles dependency.
-func (p *MCR) RequiresDependencies(_ context.Context) dependency.Requirements {
-	if p.mrhr == nil {
-		p.mrhr = host.NewHostsRolesRequirement(
-			fmt.Sprintf("%s:%s:manager", host.HostsComponentType, p.Name()),
-			fmt.Sprintf("MCR '%s' needs at least one manager host as installation targets, using roles: %s", p.id, strings.Join(MCRManagerHostRoles, ",")),
+func (c *MCR) RequiresDependencies(_ context.Context) dependency.Requirements {
+	if c.mhr == nil {
+		c.mhr = host.NewHostsRolesRequirement(
+			fmt.Sprintf("%s:%s:manager", host.HostsComponentType, c.Name()),
+			fmt.Sprintf("MCR '%s' needs at least one manager host as installation targets, using roles: %s", c.id, strings.Join(MCRManagerHostRoles, ",")),
 			host.HostsRolesFilter{
 				Roles: MCRManagerHostRoles,
 				Min:   1,
@@ -25,10 +27,10 @@ func (p *MCR) RequiresDependencies(_ context.Context) dependency.Requirements {
 			},
 		)
 	}
-	if p.wrhr == nil {
-		p.wrhr = host.NewHostsRolesRequirement(
-			fmt.Sprintf("%s:%s:worker", host.HostsComponentType, p.Name()),
-			fmt.Sprintf("MCR '%s' accepts any number of worker hosts as installation targets, using roles: %s", p.id, strings.Join(MCRWorkerHostRoles, ",")),
+	if c.whr == nil {
+		c.whr = host.NewHostsRolesRequirement(
+			fmt.Sprintf("%s:%s:worker", host.HostsComponentType, c.Name()),
+			fmt.Sprintf("MCR '%s' accepts any number of worker hosts as installation targets, using roles: %s", c.id, strings.Join(MCRWorkerHostRoles, ",")),
 			host.HostsRolesFilter{
 				Roles: MCRWorkerHostRoles,
 				Min:   0,
@@ -38,13 +40,13 @@ func (p *MCR) RequiresDependencies(_ context.Context) dependency.Requirements {
 	}
 
 	return dependency.Requirements{
-		p.mrhr,
-		p.wrhr,
+		c.mhr,
+		c.whr,
 	}
 }
 
 // Provides dependencies.
-func (p *MCR) ProvidesDependencies(ctx context.Context, r dependency.Requirement) (dependency.Dependency, error) {
+func (c *MCR) ProvidesDependencies(ctx context.Context, r dependency.Requirement) (dependency.Dependency, error) {
 	if dhr, ok := r.(dockerhost.DockerHostsRequirement); ok {
 		// DockerHosts dependency
 		//
@@ -52,13 +54,16 @@ func (p *MCR) ProvidesDependencies(ctx context.Context, r dependency.Requirement
 		//
 
 		v := dhr.NeedsDockerHost(ctx)
+		if err := c.ValidateDockerVersion(v); err != nil {
+			return nil, fmt.Errorf("%w; MCR '%s' doesn't provide the requested docker version: %+v", dependency.ErrRequirementNotMatched, c.Name(), err.Error())
+		}
 
-		if p.dhd == nil {
-			p.dhd = dockerhost.NewDockerHostsDependency(
+		if c.dhd == nil {
+			c.dhd = dockerhost.NewDockerHostsDependency(
 				fmt.Sprintf("%s:%s", ComponentType, dockerhost.ImplementationType),
 				fmt.Sprintf("Docker hosts for requirement: %s", r.Describe()),
-				func(ctx context.Context) (*dockerhost.DockerHosts, error) {
-					dh, err := p.getDockerHosts(ctx, v)
+				func(ctx context.Context) (dockerhost.Hosts, error) {
+					dh, err := c.GetAllHosts(ctx)
 					if err != nil {
 						return nil, err
 					}
@@ -68,15 +73,15 @@ func (p *MCR) ProvidesDependencies(ctx context.Context, r dependency.Requirement
 			)
 		}
 
-		return p.dhd, nil
+		return c.dhd, nil
 	}
 	if dsr, ok := r.(swarm.DockerSwarmRequirement); ok {
 		// DockerSwarm dependency
 
 		v := dsr.NeedsDockerSwarm(ctx)
 
-		if p.dsd == nil {
-			p.dsd = swarm.NewDockerSwarmDependency(
+		if c.dsd == nil {
+			c.dsd = swarm.NewDockerSwarmDependency(
 				fmt.Sprintf("%s:%s", ComponentType, "DockerSwarm"),
 				fmt.Sprintf("Docker Swarm for requirement: %s", r.Describe()),
 				func(ctx context.Context) (*swarm.Swarm, error) {
@@ -92,46 +97,87 @@ func (p *MCR) ProvidesDependencies(ctx context.Context, r dependency.Requirement
 			)
 		}
 
-		return p.dsd, nil
+		return c.dsd, nil
 	}
 
 	return nil, nil
 }
 
-func (p *MCR) getDockerHosts(ctx context.Context, version docker.Version) (*dockerhost.DockerHosts, error) {
-	hs := host.Hosts{}
+// ValidateDockerVersion to say that this component can provided the requested version.
+func (c MCR) ValidateDockerVersion(v dockerimplementation.Version) error {
+	return nil
+}
 
-	addRequirementHosts := func(r dependency.Requirement) error {
-		if r == nil {
-			return fmt.Errorf("no requirement provided")
-		}
-
-		d := r.Matched(ctx)
-		if d == nil {
-			return fmt.Errorf("no hosts dependency matched for requirement")
-		}
-
-		hd, ok := d.(host.HostsDependency)
-		if !ok {
-			return fmt.Errorf("wrong dependency type")
-		}
-
-		for id, h := range *hd.ProduceHosts(ctx) {
-			hs[id] = h
-		}
-
-		return nil
+// GetManagerHosts get the docker hosts for managers.
+func (c MCR) GetManagerHosts(ctx context.Context) (dockerhost.Hosts, error) {
+	hs, err := getRequirementHosts(ctx, c.mhr)
+	if err != nil {
+		return nil, fmt.Errorf("Manager hosts retrieval error; %w", err)
+	}
+	if len(hs) == 0 {
+		return nil, fmt.Errorf("MCR manager dependency has no hosts")
 	}
 
-	if err := addRequirementHosts(p.mrhr); err != nil {
-		return nil, err
+	return hs, nil
+}
+
+// GetWorkerHosts get the docker hosts for workers.
+func (c MCR) GetWorkerHosts(ctx context.Context) (dockerhost.Hosts, error) {
+	hs, err := getRequirementHosts(ctx, c.whr)
+	if err != nil {
+		return nil, fmt.Errorf("Worker hosts retrieval error; %w", err)
 	}
-	if err := addRequirementHosts(p.wrhr); err != nil {
-		return nil, err
+	if len(hs) == 0 {
+		slog.WarnContext(ctx, "MCR worker dependency has no hosts.")
 	}
 
-	return dockerhost.NewDockerHosts(
-		hs,
-		version,
-	), nil
+	return hs, nil
+}
+
+// GetAllHosts get the docker hosts for all hosts.
+func (c MCR) GetAllHosts(ctx context.Context) (dockerhost.Hosts, error) {
+	errs := []error{}
+	hs := dockerhost.Hosts{}
+
+	if mhs, err := c.GetManagerHosts(ctx); err != nil {
+		errs = append(errs, err)
+	} else {
+		hs.Merge(mhs)
+	}
+	if whs, err := c.GetWorkerHosts(ctx); err != nil {
+		errs = append(errs, err)
+	} else {
+		hs.Merge(whs)
+	}
+
+	if len(errs) > 0 {
+		return hs, errors.Join(errs...)
+	}
+	return hs, nil
+}
+
+// getRequirementHosts retrieve the matching docker hosts f the hosts requirement
+//
+// This needs to go through the following steps/checks:
+//  1. is the requirement nil
+//  2. was the requirement matched with a dependency
+//  3. was the requirement matched with the right kind of dependency
+//  4. get the hosts from the dependency and convert to DockerHosts
+func getRequirementHosts(ctx context.Context, r dependency.Requirement) (dockerhost.Hosts, error) {
+	if r == nil {
+		return nil, fmt.Errorf("requirement empty")
+	}
+	mhd := r.Matched(ctx)
+	if mhd == nil {
+		return nil, fmt.Errorf("requirement not matched")
+	}
+	mhddh, ok := mhd.(host.HostsDependency) // check that we have a hosts dependency
+	if !ok {
+		// this should never happen, but it is possible
+		return nil, fmt.Errorf("%w; %s Dependency is the wrong type", dependency.ErrDependencyNotMatched, mhd.Id())
+	}
+
+	hs := mhddh.ProduceHosts(ctx) // get the Hosts
+
+	return dockerhost.NewDockerHosts(hs, dockerhost.HostsOptions{SudoDocker: true}), nil // convert the hosts to Docker hosts
 }

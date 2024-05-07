@@ -13,10 +13,10 @@ var (
 )
 
 type HostsDependency interface {
-	ProduceHosts(context.Context) *Hosts
+	ProduceHosts(context.Context) Hosts
 }
 
-func NewHostsDependency(id string, describe string, factory func(context.Context) (*Hosts, error)) *hostsDep {
+func NewHostsDependency(id string, describe string, factory func(context.Context) (Hosts, error)) *hostsDep {
 	return &hostsDep{
 		id:       id,
 		describe: describe,
@@ -27,7 +27,7 @@ func NewHostsDependency(id string, describe string, factory func(context.Context
 type hostsDep struct {
 	id       string
 	describe string
-	factory  func(context.Context) (*Hosts, error)
+	factory  func(context.Context) (Hosts, error)
 
 	events dependency.Events
 }
@@ -62,7 +62,7 @@ func (hd hostsDep) Met(ctx context.Context) error {
 }
 
 // ProduceHosts is the dependency fulfilled, or is it still blocked/waiting for fulfillment.
-func (hd hostsDep) ProduceHosts(ctx context.Context) *Hosts {
+func (hd hostsDep) ProduceHosts(ctx context.Context) Hosts {
 	hs, _ := hd.factory(ctx)
 	return hs
 }

@@ -60,8 +60,7 @@ func (c K0S) CommandBuild(ctx context.Context, cmd *action.Command) error {
 
 	case action.CommandKeyReset:
 		if len(ds) > 0 { // only discover if something else needs us
-
-			pd := stepped.NewSteppedPhase(CommandPhaseApply, rs, ds, []string{dependency.EventKeyActivated})
+			pd := stepped.NewSteppedPhase(CommandPhaseDiscover, rs, ds, []string{dependency.EventKeyActivated})
 			pd.Steps().Add(
 				&discoverStep{
 					id: c.Name(),

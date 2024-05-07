@@ -4,13 +4,14 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"io/fs"
 
 	"github.com/Mirantis/launchpad/pkg/host"
 )
 
 // ---  host ---
 
-func NewHost(id string, roles []string, decodeerror error) host.Host {
+func NewHost(id string, roles []string, decodeerror error) ho {
 	return ho{
 		id:          id,
 		Roles:       roles,
@@ -29,10 +30,6 @@ func (h ho) Id() string {
 	return h.id
 }
 
-func (h ho) Exec(ctx context.Context, cmd string, inr io.Reader) (string, string, error) {
-	return "see err", "Mock Host was asked to exec", fmt.Errorf("Mock Host don't exec: %+v", h)
-}
-
 func (h ho) HasRole(rs string) bool {
 	for _, r := range h.Roles {
 		if r == rs {
@@ -42,6 +39,30 @@ func (h ho) HasRole(rs string) bool {
 	return false
 }
 
-func (h ho) IsWindows() bool {
+func (h ho) Connect(ctx context.Context) error {
+	return nil
+}
+
+func (h ho) Exec(ctx context.Context, cmd string, inr io.Reader, opts host.ExecOptions) (string, string, error) {
+	return "see err", "Mock Host was asked to exec", fmt.Errorf("Mock Host don't exec: %+v", h)
+}
+
+func (h ho) InstallPackages(ctx context.Context, packages []string) error {
+	return fmt.Errorf("Mock Host don't install packages: %+v", h)
+}
+
+func (h ho) Upload(ctx context.Context, src io.Reader, dst string, fm fs.FileMode, opts host.ExecOptions) error {
+	return fmt.Errorf("Mock Host don't upload: %+v", h)
+}
+
+func (h ho) ServiceEnable(ctx context.Context, services []string) error {
+	return fmt.Errorf("Mock Host don't manage services: %+v", h)
+}
+
+func (h ho) ServiceRestart(ctx context.Context, services []string) error {
+	return fmt.Errorf("Mock Host don't manage services: %+v", h)
+}
+
+func (h ho) IsWindows(_ context.Context) bool {
 	return false
 }

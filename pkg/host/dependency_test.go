@@ -15,8 +15,8 @@ func Test_DependencyHostRolesSanity(t *testing.T) {
 		"mock": mock.NewHost("mock", []string{"dummy"}, nil),
 	}
 	hrr := host.NewHostsRolesRequirement("test", "my test hostroles req", host.HostsRolesFilter{Roles: []string{"dummy"}, Min: 1, Max: 1})
-	hd := host.NewHostsDependency("test", "my test hostroles dep", func(ctx context.Context) (*host.Hosts, error) {
-		return &hs, nil
+	hd := host.NewHostsDependency("test", "my test hostroles dep", func(ctx context.Context) (host.Hosts, error) {
+		return hs, nil
 	})
 
 	var r dependency.Requirement = hrr
@@ -45,9 +45,9 @@ func Test_DependencyHostRolesSanity(t *testing.T) {
 	}
 
 	hs2p := hd2.ProduceHosts(ctx)
-	hs2 := *hs2p
+	hs2 := hs2p
 
 	if len(hs2) != 1 {
-		t.Errorf("host dpeendnecy didn't return the right number of hosts")
+		t.Errorf("host dependnecy didn't return the right number of hosts")
 	}
 }

@@ -2,6 +2,8 @@ package host
 
 import (
 	"context"
+	"fmt"
+	"log/slog"
 
 	"github.com/Mirantis/launchpad/pkg/action"
 	"github.com/Mirantis/launchpad/pkg/action/stepped"
@@ -19,9 +21,19 @@ var (
 func (hc *HostsComponent) CommandBuild(ctx context.Context, cmd *action.Command) error {
 	if len(hc.deps) > 0 { // only discover if something else needs us
 		p := stepped.NewSteppedPhase(CommandKeyDiscover, dependency.Requirements{}, hc.deps, []string{dependency.EventKeyActivated})
-		p.Steps().Add(&discoverStep{
-			id: hc.id,
-		})
+
+		for _, d := range hc.deps {
+			if d == nil {
+				slog.WarnContext(ctx, "HostsComponent has a nil Dependency", slog.Any("component", hc))
+				continue // sanity check
+			}
+
+			p.Steps().Add(&discoverStep{
+				id: fmt.Sprintf("%s", d.Id()),
+				d:  d,
+			})
+		}
+
 		cmd.Phases.Add(p)
 	}
 

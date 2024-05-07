@@ -7,15 +7,13 @@ import (
 )
 
 type uninstallMCRStep struct {
+	baseStep
+
 	id string
 }
 
 func (s uninstallMCRStep) Id() string {
 	return fmt.Sprintf("%s:mcr-uninstall", s.id)
-}
-
-func (s uninstallMCRStep) Validate(_ context.Context) error {
-	return nil
 }
 
 func (s uninstallMCRStep) Run(ctx context.Context) error {

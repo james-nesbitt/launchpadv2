@@ -6,13 +6,10 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"io"
-	"os"
 
 	"github.com/spf13/cobra"
 
 	"github.com/Mirantis/launchpad/pkg/action"
-	"github.com/Mirantis/launchpad/pkg/config"
 )
 
 // resetCmd represents the reset command.
@@ -27,21 +24,6 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
-
-		f, foerr := os.Open(cfgFile)
-		if foerr != nil {
-			return fmt.Errorf("could not open config '%s' : %s", cfgFile, foerr.Error())
-		}
-
-		yb, frerr := io.ReadAll(f)
-		if frerr != nil {
-			return fmt.Errorf("could not read config '%s' : %s", cfgFile, frerr.Error())
-		}
-
-		cl, umerr := config.ConfigFromYamllBytes(yb)
-		if umerr != nil {
-			return fmt.Errorf("Error occurred unarshalling yaml: %s \nYAML:\b%s", umerr.Error(), yb)
-		}
 
 		if valerr := cl.Validate(ctx); valerr != nil {
 			return fmt.Errorf("cluster validation error: %s", valerr.Error())

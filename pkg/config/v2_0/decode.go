@@ -1,6 +1,8 @@
 package v20
 
 import (
+	"log/slog"
+
 	"github.com/Mirantis/launchpad/pkg/cluster"
 	"github.com/Mirantis/launchpad/pkg/component"
 	"github.com/Mirantis/launchpad/pkg/config"
@@ -23,6 +25,13 @@ func Decode(cl *cluster.Cluster, d func(interface{}) error) error {
 
 	if err := d(&cs); err != nil {
 		return err
+	}
+
+	if len(cs.Hosts.hs) == 0 {
+		slog.Warn("no hosts were detected")
+	}
+	if cs.Products.cs == nil {
+		slog.Warn("no components were detected")
 	}
 
 	if cl.Components == nil {

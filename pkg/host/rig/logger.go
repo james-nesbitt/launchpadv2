@@ -16,9 +16,9 @@ type LogCmdLogger struct {
 func (rlcl LogCmdLogger) Write(p []byte) (n int, err error) {
 	msg := fmt.Sprintf("%s: %s", rlcl.host.Id(), string(p))
 	if rlcl.level == "err" {
-		slog.Warn(msg)
+		slog.Debug(msg)
 	} else {
-		slog.Info(msg)
+		slog.Debug(msg)
 	}
 	return len(p), nil
 }

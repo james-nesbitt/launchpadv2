@@ -31,9 +31,19 @@ type Host interface {
 	ServiceEnable(ctx context.Context, services []string) error
 	// ServiceRestart stop and restart a system service
 	ServiceRestart(ctx context.Context, services []string) error
+
+	// Network describe the host networking
+	Network(ctx context.Context) (Network, error)
 }
 
 // ExecOptions options to configure the execute.
 type ExecOptions struct {
 	Sudo bool
+}
+
+// Network networking information about the Host
+type Network struct {
+	PublicAddress    string `yaml:"public_address"`
+	PrivateInterface string `yaml:"private_interface"`
+	PrivateAddress   string `yaml:"private_address"`
 }

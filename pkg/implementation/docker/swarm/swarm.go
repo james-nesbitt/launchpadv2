@@ -1,6 +1,8 @@
 package swarm
 
 import (
+	"fmt"
+
 	dockerimplementation "github.com/Mirantis/launchpad/pkg/implementation/docker"
 )
 
@@ -18,4 +20,8 @@ type Swarm struct {
 
 func (s Swarm) ValidateVersion(version dockerimplementation.Version) error {
 	return nil
+}
+
+func SwarmAddress(ip string) string {
+	return fmt.Sprintf("%s:%s", ip, 2377)
 }

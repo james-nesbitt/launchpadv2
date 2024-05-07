@@ -28,7 +28,7 @@ func (s discoverStep) Run(ctx context.Context) error {
 	}
 
 	if err := hs.Each(ctx, discoverVersion); err != nil {
-		slog.WarnContext(ctx, "MCR discovery failed to discover installation")
+		slog.WarnContext(ctx, "MCR discovery failed to discover installation", slog.Any("error", err.Error()))
 		if s.failOnError {
 			return err
 		}

@@ -23,7 +23,7 @@ func NewMCR(id string, c Config) *MCR {
 	return &MCR{
 		id:     id,
 		config: c,
-		state:  State{},
+		state:  state{},
 	}
 }
 
@@ -40,7 +40,7 @@ type MCR struct {
 	dsd dependency.Dependency // docker-swarm dependency
 
 	config Config
-	state  State
+	state  state
 }
 
 // Name for the component.

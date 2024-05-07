@@ -7,10 +7,16 @@ import (
 	"io"
 	"io/fs"
 	"log/slog"
+	"net"
+	"regexp"
 	"strings"
 
 	"github.com/Mirantis/launchpad/pkg/host"
 	"github.com/k0sproject/rig/v2"
+)
+
+var (
+	sbinPath = "PATH=/usr/local/sbin:/usr/sbin:/sbin:$PATH"
 )
 
 // NewRigHostHost Host constructor from HostConfig.
@@ -175,4 +181,79 @@ func (h *Host) ServiceRestart(ctx context.Context, services []string) error {
 	}
 
 	return nil
+}
+
+// Network retrieve the Network information for the machine
+func (h *Host) Network(ctx context.Context) (host.Network, error) {
+	n := host.Network{}
+
+	if pi, err := h.resolvePrivateInterface(ctx); err != nil {
+		return n, err
+	} else {
+		n.PrivateInterface = pi
+	}
+
+	if ip, err := h.resolvePublicIP(); err != nil {
+		return n, err
+	} else {
+		n.PublicAddress = ip
+	}
+
+	if ip, err := h.resolveInternaIP(ctx, n.PrivateInterface, n.PublicAddress); err != nil {
+		return n, err
+	} else {
+		n.PublicAddress = ip
+	}
+
+	return n, nil
+}
+
+func (h Host) resolvePrivateInterface(ctx context.Context) (string, error) {
+	cmd := fmt.Sprintf(`%s; (ip route list scope global | grep -P "\b(172|10|192\.168)\.") || (ip route list | grep -m1 default)`, sbinPath)
+	o, e, err := h.Exec(ctx, cmd, nil, host.ExecOptions{})
+	if err != nil {
+		return "", fmt.Errorf("could not detect private interface ;%w : %s", err, e)
+	}
+
+	re := regexp.MustCompile(`\bdev (\w+)`)
+	match := re.FindSubmatch([]byte(o))
+	if len(match) == 0 {
+		return "", fmt.Errorf("can't find 'dev' in output")
+	}
+	return string(match[1]), nil
+}
+
+func (h Host) resolvePublicIP() (string, error) {
+	return h.rig.ConnectionConfig.SSH.Address, nil
+}
+
+func (h Host) resolveInternaIP(ctx context.Context, privateInterface string, publicIP string) (string, error) {
+	o, e, err := h.Exec(ctx, fmt.Sprintf("%s ip -o addr show dev %s scope global", sbinPath, privateInterface), nil, host.ExecOptions{})
+	if err != nil {
+		return "", fmt.Errorf("failed to find private interface with name %s: %s. Make sure you've set correct 'privateInterface' for the host in config: %s / %s; %w", err, o, e)
+	}
+
+	lines := strings.Split(o, "\n")
+	for _, line := range lines {
+		items := strings.Fields(line)
+		if len(items) < 4 {
+			//log.Debugf("not enough items in ip address line (%s), skipping...", items)
+			continue
+		}
+
+		idx := strings.Index(items[3], "/")
+		if idx == -1 {
+			//log.Debugf("no CIDR mask in ip address line (%s), skipping...", items)
+			continue
+		}
+		addr := items[3][:idx]
+
+		if addr != publicIP {
+			//log.Infof("%s: using %s as private IP", h, addr)
+			if net.ParseIP(addr) != nil {
+				return addr, nil
+			}
+		}
+	}
+	return publicIP, nil
 }

@@ -7,4 +7,6 @@ type Config struct {
 	InstallURLLinux   string `yaml:"installURLLinux,omitempty" json:"installURLLinux,omitempty"`
 	InstallURLWindows string `yaml:"installURLWindows,omitempty" json:"installURLWindows,omitempty"`
 	Channel           string `yaml:"channel,omitempty" json:"channel,omitempty"`
+
+	SwarmInstallFlags []string `yaml:"swarm_install_flags,omitempty" json:"swarm_init_flags,omitempty"`
 }

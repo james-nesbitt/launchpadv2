@@ -21,8 +21,11 @@ func NewHost(id string, roles []string, decodeerror error) ho {
 
 // Host a host type that does nothing, but can be used as a substitute when needed.
 type ho struct {
-	id          string
-	Roles       []string `yaml:"roles"`
+	id string
+
+	Roles []string     `yaml:"roles"`
+	Net   host.Network `yaml:"network"`
+
 	DecodeError error
 }
 
@@ -61,6 +64,10 @@ func (h ho) ServiceEnable(ctx context.Context, services []string) error {
 
 func (h ho) ServiceRestart(ctx context.Context, services []string) error {
 	return fmt.Errorf("Mock Host don't manage services: %+v", h)
+}
+
+func (h ho) Network(_ context.Context) (host.Network, error) {
+	return h.Net, nil
 }
 
 func (h ho) IsWindows(_ context.Context) bool {

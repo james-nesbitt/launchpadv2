@@ -9,7 +9,8 @@ import (
 	"log/slog"
 	"strings"
 
-	"github.com/docker/docker/api/types"
+	dockertypes "github.com/docker/docker/api/types"
+	dockertypessystem "github.com/docker/docker/api/types/system"
 )
 
 /**
@@ -42,9 +43,9 @@ func (de DockerExec) dockerCommand(ctx context.Context, args []string) (string, 
 	return de.executor(ctx, cmd, nil)
 }
 
-// ServerVersion retrieve the Docker Version from the remote server.
-func (de DockerExec) ServerVersion(ctx context.Context) (map[string]types.Version, error) {
-	var dv map[string]types.Version
+// Version retrieve the Docker Version from the remote server.
+func (de DockerExec) Version(ctx context.Context) (map[string]dockertypes.Version, error) {
+	var dv map[string]dockertypes.Version
 
 	o, e, eerr := de.dockerCommand(ctx, []string{"version", "--format=json"})
 	if eerr != nil {
@@ -63,8 +64,29 @@ func (de DockerExec) ServerVersion(ctx context.Context) (map[string]types.Versio
 		return dv, fmt.Errorf("%w: no version discovered: %+v", ErrDockerExecuteError, dv)
 	}
 
-	slog.ErrorContext(ctx, "DockerVersion", slog.Any("version", dv))
+	slog.Default().DebugContext(ctx, "DockerVersion", slog.Any("version", dv))
 	return dv, nil
+}
+
+// Info retrieve the Docker VInfo from the remote server.
+func (de DockerExec) Info(ctx context.Context) (dockertypessystem.Info, error) {
+	var di dockertypessystem.Info
+
+	o, e, eerr := de.dockerCommand(ctx, []string{"info", "--format=json"})
+	if eerr != nil {
+		return di, fmt.Errorf("%w; %s : %s", ErrDockerExecuteError, eerr, e)
+	}
+
+	if len(o) == 0 {
+		return di, fmt.Errorf("%w: no info retrieved: `%s` / `%s`", ErrDockerExecuteError, o, e)
+	}
+
+	if err := json.Unmarshal([]byte(o), &di); err != nil {
+		return di, fmt.Errorf("%w; unmarshal error %s `%s`", ErrDockerExecuteError, err, o)
+	}
+
+	slog.DebugContext(ctx, "DockerInfo", slog.Any("info", di))
+	return di, nil
 }
 
 // SwarmInit Initialize swarm

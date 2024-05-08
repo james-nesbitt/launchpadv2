@@ -2,6 +2,7 @@ package mcr
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 
@@ -27,7 +28,20 @@ func (s discoverStep) Run(ctx context.Context) error {
 		return fmt.Errorf("could not discover hosts: %s", gherr.Error())
 	}
 
-	if err := hs.Each(ctx, discoverVersion); err != nil {
+	if err := hs.Each(ctx, func(ctx context.Context, h *dockerhost.Host) error {
+		hs := s.c.state.hosts.GetOrCreate(h.Id())
+
+		verr := s.discoverVersion(ctx, h)
+		ierr := s.discoverInfo(ctx, h)
+
+		if ierr != nil || verr != nil {
+			return errors.Join(ierr, verr)
+		}
+
+		slog.InfoContext(ctx, fmt.Sprintf("%s: state discovered", h.Id()), slog.Any("host", h), slog.Any("version", hs.version), slog.Any("info", hs.info))
+
+		return nil
+	}); err != nil {
 		slog.WarnContext(ctx, "MCR discovery failed to discover installation", slog.Any("error", err.Error()))
 		if s.failOnError {
 			return err
@@ -36,13 +50,26 @@ func (s discoverStep) Run(ctx context.Context) error {
 	return nil
 }
 
-func discoverVersion(ctx context.Context, h *dockerhost.Host) error {
-	v, err := h.Docker(ctx).ServerVersion(ctx)
+func (s discoverStep) discoverVersion(ctx context.Context, h *dockerhost.Host) error {
+	v, err := h.Docker(ctx).Version(ctx)
 	if err != nil {
 		return fmt.Errorf("%s: version discover error: %s", h.Id(), err)
 	}
 
-	slog.InfoContext(ctx, "host version discovered", slog.Any("version", v))
+	sh := s.c.state.hosts.GetOrCreate(h.Id())
+	sh.setVersion(v)
+
+	return nil
+}
+
+func (s discoverStep) discoverInfo(ctx context.Context, h *dockerhost.Host) error {
+	i, err := h.Docker(ctx).Info(ctx)
+	if err != nil {
+		return fmt.Errorf("%s: info discover error: %s", h.Id(), err)
+	}
+
+	sh := s.c.state.hosts.GetOrCreate(h.Id())
+	sh.setInfo(i)
 
 	return nil
 }

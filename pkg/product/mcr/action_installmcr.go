@@ -37,6 +37,16 @@ func (s installMCRStep) Run(ctx context.Context) error {
 	}
 
 	err := hs.Each(ctx, func(ctx context.Context, h *dockerhost.Host) error {
+		hs := s.c.state.hosts.GetOrCreate(h.Id())
+
+		hs.mu.Lock()
+		defer hs.mu.Unlock()
+
+		sv := hs.info.ServerVersion
+		if sv == s.c.config.Version {
+			slog.InfoContext(ctx, fmt.Sprintf("%s: already at version %s", h.Id(), sv), slog.Any("host", h), slog.Any("version", sv))
+		}
+
 		if err := s.downloadMCRInstaller(ctx, h); err != nil {
 			return err
 		}

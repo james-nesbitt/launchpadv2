@@ -27,10 +27,12 @@ type Host interface {
 	// Upload content from a io.Reader to a path on the Host
 	Upload(ctx context.Context, src io.Reader, dst string, fm fs.FileMode, opts ExecOptions) error
 
-	// ServiceEnable activate a system service
+	// ServiceEnable activate and start system services
 	ServiceEnable(ctx context.Context, services []string) error
-	// ServiceRestart stop and restart a system service
+	// ServiceRestart stop and restart system services
 	ServiceRestart(ctx context.Context, services []string) error
+	// ServiceDisable stop and disable system services
+	ServiceDisable(ctx context.Context, services []string) error
 
 	// Network describe the host networking
 	Network(ctx context.Context) (Network, error)

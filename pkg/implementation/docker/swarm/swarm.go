@@ -23,5 +23,5 @@ func (s Swarm) ValidateVersion(version dockerimplementation.Version) error {
 }
 
 func SwarmAddress(ip string) string {
-	return fmt.Sprintf("%s:%s", ip, 2377)
+	return fmt.Sprintf("%s:%d", ip, 2377)
 }

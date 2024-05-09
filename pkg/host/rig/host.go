@@ -145,9 +145,12 @@ func (h *Host) ServiceEnable(ctx context.Context, services []string) error {
 			errs = append(errs, sgerr)
 			continue
 		}
-		if err := s.Start(ctx); err != nil {
-			errs = append(errs, sgerr)
-			continue
+
+		if !s.IsRunning(ctx) {
+			if err := s.Start(ctx); err != nil {
+				errs = append(errs, sgerr)
+				continue
+			}
 		}
 	}
 
@@ -183,6 +186,34 @@ func (h *Host) ServiceRestart(ctx context.Context, services []string) error {
 	return nil
 }
 
+// ServiceDisable stop and disable some services
+func (h *Host) ServiceDisable(ctx context.Context, services []string) error {
+	rigc := h.rig.Sudo()
+
+	errs := []error{}
+	for _, sn := range services {
+		s, sgerr := rigc.Service(sn)
+		if sgerr != nil {
+			errs = append(errs, fmt.Errorf("%s: service '%s' unknown: %s", h.Id(), sn, sgerr.Error()))
+			continue
+		}
+
+		if err := s.Stop(ctx); err != nil {
+			slog.WarnContext(ctx, fmt.Sprintf("%s: service '%s' did not stop properly", h.Id(), sn), slog.Any("host", h))
+		}
+
+		if err := s.Disable(ctx); err != nil {
+			errs = append(errs, fmt.Errorf("%s: service '%s' disable failed: %s", h.Id(), sn, err.Error()))
+		}
+	}
+
+	if len(errs) > 0 {
+		return errors.Join(errs...)
+	}
+
+	return nil
+}
+
 // Network retrieve the Network information for the machine
 func (h *Host) Network(ctx context.Context) (host.Network, error) {
 	n := host.Network{}
@@ -202,7 +233,7 @@ func (h *Host) Network(ctx context.Context) (host.Network, error) {
 	if ip, err := h.resolveInternaIP(ctx, n.PrivateInterface, n.PublicAddress); err != nil {
 		return n, err
 	} else {
-		n.PublicAddress = ip
+		n.PrivateAddress = ip
 	}
 
 	return n, nil
@@ -230,7 +261,7 @@ func (h Host) resolvePublicIP() (string, error) {
 func (h Host) resolveInternaIP(ctx context.Context, privateInterface string, publicIP string) (string, error) {
 	o, e, err := h.Exec(ctx, fmt.Sprintf("%s ip -o addr show dev %s scope global", sbinPath, privateInterface), nil, host.ExecOptions{})
 	if err != nil {
-		return "", fmt.Errorf("failed to find private interface with name %s: %s. Make sure you've set correct 'privateInterface' for the host in config: %s / %s; %w", err, o, e)
+		return "", fmt.Errorf("%s: failed to find private interface: %s :: %s", h.Id(), err.Error(), e)
 	}
 
 	lines := strings.Split(o, "\n")

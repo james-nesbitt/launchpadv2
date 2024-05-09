@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	dockertypes "github.com/docker/docker/api/types"
+	dockertypesswarm "github.com/docker/docker/api/types/swarm"
 	dockertypessystem "github.com/docker/docker/api/types/system"
 )
 
@@ -40,6 +41,7 @@ type DockerExec struct {
 
 func (de DockerExec) dockerCommand(ctx context.Context, args []string) (string, string, error) {
 	cmd := strings.Join(append([]string{"docker"}, args...), " ")
+	slog.DebugContext(ctx, "DOCKER COMMAND", slog.String("command", cmd))
 	return de.executor(ctx, cmd, nil)
 }
 
@@ -64,7 +66,6 @@ func (de DockerExec) Version(ctx context.Context) (map[string]dockertypes.Versio
 		return dv, fmt.Errorf("%w: no version discovered: %+v", ErrDockerExecuteError, dv)
 	}
 
-	slog.Default().DebugContext(ctx, "DockerVersion", slog.Any("version", dv))
 	return dv, nil
 }
 
@@ -85,54 +86,110 @@ func (de DockerExec) Info(ctx context.Context) (dockertypessystem.Info, error) {
 		return di, fmt.Errorf("%w; unmarshal error %s `%s`", ErrDockerExecuteError, err, o)
 	}
 
-	slog.DebugContext(ctx, "DockerInfo", slog.Any("info", di))
 	return di, nil
 }
 
 // SwarmInit Initialize swarm
-func (de DockerExec) SwarmInit(ctx context.Context, installFlags []string) error {
+func (de DockerExec) SwarmInit(ctx context.Context, r dockertypesswarm.InitRequest) error {
 	cmd := []string{"swarm", "init"}
-	cmd = append(cmd, installFlags...)
 
-	o, e, err := de.dockerCommand(ctx, cmd)
-	if err != nil {
-		return fmt.Errorf("swarm init failed: %w :: %s", err.Error(), e)
+	if r.AdvertiseAddr != "" {
+		cmd = append(cmd, fmt.Sprintf("--advertise-addr=%s", r.AdvertiseAddr))
+	}
+	if r.ListenAddr != "" {
+		cmd = append(cmd, fmt.Sprintf("--listen-addr=%s", r.ListenAddr))
+	}
+	if r.DataPathAddr != "" {
+		cmd = append(cmd, fmt.Sprintf("--data-path-addr=%s", r.DataPathAddr))
+	}
+	if r.Availability != "" {
+		cmd = append(cmd, fmt.Sprintf("--availability=%s", r.DataPathAddr))
 	}
 
-	slog.InfoContext(ctx, fmt.Sprintf("swarm init suceeded: %s", o))
+	cmd = append(cmd, r.DefaultAddrPool...)
+
+	_, e, err := de.dockerCommand(ctx, cmd)
+	if err != nil {
+		return fmt.Errorf("swarm init failed: %w :: %s", err, e)
+	}
 
 	return nil
 }
 
-// SwarmJoinToken get a swarm join token
-func (de DockerExec) SwarmJoinToken(ctx context.Context, joinType string, rotate bool) (string, error) {
-	cmd := []string{"swarm", "join-token", "-q"}
+// DockerInspect get info and join tokens
+//
+// @NOTE the docker cli does not have an equivalent so we have to build it from a couple
+//
+//	of cli calls.
+func (de DockerExec) SwarmInspect(ctx context.Context) (dockertypesswarm.Swarm, error) {
+	s := dockertypesswarm.Swarm{}
 
-	if rotate {
-		cmd = append(cmd, "--rotate")
+	if i, err := de.Info(ctx); err != nil {
+		return s, fmt.Errorf("manager swarm info fail: %s", err.Error())
+	} else if i.Swarm.Cluster == nil {
+		return s, fmt.Errorf("manager swarm info fail, no cluster info: %+v", i)
+	} else {
+		s.ClusterInfo = *(i.Swarm.Cluster)
 	}
 
-	cmd = append(cmd, joinType)
-
-	o, e, err := de.dockerCommand(ctx, cmd)
-	if err != nil {
-		return "", fmt.Errorf("swarm token fail: %s :: %s", err.Error(), e)
+	tcmd := []string{"swarm", "join-token", "-q"}
+	if o, e, err := de.dockerCommand(ctx, append(tcmd, "manager")); err != nil {
+		return s, fmt.Errorf("manager swarm token fail: %s :: %s", err.Error(), e)
+	} else {
+		s.JoinTokens.Manager = strings.TrimSpace(o)
+	}
+	if o, e, err := de.dockerCommand(ctx, append(tcmd, "worker")); err != nil {
+		return s, fmt.Errorf("worker swarm token fail: %s :: %s", err.Error(), e)
+	} else {
+		s.JoinTokens.Worker = strings.TrimSpace(o)
 	}
 
-	return o, nil
+	slog.DebugContext(ctx, "swarm inspect", slog.Any("swarm", s))
+
+	return s, nil
 }
 
 // SwarmJoin join a swarm
-func (de DockerExec) SwarmJoin(ctx context.Context, leaderAddress string, token string, options []string) error {
+func (de DockerExec) SwarmJoin(ctx context.Context, r dockertypesswarm.JoinRequest) error {
 	cmd := []string{"swarm", "join"}
 
-	cmd = append(cmd, fmt.Sprintf("--token=%s", token))
+	cmd = append(cmd, fmt.Sprintf("--token=%s", r.JoinToken))
 
-	if len(options) > 0 {
-		cmd = append(cmd, options...)
+	if r.AdvertiseAddr != "" {
+		cmd = append(cmd, fmt.Sprintf("--advertise-addrs=%s", r.AdvertiseAddr))
+	}
+	if r.DataPathAddr != "" {
+		cmd = append(cmd, fmt.Sprintf("--data-path-addrs=%s", r.AdvertiseAddr))
+	}
+	if r.ListenAddr != "" {
+		cmd = append(cmd, fmt.Sprintf("--listen-addrs=%s", r.ListenAddr))
+	}
+	if r.Availability != "" {
+		cmd = append(cmd, fmt.Sprintf("--availability=%s", r.Availability))
 	}
 
-	cmd = append(cmd, leaderAddress)
+	cmd = append(cmd, r.RemoteAddrs...)
+
+	_, e, err := de.dockerCommand(ctx, cmd)
+	if err != nil {
+		return fmt.Errorf("swarm join fail: %s :: %s = %+v", err.Error(), e, r)
+	}
+
+	return nil
+}
+
+// SwarmLeave leave a swarm cluster
+func (de DockerExec) SwarmLeave(ctx context.Context, force bool) error {
+	cmd := []string{"swarm", "leave"}
+
+	if force {
+		cmd = append(cmd, "--force")
+	}
+
+	_, e, err := de.dockerCommand(ctx, cmd)
+	if err != nil {
+		return fmt.Errorf("swarm leave fail: %s :: %s", err.Error(), e)
+	}
 
 	return nil
 }

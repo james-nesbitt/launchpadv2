@@ -66,6 +66,10 @@ func (h ho) ServiceRestart(ctx context.Context, services []string) error {
 	return fmt.Errorf("Mock Host don't manage services: %+v", h)
 }
 
+func (h ho) ServiceDisable(ctx context.Context, services []string) error {
+	return fmt.Errorf("Mock Host don't manage services: %+v", h)
+}
+
 func (h ho) Network(_ context.Context) (host.Network, error) {
 	return h.Net, nil
 }

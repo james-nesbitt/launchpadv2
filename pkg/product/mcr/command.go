@@ -47,10 +47,10 @@ func (c MCR) CommandBuild(ctx context.Context, cmd *action.Command) error {
 				id:       fmt.Sprintf("%s-before", c.Name()),
 				baseStep: bs,
 			},
-			&prepareMCRNodesStep{
-				id:       c.Name(),
-				baseStep: bs,
-			},
+			//			&prepareMCRNodesStep{
+			//				id:       c.Name(),
+			//				baseStep: bs,
+			//			},
 			&installMCRStep{
 				id:       c.Name(),
 				baseStep: bs,

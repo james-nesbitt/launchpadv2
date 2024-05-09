@@ -23,7 +23,7 @@ func NewMCR(id string, c Config) *MCR {
 	return &MCR{
 		id:     id,
 		config: c,
-		state:  state{},
+		state:  state{hosts: map[string]*hostState{}},
 	}
 }
 

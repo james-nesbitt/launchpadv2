@@ -12,3 +12,7 @@
 ## Host 
 
 - [x] (host-network-discover) Hosts need to be able to discover their networking (internal) so that we can activate swarm using the advertise address
+
+## Component
+
+- [ ] develop a better state strategy with locking

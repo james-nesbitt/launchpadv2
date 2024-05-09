@@ -6,12 +6,14 @@ package cmd
 import (
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 
 	"github.com/spf13/cobra"
 
 	"github.com/Mirantis/launchpad/pkg/cluster"
 	"github.com/Mirantis/launchpad/pkg/config"
+
 	// Register v2 spec handler.
 	_ "github.com/Mirantis/launchpad/pkg/config/v2_0"
 	// Register Host handlers.
@@ -30,6 +32,7 @@ import (
 )
 
 var (
+	debug   bool
 	cfgFile string
 	cl      cluster.Cluster
 )
@@ -62,6 +65,10 @@ var rootCmd = &cobra.Command{
 			return fmt.Errorf("cluster validation error: %s", valerr.Error())
 		}
 
+		if debug {
+			slog.SetLogLoggerLevel(slog.LevelDebug)
+		}
+
 		return nil
 	},
 }
@@ -75,4 +82,5 @@ func Execute() {
 
 func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.launchpad.yaml)")
+	rootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "increase logging verbosity")
 }

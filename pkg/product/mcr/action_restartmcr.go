@@ -37,5 +37,10 @@ func (s restartMCRStep) restartMCRService(ctx context.Context, h *dockerhost.Hos
 		return err
 	}
 
+	if err := s.updateDockerState(ctx); err != nil {
+		slog.WarnContext(ctx, "MCR discovery failed to discover MCR after restart", slog.Any("error", err.Error()))
+		return err
+	}
+
 	return nil
 }

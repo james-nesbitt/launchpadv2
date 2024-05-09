@@ -14,13 +14,17 @@ const (
 	CommandPhaseReset    = "MKE3-Reset"
 )
 
-func (c MKE3) CommandBuild(ctx context.Context, cmd *action.Command) error {
+func (c *MKE3) CommandBuild(ctx context.Context, cmd *action.Command) error {
 	rs := dependency.Requirements{ // Requirements that we need
 		c.dhr,
 	}
 	ds := dependency.Dependencies{ // Dependencies that we deliver
 		c.k8sd,
 		c.mked,
+	}
+
+	bs := baseStep{
+		c: c,
 	}
 
 	switch cmd.Key {
@@ -43,7 +47,8 @@ func (c MKE3) CommandBuild(ctx context.Context, cmd *action.Command) error {
 				id: c.Name(),
 			},
 			&installMKEStep{
-				id: c.Name(),
+				baseStep: bs,
+				id:       c.Name(),
 			},
 		})
 		cmd.Phases.Add(p)

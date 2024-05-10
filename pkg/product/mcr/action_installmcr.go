@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	MCRInstallerPath = "/tmp/mcr-install.sh"
+	MCRInstallerPath = "mcr-install"
 	MCRServices      = []string{"docker", "containerd"}
 )
 
@@ -26,11 +26,7 @@ func (s installMCRStep) Id() string {
 	return fmt.Sprintf("%s:mcr-install", s.id)
 }
 
-func (s installMCRStep) Validate(_ context.Context) error {
-	return nil
-}
-
-func (s installMCRStep) Run(ctx context.Context) error {
+func (s *installMCRStep) Run(ctx context.Context) error {
 	slog.InfoContext(ctx, "running MCR install step", slog.String("ID", s.Id()))
 
 	hs, hsgerr := s.c.GetAllHosts(ctx)
@@ -39,18 +35,15 @@ func (s installMCRStep) Run(ctx context.Context) error {
 	}
 
 	if err := hs.Each(ctx, func(ctx context.Context, h *dockerhost.Host) error {
-		hs := s.c.state.hosts.GetOrCreate(h.Id())
+		i, ierr := h.Docker(ctx).Info(ctx)
 
-		hsi := hs.getInfo()
-
-		sv := hsi.ServerVersion
-		if sv == s.c.config.Version {
-			slog.InfoContext(ctx, fmt.Sprintf("%s: MCR already at version %s", h.Id(), sv), slog.Any("host", h), slog.Any("version", sv))
+		if ierr == nil && i.ServerVersion == s.c.config.Version {
+			slog.InfoContext(ctx, fmt.Sprintf("%s: MCR already at version %s", h.Id(), i.ServerVersion), slog.Any("host", h))
 		} else {
-			if sv == "" {
-				slog.InfoContext(ctx, fmt.Sprintf("%s: installing MCR version %s", h.Id(), sv), slog.Any("host", h), slog.Any("version", sv))
+			if i.ServerVersion == "" {
+				slog.InfoContext(ctx, fmt.Sprintf("%s: installing MCR version %s", h.Id(), i.ServerVersion), slog.Any("host", h))
 			} else {
-				slog.InfoContext(ctx, fmt.Sprintf("%s: upgrading MCR from version %s -> %s", h.Id(), sv, hs.info.ServerVersion), slog.Any("host", h))
+				slog.InfoContext(ctx, fmt.Sprintf("%s: upgrading MCR from version %s -> %s", h.Id(), i.ServerVersion, s.c.config.Version), slog.Any("host", h))
 			}
 
 			if err := s.downloadMCRInstaller(ctx, h); err != nil {
@@ -61,10 +54,15 @@ func (s installMCRStep) Run(ctx context.Context) error {
 				return err
 			}
 
-		}
+			if i.ServerVersion == "" {
+				if err := s.enableMCRService(ctx, h); err != nil {
+					return err
+				}
+			}
 
-		if err := s.enableMCRService(ctx, h); err != nil {
-			return err
+			if _, err := h.Docker(ctx).Info(ctx); err != nil {
+				return fmt.Errorf("%s: MCR discovery error after install")
+			}
 		}
 
 		return nil
@@ -72,17 +70,14 @@ func (s installMCRStep) Run(ctx context.Context) error {
 		return err
 	}
 
-	if err := s.updateDockerState(ctx); err != nil {
-		slog.WarnContext(ctx, "MCR discovery failed to discover MCR after installation", slog.Any("error", err.Error()))
-		return err
-	}
-
 	return nil
 }
 
 func (s installMCRStep) downloadMCRInstaller(ctx context.Context, h *dockerhost.Host) error {
-	slog.InfoContext(ctx, fmt.Sprintf("%s: downloading MCR Installer: %s", h.Id(), s.c.config.InstallURLLinux), slog.Any("host", h))
-	irs, igerr := http.Get(s.c.config.InstallURLLinux)
+	ir := s.c.config.InstallURLLinux
+
+	slog.InfoContext(ctx, fmt.Sprintf("%s: downloading MCR Installer: %s", h.Id(), ir), slog.Any("host", h))
+	irs, igerr := http.Get(ir)
 	if igerr != nil {
 		return igerr
 	}

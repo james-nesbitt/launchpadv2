@@ -106,6 +106,12 @@ func (h *Host) InstallPackages(ctx context.Context, packages []string) error {
 	return h.rig.Sudo().PackageManagerService.PackageManager().Install(ctx, packages...)
 }
 
+// RemovePackages install some packages.
+func (h *Host) RemovePackages(ctx context.Context, packages []string) error {
+	slog.DebugContext(ctx, fmt.Sprintf("%s: RIG install packages", h.Id()), slog.Any("packages", packages))
+	return h.rig.Sudo().PackageManagerService.PackageManager().Remove(ctx, packages...)
+}
+
 // Upload from an io.Reader to a file path on the Host.
 func (h *Host) Upload(ctx context.Context, src io.Reader, dst string, fm fs.FileMode, opts host.ExecOptions) error {
 	slog.DebugContext(ctx, fmt.Sprintf("%s: Rig Upload: %s", h.Id(), dst))

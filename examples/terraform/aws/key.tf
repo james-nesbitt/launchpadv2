@@ -9,13 +9,9 @@ module "common_key" {
   tags = local.tags
 }
 
-locals {
-  pk_path = var.ssh_pk_location != "" ? join("/", [var.ssh_pk_location, ) : "./ssh-keys/${var.name}-common.pem"
-}
-
 resource "local_sensitive_file" "common_private_key" {
   content              = module.common_key.private_key
-  filename             = "${var.name}-common.pem"]
+  filename             = "${var.name}-common.pem"
   file_permission      = "0600"
   directory_permission = "0700"
 }

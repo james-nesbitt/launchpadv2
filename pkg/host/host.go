@@ -21,8 +21,10 @@ type Host interface {
 	// Exec execute a command
 	Exec(ctx context.Context, cmd string, inr io.Reader, opts ExecOptions) (string, string, error)
 
-	// Install the passed system packages
+	// InstallPackages install the passed system packages
 	InstallPackages(ctx context.Context, packages []string) error
+	// RemovePackages uninstall some packages
+	RemovePackages(ctx context.Context, packages []string) error
 
 	// Upload content from a io.Reader to a path on the Host
 	Upload(ctx context.Context, src io.Reader, dst string, fm fs.FileMode, opts ExecOptions) error

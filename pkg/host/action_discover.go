@@ -51,7 +51,7 @@ func (ds discoverStep) Run(ctx context.Context) error {
 
 	cerr := hs.Each(ctx, func(ctx context.Context, h Host) error {
 		if err := h.Connect(ctx); err != nil {
-			return fmt.Errorf("%s host connection failed", h.Id())
+			return fmt.Errorf("%s host connection failed: %s", h.Id(), err.Error())
 		}
 
 		slog.InfoContext(ctx, fmt.Sprintf("%s: host connection successful", h.Id()), slog.Any("host", h))

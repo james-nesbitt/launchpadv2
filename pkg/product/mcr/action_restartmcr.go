@@ -18,7 +18,7 @@ func (s restartMCRStep) Id() string {
 	return fmt.Sprintf("%s:mcr-restart", s.id)
 }
 
-func (s restartMCRStep) Run(ctx context.Context) error {
+func (s *restartMCRStep) Run(ctx context.Context) error {
 	slog.InfoContext(ctx, "running MCR restart step", slog.String("ID", s.Id()))
 	hs, hsgerr := s.c.GetAllHosts(ctx)
 	if hsgerr != nil {
@@ -34,11 +34,6 @@ func (s restartMCRStep) Run(ctx context.Context) error {
 
 func (s restartMCRStep) restartMCRService(ctx context.Context, h *dockerhost.Host) error {
 	if err := h.ServiceRestart(ctx, []string{"docker"}); err != nil {
-		return err
-	}
-
-	if err := s.updateDockerState(ctx); err != nil {
-		slog.WarnContext(ctx, "MCR discovery failed to discover MCR after restart", slog.Any("error", err.Error()))
 		return err
 	}
 

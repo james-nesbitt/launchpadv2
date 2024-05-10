@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+
+	dockerhost "github.com/Mirantis/launchpad/pkg/implementation/docker/host"
 )
 
 type discoverStep struct {
@@ -17,14 +19,30 @@ func (s discoverStep) Id() string {
 	return fmt.Sprintf("%s:mcr-discover", s.id)
 }
 
-func (s discoverStep) Run(ctx context.Context) error {
+func (s *discoverStep) Run(ctx context.Context) error {
 	slog.InfoContext(ctx, "running MCR discover step", slog.String("ID", s.Id()))
 
-	if err := s.updateDockerState(ctx); err != nil {
-		if s.failOnError {
-			slog.WarnContext(ctx, "MCR discovery failed to discover installation", slog.Any("error", err.Error()))
-			return err
-		}
+	hs, gherr := s.c.GetAllHosts(ctx)
+	if gherr != nil {
+		return fmt.Errorf("MCR has no hosts to discover: %s", gherr.Error())
 	}
+
+	if err := hs.Each(ctx, func(ctx context.Context, h *dockerhost.Host) error {
+		slog.InfoContext(ctx, fmt.Sprintf("%s: discovering MCR state", h.Id()), slog.Any("host", h))
+
+		if _, err := h.Docker(ctx).Info(ctx); err != nil {
+			slog.DebugContext(ctx, fmt.Sprintf("%s: MCR state discovery failure", h.Id()), slog.Any("host", h), slog.Any("error", err))
+			return fmt.Errorf("%s: failed to update docker info: %s", h.Id(), err.Error())
+		}
+
+		return nil
+	}); err != nil {
+		if s.failOnError {
+			return fmt.Errorf("docker info update failed: %s", err.Error())
+		}
+		slog.WarnContext(ctx, "At least one host was missing MCR installation")
+	}
+
+	slog.InfoContext(ctx, "MCR discovery succeeded")
 	return nil
 }

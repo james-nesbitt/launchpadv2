@@ -1,10 +1,18 @@
 package cluster
 
-import "context"
+import (
+	"context"
+	"time"
+)
 
 // Debug the cluster.
 func (cl *Cluster) Debug(ctx context.Context) interface{} {
 	cld := map[string]interface{}{}
+
+	ctx, c := context.WithTimeout(context.Background(), time.Second*30)
+	defer c()
+
+	rs, ds, _ := cl.matchRequirements(ctx)
 
 	cl_v := "valid"
 	if err := cl.Validate(ctx); err != nil {
@@ -36,7 +44,7 @@ func (cl *Cluster) Debug(ctx context.Context) interface{} {
 	cld["components"] = cld_components
 
 	cld_requirements := map[string]interface{}{}
-	for _, r := range cl.requirements {
+	for _, r := range rs {
 		cld_r_d := "<un-met>"
 		if d := r.Matched(ctx); d != nil {
 			cld_r_d = d.Id()
@@ -55,7 +63,7 @@ func (cl *Cluster) Debug(ctx context.Context) interface{} {
 	cld["requirements"] = cld_requirements
 
 	cld_dependencies := map[string]interface{}{}
-	for _, d := range cl.dependencies {
+	for _, d := range ds {
 		d_v := "valid"
 		if err := d.Validate(ctx); err != nil {
 			d_v = err.Error()

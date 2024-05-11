@@ -51,7 +51,11 @@ func (h ho) Exec(ctx context.Context, cmd string, inr io.Reader, opts host.ExecO
 }
 
 func (h ho) InstallPackages(ctx context.Context, packages []string) error {
-	return fmt.Errorf("Mock Host don't install packages: %+v", h)
+	return fmt.Errorf("Mock Host don't manage packages: %+v", h)
+}
+
+func (h ho) RemovePackages(ctx context.Context, packages []string) error {
+	return fmt.Errorf("Mock Host don't manage packages: %+v", h)
 }
 
 func (h ho) Upload(ctx context.Context, src io.Reader, dst string, fm fs.FileMode, opts host.ExecOptions) error {

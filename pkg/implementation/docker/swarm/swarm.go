@@ -22,6 +22,7 @@ func (s Swarm) ValidateVersion(version dockerimplementation.Version) error {
 	return nil
 }
 
+// SwarmAddress convert an IP into a address
 func SwarmAddress(ip string) string {
 	return fmt.Sprintf("%s:%d", ip, 2377)
 }

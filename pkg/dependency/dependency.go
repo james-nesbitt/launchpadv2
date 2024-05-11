@@ -3,8 +3,6 @@ package dependency
 import (
 	"context"
 	"errors"
-	"fmt"
-	"log/slog"
 )
 
 const (
@@ -107,50 +105,4 @@ type Dependency interface {
 	Validate(context.Context) error
 	// Met is the dependency fulfilled, or is it still blocked/waiting for fulfillment
 	Met(context.Context) error
-}
-
-// --- Dependency and Requirement helper functions
-
-// GetRequirementDependency Build a dependency for a requirement
-//
-//		Find a Handler which can handle the Requirement, and make it produce a Dependency.
-//		Associate the Dependency with the Requirement, but return it as well so that it
-//		can be collected.
-//
-//	    NOTE: WE DO NOT TELL THE REQUIREMENT ABOUT THE DEPENDENCY - YOU NEED TO DO THAT
-func GetRequirementDependency(ctx context.Context, r Requirement, fds map[string]ProvidesDependencies) (Dependency, error) {
-	if len(fds) == 0 {
-		return nil, fmt.Errorf("%w; no dependency handlers providers for requirement %s", ErrNotHandled, r.Id())
-	}
-
-	for name, fd := range fds {
-		if fd == nil {
-			slog.WarnContext(ctx, fmt.Sprintf("%s handler empty", name), slog.Any("requirement", r), slog.Any("handler", fd))
-			continue // stupidity check
-		}
-
-		d, err := fd.ProvidesDependencies(ctx, r)
-
-		// it is allowed to return no error, and no dependency,
-		// which just means that the req wasn't handled
-		if d == nil && err == nil {
-			err = ErrNotHandled
-		}
-
-		if err == nil {
-			slog.DebugContext(ctx, fmt.Sprintf("dependency: '%s' handled by '%s'", r.Id(), name), slog.Any("requirement", r), slog.Any("handler", fd))
-			return d, nil // successful dependency creation
-		}
-
-		if errors.Is(err, ErrShouldHaveHandled) {
-			slog.WarnContext(ctx, fmt.Sprintf("dependency: Dependency generation failure: (%s) %s", r.Id(), err.Error()), slog.String("error", err.Error()))
-			return d, err // Handler says that it should have handled it, but couldn't, so return an error
-		}
-
-		if !errors.Is(err, ErrNotHandled) {
-			slog.WarnContext(ctx, fmt.Sprintf("dependency: Unknown Dependency generation error: (%s) %s", r.Id(), err.Error()), slog.String("error", err.Error()))
-		}
-	}
-
-	return nil, ErrNotHandled
 }

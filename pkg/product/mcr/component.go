@@ -2,6 +2,7 @@ package mcr
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/Mirantis/launchpad/pkg/dependency"
@@ -23,7 +24,7 @@ func NewMCR(id string, c Config) *MCR {
 	return &MCR{
 		id:     id,
 		config: c,
-		state:  state{hosts: map[string]*hostState{}},
+		state:  state{},
 	}
 }
 
@@ -52,11 +53,29 @@ func (p MCR) Name() string {
 }
 
 // Debug product debug.
-func (_ MCR) Debug() interface{} {
-	return nil
+func (c *MCR) Debug() interface{} {
+	return struct {
+		Config Config
+		State  interface{}
+	}{
+		Config: c.config,
+		State:  c.state.Debug(),
+	}
 }
 
 // Validate that the cluster meets the needs of the Product.
-func (_ MCR) Validate(context.Context) error {
+func (c *MCR) Validate(ctx context.Context) error {
+	errs := []error{}
+
+	if _, err := c.GetManagerHosts(ctx); err != nil {
+		errs = append(errs, fmt.Errorf("manager host dependency error: %s", err))
+	}
+	if _, err := c.GetWorkerHosts(ctx); err != nil {
+		errs = append(errs, fmt.Errorf("worker host dependency error: %s", err))
+	}
+
+	if len(errs) > 0 {
+		return fmt.Errorf("MCR validation failed: %s", errors.Join(errs...))
+	}
 	return nil
 }

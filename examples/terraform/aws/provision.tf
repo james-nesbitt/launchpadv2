@@ -18,7 +18,7 @@ module "provision" {
     ami : ngd.ami
     count : ngd.count
     type : ngd.type
-    keypair_id : module.key.keypair_id
+    keypair_id : module.common_key.keypair_id
     root_device_name : ngd.root_device_name
     volume_size : ngd.volume_size
     role : ngd.role

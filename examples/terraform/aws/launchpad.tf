@@ -126,7 +126,7 @@ locals {
 // ------- Ye old launchpad yaml (just for debugging)
 
 locals {
-  launchpad_yaml_14 = <<-EOT
+  launchpad_yaml_20 = <<-EOT
 apiVersion: launchpad.mirantis.com/v2.0
 kind: cluster
 metadata:
@@ -194,7 +194,7 @@ EOT
 output "launchpad_yaml" {
   description = "launchpad config file yaml (for debugging)"
   sensitive   = true
-  value       = local.launchpad_yaml_14
+  value       = local.launchpad_yaml_20
 }
 
 output "mke_connect" {

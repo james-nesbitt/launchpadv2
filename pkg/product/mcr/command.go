@@ -15,7 +15,7 @@ const (
 	CommandPhaseReset    = "MCR-Reset"
 )
 
-func (c MCR) CommandBuild(ctx context.Context, cmd *action.Command) error {
+func (c *MCR) CommandBuild(ctx context.Context, cmd *action.Command) error {
 	rs := dependency.Requirements{ // Requirements that we need
 		c.mhr,
 		c.whr,
@@ -34,8 +34,9 @@ func (c MCR) CommandBuild(ctx context.Context, cmd *action.Command) error {
 		p := stepped.NewSteppedPhase(CommandPhaseDiscover, rs, ds, []string{dependency.EventKeyActivated})
 		p.Steps().Add(
 			&discoverStep{
-				id:       c.Name(),
-				baseStep: bs,
+				id:          c.Name(),
+				baseStep:    bs,
+				failOnError: true,
 			},
 		)
 		cmd.Phases.Add(p)

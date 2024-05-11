@@ -44,14 +44,6 @@ func (c *MCR) CommandBuild(ctx context.Context, cmd *action.Command) error {
 	case action.CommandKeyApply:
 		p := stepped.NewSteppedPhase(CommandPhaseApply, rs, ds, []string{dependency.EventKeyActivated})
 		p.Steps().Merge(stepped.Steps{
-			&discoverStep{
-				id:       fmt.Sprintf("%s-before", c.Name()),
-				baseStep: bs,
-			},
-			//			&prepareMCRNodesStep{
-			//				id:       c.Name(),
-			//				baseStep: bs,
-			//			},
 			&installMCRStep{
 				id:       c.Name(),
 				baseStep: bs,
@@ -69,7 +61,7 @@ func (c *MCR) CommandBuild(ctx context.Context, cmd *action.Command) error {
 		cmd.Phases.Add(p)
 
 	case action.CommandKeyReset:
-		if len(ds) > 0 { // only discover if something else needs us
+		if len(ds) > 0 { // only discover if something else needs us - so that we can meet any dependencies
 
 			pd := stepped.NewSteppedPhase(CommandPhaseDiscover, rs, ds, []string{dependency.EventKeyActivated})
 			pd.Steps().Add(

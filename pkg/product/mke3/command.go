@@ -46,11 +46,24 @@ func (c *MKE3) CommandBuild(ctx context.Context, cmd *action.Command) error {
 			&prepareNodesStep{
 				id: c.Name(),
 			},
-			&installMKEStep{
+		})
+
+		if c.config.imagePrepullRequired() {
+			p.Steps().Add(
+				&prePullImagesStep{
+					baseStep: bs,
+					id:       c.Name(),
+				},
+			)
+		}
+
+		p.Steps().Add(
+			&runMKEBootstrapper{
 				baseStep: bs,
 				id:       c.Name(),
 			},
-		})
+		)
+
 		cmd.Phases.Add(p)
 
 	case action.CommandKeyReset:

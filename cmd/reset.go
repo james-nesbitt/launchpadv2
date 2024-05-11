@@ -14,14 +14,10 @@ import (
 
 // resetCmd represents the reset command.
 var resetCmd = &cobra.Command{
-	Use:   "reset",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	GroupID: "cluster",
+	Use:     "cluster:reset",
+	Short:   "Remove any component installs in your cluster",
+	Long:    ``,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 
@@ -47,8 +43,6 @@ to quickly create a Cobra application.`,
 }
 
 func init() {
-	rootCmd.AddCommand(resetCmd)
-
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

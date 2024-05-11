@@ -45,14 +45,14 @@ func Test_MatchRequirements_Success(t *testing.T) {
 	ctx := context.Background()
 	r := mock.Requirement("mock", "", nil)          // only needed as an argument. fds do all of the work
 	testerr := errors.New("we should not get here") // this should not get returned
-	fds := map[string]dependency.ProvidesDependencies{
-		"skip-one":     mock.ProvidesDependencies(nil, dependency.ErrNotHandled),
-		"skip-two":     mock.ProvidesDependencies(nil, dependency.ErrNotHandled),
-		"use-this-one": mock.ProvidesDependencies(mock.Dependency("this-one", "", nil, nil), nil),         // this handler should get used
-		"skip-three":   mock.ProvidesDependencies(mock.Dependency("not-this-one", "", nil, nil), testerr), // this handler should not get used
+	fds := []dependency.ProvidesDependencies{
+		mock.ProvidesDependencies(nil, dependency.ErrNotHandled),
+		mock.ProvidesDependencies(nil, dependency.ErrNotHandled),
+		mock.ProvidesDependencies(mock.Dependency("this-one", "", nil, nil), nil),         // this handler should get used
+		mock.ProvidesDependencies(mock.Dependency("not-this-one", "", nil, nil), testerr), // this handler should not get used
 	}
 
-	d, err := dependency.GetRequirementDependency(ctx, r, fds)
+	d, err := dependency.MatchRequirementDependency(ctx, r, fds)
 	if errors.Is(err, testerr) {
 		t.Error("dependency handler was not used")
 	}
@@ -72,14 +72,14 @@ func Test_MatchRequirements_ShouldFail(t *testing.T) {
 	ctx := context.Background()
 	r := mock.Requirement("", "", nil)              // only needed as an argument. fds do all of the work
 	testerr := errors.New("we should not get here") // this should not get returned
-	fds := map[string]dependency.ProvidesDependencies{
-		"skip-one":             mock.ProvidesDependencies(nil, dependency.ErrNotHandled),        // this handler should not get used
-		"should-fail-handling": mock.ProvidesDependencies(nil, dependency.ErrShouldHaveHandled), // this handler should get used, and result in an error
-		"skip-two":             mock.ProvidesDependencies(nil, nil),                             // this handler should get used
-		"skip-three":           mock.ProvidesDependencies(nil, testerr),                         // this handler should not get used
+	fds := []dependency.ProvidesDependencies{
+		mock.ProvidesDependencies(nil, dependency.ErrNotHandled),        // this handler should not get used
+		mock.ProvidesDependencies(nil, dependency.ErrShouldHaveHandled), // this handler should get used, and result in an error
+		mock.ProvidesDependencies(nil, nil),                             // this handler should get used
+		mock.ProvidesDependencies(nil, testerr),                         // this handler should not get used
 	}
 
-	_, err := dependency.GetRequirementDependency(ctx, r, fds)
+	_, err := dependency.MatchRequirementDependency(ctx, r, fds)
 	if !errors.Is(err, dependency.ErrShouldHaveHandled) {
 		t.Error("empty dependency handlers did not give expected ShouldHaveHandled error")
 	}
@@ -88,9 +88,9 @@ func Test_MatchRequirements_ShouldFail(t *testing.T) {
 func Test_MatchRequirements_Empty(t *testing.T) {
 	ctx := context.Background()
 	r := mock.Requirement("mock", "", nil)              // only needed as an argument. fds do all of the work
-	fds := map[string]dependency.ProvidesDependencies{} // empty list of handlers/fullfillers
+	fds := []dependency.ProvidesDependencies{} // empty list of handlers/fullfillers
 
-	_, err := dependency.GetRequirementDependency(ctx, r, fds)
+	_, err := dependency.MatchRequirementDependency(ctx, r, fds)
 	if !errors.Is(err, dependency.ErrNotHandled) {
 		t.Error("empty dependency handlers did not give expected NotHandled error")
 	}

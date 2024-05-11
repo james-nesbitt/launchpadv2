@@ -2,6 +2,7 @@ package v20
 
 import (
 	"log/slog"
+	"strings"
 
 	"github.com/Mirantis/launchpad/pkg/cluster"
 	"github.com/Mirantis/launchpad/pkg/component"
@@ -11,8 +12,6 @@ import (
 
 const (
 	ID = "launchpad.mirantis.com/v2.0"
-
-	HostsComponentId = "hosts"
 )
 
 func init() {
@@ -38,10 +37,10 @@ func Decode(cl *cluster.Cluster, d func(interface{}) error) error {
 		cl.Components = component.Components{}
 	}
 
-	cl.Components[HostsComponentId] = host.NewHostsComponent(HostsComponentId, cs.Hosts.hosts())
+	cl.Components[host.ComponentType] = host.NewHostsComponent(host.ComponentType, cs.Hosts.hosts())
 
 	for id, cp := range cs.Products.products() {
-		cl.Components[id] = cp
+		cl.Components[strings.ToUpper(id)] = cp
 	}
 
 	return nil

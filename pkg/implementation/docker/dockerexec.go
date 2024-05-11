@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	dockertypes "github.com/docker/docker/api/types"
+	dockertypesimage "github.com/docker/docker/api/types/image"
 	dockertypesswarm "github.com/docker/docker/api/types/swarm"
 	dockertypessystem "github.com/docker/docker/api/types/system"
 )
@@ -29,27 +30,41 @@ var (
 	ErrDockerExecuteError = errors.New("error occurred running Docker command")
 )
 
-func NewDockerExec(executor func(ctx context.Context, cmd string, inr io.Reader) (string, string, error)) DockerExec {
-	return DockerExec{
+func NewDockerExec(executor func(ctx context.Context, cmd string, inr io.Reader, options RunOptions) (string, string, error)) *DockerExec {
+	return &DockerExec{
 		executor: executor,
 	}
 }
 
 type DockerExec struct {
-	executor func(ctx context.Context, cmd string, inr io.Reader) (string, string, error)
+	executor func(ctx context.Context, cmd string, inr io.Reader, options RunOptions) (string, string, error)
+
+	di dockertypessystem.Info
 }
 
-func (de DockerExec) dockerCommand(ctx context.Context, args []string) (string, string, error) {
+func (de DockerExec) dockerCommand(ctx context.Context, args []string, opts RunOptions) (string, string, error) {
 	cmd := strings.Join(append([]string{"docker"}, args...), " ")
 	slog.DebugContext(ctx, "DOCKER COMMAND", slog.String("command", cmd))
-	return de.executor(ctx, cmd, nil)
+	return de.executor(ctx, cmd, nil, opts)
+}
+
+// Run a docker command
+//
+//	@NOTE It would be nice to avoid this and use just the API commands to create run and delete a container.
+func (de DockerExec) Run(ctx context.Context, args []string, ro RunOptions) (string, string, error) {
+	return de.dockerCommand(ctx, args, ro)
+}
+
+type RunOptions struct {
+	ShowOutput bool
+	ShowError  bool
 }
 
 // Version retrieve the Docker Version from the remote server.
 func (de DockerExec) Version(ctx context.Context) (map[string]dockertypes.Version, error) {
 	var dv map[string]dockertypes.Version
 
-	o, e, eerr := de.dockerCommand(ctx, []string{"version", "--format=json"})
+	o, e, eerr := de.dockerCommand(ctx, []string{"version", "--format=json"}, RunOptions{})
 	if eerr != nil {
 		return dv, fmt.Errorf("%w; %s : %s", ErrDockerExecuteError, eerr, e)
 	}
@@ -71,22 +86,58 @@ func (de DockerExec) Version(ctx context.Context) (map[string]dockertypes.Versio
 
 // Info retrieve the Docker VInfo from the remote server.
 func (de DockerExec) Info(ctx context.Context) (dockertypessystem.Info, error) {
-	var di dockertypessystem.Info
+	if de.di.ID == "" {
+		o, e, eerr := de.dockerCommand(ctx, []string{"info", "--format=json"}, RunOptions{})
+		if eerr != nil {
+			return de.di, fmt.Errorf("%w; %s : %s", ErrDockerExecuteError, eerr, e)
+		}
 
-	o, e, eerr := de.dockerCommand(ctx, []string{"info", "--format=json"})
+		if len(o) == 0 {
+			return de.di, fmt.Errorf("%w: no info retrieved: `%s` / `%s`", ErrDockerExecuteError, o, e)
+		}
+
+		if err := json.Unmarshal([]byte(o), &de.di); err != nil {
+			return de.di, fmt.Errorf("%w; unmarshal error %s `%s`", ErrDockerExecuteError, err, o)
+		}
+	}
+
+	return de.di, nil
+}
+
+// ImagePull
+func (de DockerExec) ImagePull(ctx context.Context, refStr string, options dockertypesimage.PullOptions) (io.ReadCloser, error) {
+	o, e, eerr := de.dockerCommand(ctx, []string{"image", "pull", refStr}, RunOptions{})
 	if eerr != nil {
-		return di, fmt.Errorf("%w; %s : %s", ErrDockerExecuteError, eerr, e)
+		return nil, fmt.Errorf("%w; %s : %s", ErrDockerExecuteError, eerr, e)
 	}
 
-	if len(o) == 0 {
-		return di, fmt.Errorf("%w: no info retrieved: `%s` / `%s`", ErrDockerExecuteError, o, e)
+	return io.NopCloser(strings.NewReader(o)), nil
+}
+
+// NodeList retried the list of nodes in the swarm
+func (de DockerExec) NodeList(ctx context.Context, options dockertypes.NodeListOptions) ([]dockertypesswarm.Node, error) {
+	cmd := []string{"node", "ls", "--format=json"}
+
+	for _, k := range options.Filters.Keys() {
+		cmd = append(cmd, fmt.Sprintf("--filter='%s=%s')", k, strings.Join(options.Filters.Get(k), ",")))
 	}
 
-	if err := json.Unmarshal([]byte(o), &di); err != nil {
-		return di, fmt.Errorf("%w; unmarshal error %s `%s`", ErrDockerExecuteError, err, o)
+	o, e, eerr := de.dockerCommand(ctx, cmd, RunOptions{})
+	if eerr != nil {
+		return nil, fmt.Errorf("%w; %s : %s", ErrDockerExecuteError, eerr, e)
 	}
 
-	return di, nil
+	// docker does not output a json list, it prints each node in json in sequence
+	no := fmt.Sprintf("[%s]", strings.Join(strings.Split(strings.TrimSpace(o), "\n"), ","))
+
+	ncs := []nodeListCapture{}
+	ns := []dockertypesswarm.Node{}
+
+	if err := json.Unmarshal([]byte(no), &ncs); err != nil {
+		return ns, fmt.Errorf("%w; unmarshal error %s /n`%s`", ErrDockerExecuteError, err, no)
+	}
+
+	return nodeListCapturesListConvert(ncs), nil
 }
 
 // SwarmInit Initialize swarm
@@ -108,10 +159,12 @@ func (de DockerExec) SwarmInit(ctx context.Context, r dockertypesswarm.InitReque
 
 	cmd = append(cmd, r.DefaultAddrPool...)
 
-	_, e, err := de.dockerCommand(ctx, cmd)
+	_, e, err := de.dockerCommand(ctx, cmd, RunOptions{})
 	if err != nil {
 		return fmt.Errorf("swarm init failed: %w :: %s", err, e)
 	}
+
+	de.di = dockertypessystem.Info{}
 
 	return nil
 }
@@ -133,12 +186,12 @@ func (de DockerExec) SwarmInspect(ctx context.Context) (dockertypesswarm.Swarm, 
 	}
 
 	tcmd := []string{"swarm", "join-token", "-q"}
-	if o, e, err := de.dockerCommand(ctx, append(tcmd, "manager")); err != nil {
+	if o, e, err := de.dockerCommand(ctx, append(tcmd, "manager"), RunOptions{}); err != nil {
 		return s, fmt.Errorf("manager swarm token fail: %s :: %s", err.Error(), e)
 	} else {
 		s.JoinTokens.Manager = strings.TrimSpace(o)
 	}
-	if o, e, err := de.dockerCommand(ctx, append(tcmd, "worker")); err != nil {
+	if o, e, err := de.dockerCommand(ctx, append(tcmd, "worker"), RunOptions{}); err != nil {
 		return s, fmt.Errorf("worker swarm token fail: %s :: %s", err.Error(), e)
 	} else {
 		s.JoinTokens.Worker = strings.TrimSpace(o)
@@ -170,10 +223,12 @@ func (de DockerExec) SwarmJoin(ctx context.Context, r dockertypesswarm.JoinReque
 
 	cmd = append(cmd, r.RemoteAddrs...)
 
-	_, e, err := de.dockerCommand(ctx, cmd)
+	_, e, err := de.dockerCommand(ctx, cmd, RunOptions{})
 	if err != nil {
 		return fmt.Errorf("swarm join fail: %s :: %s = %+v", err.Error(), e, r)
 	}
+
+	de.di = dockertypessystem.Info{}
 
 	return nil
 }
@@ -186,10 +241,44 @@ func (de DockerExec) SwarmLeave(ctx context.Context, force bool) error {
 		cmd = append(cmd, "--force")
 	}
 
-	_, e, err := de.dockerCommand(ctx, cmd)
+	_, e, err := de.dockerCommand(ctx, cmd, RunOptions{})
 	if err != nil {
 		return fmt.Errorf("swarm leave fail: %s :: %s", err.Error(), e)
 	}
 
+	de.di = dockertypessystem.Info{}
+
 	return nil
+}
+
+// --- Helper Types
+
+type nodeListCapture struct {
+	Availability  string `json:"Availability"`
+	EngineVersion string `json:"EngineVersion"`
+	Hostname      string `json:"Hostname"`
+	ID            string `json:"ID"`
+	ManagerStatus string `json:"ManagerStatus"`
+	Self          bool   `json:"Self"`
+	Status        string `json:"Status"`
+	TLSStatus     string `json:"TLSStatus"`
+}
+
+func (nlc nodeListCapture) Node() dockertypesswarm.Node {
+	n := dockertypesswarm.Node{
+		ID:            nlc.ID,
+		ManagerStatus: &dockertypesswarm.ManagerStatus{},
+	}
+
+	// @TODO fill out the rest of this build
+
+	return n
+}
+
+func nodeListCapturesListConvert(ncs []nodeListCapture) []dockertypesswarm.Node {
+	ns := []dockertypesswarm.Node{}
+	for _, nc := range ncs {
+		ns = append(ns, nc.Node())
+	}
+	return ns
 }

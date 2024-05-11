@@ -61,7 +61,7 @@ func (s *installMCRStep) Run(ctx context.Context) error {
 			}
 
 			if _, err := h.Docker(ctx).Info(ctx); err != nil {
-				return fmt.Errorf("%s: MCR discovery error after install")
+				return fmt.Errorf("%s: MCR discovery error after install", h.Id())
 			}
 		}
 

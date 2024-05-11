@@ -108,7 +108,7 @@ func (cl *Cluster) matchRequirements(ctx context.Context) (dependency.Requiremen
 
 	slog.DebugContext(ctx, "Cluster: start component dependency matching")
 	rs, ds, merr := dependency.MatchRequirements(ctx, rds, pds)
-	slog.DebugContext(ctx, "Cluster: start component dependency matching")
+	slog.DebugContext(ctx, "Cluster: finished component dependency matching")
 	if merr != nil {
 		return rs, ds, fmt.Errorf("cluster dependency matching failed: %s", merr.Error())
 	}

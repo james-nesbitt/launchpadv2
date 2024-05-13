@@ -5,9 +5,12 @@ import (
 	"fmt"
 	"log/slog"
 
+	dockertypes "github.com/docker/docker/api/types"
 	dockertypesswarm "github.com/docker/docker/api/types/swarm"
+	dockertypessystem "github.com/docker/docker/api/types/system"
 
 	dockerhost "github.com/Mirantis/launchpad/pkg/implementation/docker/host"
+	"github.com/Mirantis/launchpad/pkg/implementation/docker/swarm"
 )
 
 type swarmActivateStep struct {
@@ -31,7 +34,6 @@ func (s *swarmActivateStep) Run(ctx context.Context) error {
 	// 1. Find a swarm cluster OR Create a new one
 
 	var l *dockerhost.Host
-	var swaas []string
 
 	if dl, err := discoverLeader(ctx, mhs); err == nil {
 		slog.InfoContext(ctx, fmt.Sprintf("%s: discovered as state leader", dl.Id()), slog.Any("leader", dl))
@@ -43,25 +45,24 @@ func (s *swarmActivateStep) Run(ctx context.Context) error {
 		return fmt.Errorf("could not initialize swarm")
 	}
 
-	sw, err := l.Docker(ctx).SwarmInspect(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to retrieve swarm info from state leader: %s", err.Error())
+	li, lierr := l.Docker(ctx).Info(ctx)
+	if lierr != nil {
+		return fmt.Errorf("%s: swarm join failed because leader docker info error: %s", l.Id(), lierr.Error())
 	}
-
-	ln, lnerr := l.Network(ctx)
-	if lnerr != nil {
-		return fmt.Errorf("%s: could not retrieve leader network for swarm initialization: %s", l.Id(), lnerr.Error())
+	si, sierr := l.Docker(ctx).SwarmInspect(ctx)
+	if sierr != nil {
+		return fmt.Errorf("%s: swarm join failed because leader docker swarm inspect error: %s", l.Id(), sierr.Error())
 	}
-	if ln.PrivateInterface == "" {
-		return fmt.Errorf("%s: leader network did not contain an address we can use for swarm: %+v", l.Id(), ln)
+	ni, nierr := l.Docker(ctx).NodeList(ctx, dockertypes.NodeListOptions{})
+	if nierr != nil {
+		return fmt.Errorf("%s: swarm join failed because leader docker swarm node list error: %s", l.Id(), nierr.Error())
 	}
-	slog.InfoContext(ctx, "setting swarm listen address", slog.Any("network", ln))
-	swaas = append(swaas, ln.PrivateAddress)
 
 	// at this point the state should have swarm info populated
 	// so all we need to do is to join the rest of the hosts
 	if err := mhs.Each(ctx, func(ctx context.Context, h *dockerhost.Host) error {
-		return joinSwarm(ctx, h, sw, swaas, "manager")
+		slog.InfoContext(ctx, fmt.Sprintf("%s: swarm manager join", h.Id()), slog.Any("host", h))
+		return joinSwarm(ctx, h, li, si, ni, "manager")
 	}); err != nil {
 		return fmt.Errorf("error joining managers to the swarm: %s", err.Error())
 	}
@@ -71,7 +72,8 @@ func (s *swarmActivateStep) Run(ctx context.Context) error {
 		return fmt.Errorf("could not retrieve workers to join the swarm: %s", whsgerr.Error())
 	}
 	if err := whs.Each(ctx, func(ctx context.Context, h *dockerhost.Host) error {
-		return joinSwarm(ctx, h, sw, swaas, "worker")
+		slog.InfoContext(ctx, fmt.Sprintf("%s: swarm worker join", h.Id()), slog.Any("host", h))
+		return joinSwarm(ctx, h, li, si, ni, "worker")
 	}); err != nil {
 		return fmt.Errorf("error joining workers to the swarm: %s", err.Error())
 	}
@@ -125,31 +127,47 @@ func initSwarm(ctx context.Context, mhs dockerhost.Hosts) (*dockerhost.Host, err
 // @NOTE We have to check if the host is already in the swarm
 //
 //	and we may need to leave a/the swarm first
-func joinSwarm(ctx context.Context, h *dockerhost.Host, sw dockertypesswarm.Swarm, swaas []string, role string) error {
-	if si, err := h.Docker(ctx).SwarmInspect(ctx); err == nil {
-		if si.ID != sw.ID {
-			// host is already in a different swarm
-			if lerr := h.Docker(ctx).SwarmLeave(ctx, true); lerr != nil {
-				return fmt.Errorf("%s: was in another swarm '%s', and failed to leave it", h.Id(), si.ID)
+func joinSwarm(ctx context.Context, h *dockerhost.Host, li dockertypessystem.Info, si dockertypesswarm.Swarm, ni []dockertypesswarm.Node, role string) error {
+	// @NOTE The following three docker commands are repeated on the leader on every swarm join (probably could be cached)
+
+	if hi, err := h.Docker(ctx).Info(ctx); err == nil && hi.Swarm.LocalNodeState != "inactive" {
+		if hi.Swarm.NodeID == li.Swarm.NodeID {
+			slog.InfoContext(ctx, fmt.Sprintf("%s: host already in swarm as the leader", h.Id()))
+			return nil
+		}
+
+		for _, sn := range ni {
+			if sn.ID == hi.Swarm.NodeID {
+				// Node is already in swarm
+
+				if hi.Swarm.ControlAvailable && role == "worker" {
+					slog.WarnContext(ctx, fmt.Sprintf("%s: host is already in the swarm, but is a worker when it is supposed to be a manager", h.Id()))
+				} else if !hi.Swarm.ControlAvailable && role == "manager" {
+					slog.WarnContext(ctx, fmt.Sprintf("%s: host is already in the swarm, but is a manager when it is supposed to be a worker", h.Id()))
+				}
+
+				slog.InfoContext(ctx, fmt.Sprintf("%s: host already in swarm", h.Id()), slog.Any("host-swarm", hi.Swarm))
+				return nil
+
 			}
+		}
 
-			// @TODO check it is not in the wrong role
-
-		} else {
-			slog.InfoContext(ctx, fmt.Sprintf("%s: host already in swarm", h.Id()), slog.Any("host", h))
-			return nil // no action needed
+		// Node is in a swarm, but it is the wrong swarm
+		if lerr := h.Docker(ctx).SwarmLeave(ctx, true); lerr != nil {
+			slog.ErrorContext(ctx, fmt.Sprintf("%s: host already in swarm", h.Id()), slog.Any("host-swarm", hi.Swarm), slog.Any("leader-swarm", li))
+			return fmt.Errorf("%s: was in another swarm, and failed to leave it", h.Id())
 		}
 	}
 
 	r := dockertypesswarm.JoinRequest{
-		RemoteAddrs: swaas,
+		RemoteAddrs: []string{swarm.SwarmAddress(li.Swarm.NodeAddr)},
 	}
 
 	switch role {
 	case "manager":
-		r.JoinToken = sw.JoinTokens.Manager
+		r.JoinToken = si.JoinTokens.Manager
 	case "worker":
-		r.JoinToken = sw.JoinTokens.Worker
+		r.JoinToken = si.JoinTokens.Worker
 	}
 
 	if err := h.Docker(ctx).SwarmJoin(ctx, r); err != nil {

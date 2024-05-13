@@ -42,7 +42,9 @@ type Host interface {
 
 // ExecOptions options to configure the execute.
 type ExecOptions struct {
-	Sudo bool
+	Sudo        bool
+	OutputLevel string
+	ErrorLevel  string
 }
 
 // Network networking information about the Host

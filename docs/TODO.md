@@ -16,3 +16,7 @@
 ## Component
 
 - [ ] develop a better state strategy with locking
+
+## Docker Host 
+
+- [ ] we call docker info and swarm inspect repeatedly for leaders. This host should likely cache this information.

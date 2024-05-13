@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	HostsComponentType = "hosts"
+	ComponentType = "hosts"
 )
 
 func NewHostsComponent(id string, hosts Hosts) *HostsComponent {
@@ -28,7 +28,10 @@ type HostsComponent struct {
 }
 
 func (hc HostsComponent) Name() string {
-	return fmt.Sprintf("%s:%s", HostsComponentType, hc.id)
+	if hc.id == ComponentType {
+		return hc.id
+	}
+	return fmt.Sprintf("%s:%s", ComponentType, hc.id)
 }
 
 func (hc HostsComponent) Debug() interface{} {
@@ -58,7 +61,7 @@ func (hc *HostsComponent) ProvidesDependencies(ctx context.Context, req dependen
 				return hs, err
 			},
 		)
-		slog.DebugContext(ctx, fmt.Sprintf("%s added a HostDependency '%s'for Requirement '%s'", HostsComponentType, d.Id(), req.Id()), slog.Any("dependency", d), slog.Any("requirement", req))
+		slog.DebugContext(ctx, fmt.Sprintf("%s added a HostDependency '%s'for Requirement '%s'", ComponentType, d.Id(), req.Id()), slog.Any("dependency", d), slog.Any("requirement", req))
 
 		hc.deps = append(hc.deps, d)
 

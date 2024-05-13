@@ -4,6 +4,7 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"log/slog"
@@ -34,53 +35,103 @@ import (
 var (
 	debug   bool
 	cfgFile string
-	cl      cluster.Cluster
+	cl      *cluster.Cluster
 )
 
-// rootCmd represents the base command when called without any subcommands.
-var rootCmd = &cobra.Command{
-	Use:   "launchpad",
-	Short: "A Mirantis installer",
-	Long:  `Install various Mirantis products.`,
-
-	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-		f, foerr := os.Open(cfgFile)
-		if foerr != nil {
-			return fmt.Errorf("could not access config '%s' : %s", cfgFile, foerr.Error())
-		}
-
-		yb, frerr := io.ReadAll(f)
-		if frerr != nil {
-			return fmt.Errorf("could not read config '%s' : %s", cfgFile, frerr.Error())
-		}
-
-		tcl, umerr := config.ConfigFromYamllBytes(yb)
-		if umerr != nil {
-			return fmt.Errorf("Error occurred unarshalling yaml: %s \nYAML:\b%s", umerr.Error(), yb)
-		}
-
-		cl = tcl
-
-		if valerr := cl.Validate(cmd.Context()); valerr != nil {
-			return fmt.Errorf("cluster validation error: %s", valerr.Error())
-		}
-
-		if debug {
-			slog.SetLogLoggerLevel(slog.LevelDebug)
-		}
-
-		return nil
-	},
-}
-
 func Execute() {
-	err := rootCmd.Execute()
-	if err != nil {
+	var rootCmd = &cobra.Command{
+		Use:   "launchpad",
+		Short: "A Mirantis installer",
+		Long:  `Install various Mirantis products.`,
+	}
+
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.launchpad.yaml)")
+	rootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "increase logging verbosity")
+
+	// This should early pre-populate the above flags, which we will use to build more commands. This will
+	// be executed again with rootCmd.Execute()
+	rootCmd.ParseFlags(os.Args[1:])
+
+	if debug {
+		slog.SetLogLoggerLevel(slog.LevelDebug)
+	}
+
+	slog.DebugContext(rootCmd.Context(), "building project for cli")
+	if err := boostrapBuildCluster(rootCmd.Context()); err != nil {
+		slog.Error("failed to build cluster", slog.Any("error", err))
+		os.Exit(1)
+	}
+	slog.DebugContext(rootCmd.Context(), "finished building project for cli")
+
+	if err := bootstrapLaunchpadCmd(rootCmd); err != nil {
+		slog.Error("failed to bootstrap cli")
+	}
+
+	rootCmd.ParseFlags(os.Args[1:])
+
+	if err := rootCmd.Execute(); err != nil {
+		slog.Error("failed to run command")
 		os.Exit(1)
 	}
 }
 
-func init() {
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.launchpad.yaml)")
-	rootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "increase logging verbosity")
+func boostrapBuildCluster(ctx context.Context) error {
+	if cfgFile == "" {
+		return fmt.Errorf("no config file defined")
+	}
+
+	f, foerr := os.Open(cfgFile)
+	if foerr != nil {
+		return fmt.Errorf("could not access config '%s' : %s", cfgFile, foerr.Error())
+	}
+
+	yb, frerr := io.ReadAll(f)
+	if frerr != nil {
+		return fmt.Errorf("could not read config '%s' : %s", cfgFile, frerr.Error())
+	}
+
+	tcl, umerr := config.ConfigFromYamllBytes(yb)
+	if umerr != nil {
+		return fmt.Errorf("Error occurred unarshalling yaml: %s \nYAML:\b%s", umerr.Error(), yb)
+	}
+
+	cl = &tcl
+
+	if valerr := cl.Validate(ctx); valerr != nil {
+		return fmt.Errorf("cluster validation error: %s", valerr.Error())
+	}
+
+	return nil
+}
+
+func bootstrapLaunchpadCmd(cmd *cobra.Command) error {
+
+	cmd.AddGroup(&cobra.Group{
+		ID:    "cluster",
+		Title: "Cluster",
+	})
+
+	cmd.AddCommand(statusCmd)
+	cmd.AddCommand(applyCmd)
+	cmd.AddCommand(resetCmd)
+
+	if cl == nil {
+		slog.WarnContext(cmd.Context(), "no cluster object was built")
+	} else {
+		slog.DebugContext(cmd.Context(), "building cli commands from cluster")
+
+		for _, c := range cl.Components {
+			if ccb, ok := c.(CliBuilder); ok {
+				if err := ccb.CliBuild(cmd); err != nil {
+					slog.ErrorContext(cmd.Context(), fmt.Sprintf("%s: error when building cli", c.Name()), slog.Any("component", c))
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
+type CliBuilder interface {
+	CliBuild(*cobra.Command) error
 }

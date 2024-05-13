@@ -16,7 +16,7 @@ import (
 func (c *MCR) RequiresDependencies(_ context.Context) dependency.Requirements {
 	if c.mhr == nil {
 		c.mhr = host.NewHostsRolesRequirement(
-			fmt.Sprintf("%s:%s:manager", host.HostsComponentType, c.Name()),
+			fmt.Sprintf("%s:%s:manager", host.ComponentType, c.Name()),
 			fmt.Sprintf("MCR '%s' needs at least one manager host as installation targets, using roles: %s", c.id, strings.Join(MCRManagerHostRoles, ",")),
 			host.HostsRolesFilter{
 				Roles: MCRManagerHostRoles,
@@ -27,7 +27,7 @@ func (c *MCR) RequiresDependencies(_ context.Context) dependency.Requirements {
 	}
 	if c.whr == nil {
 		c.whr = host.NewHostsRolesRequirement(
-			fmt.Sprintf("%s:%s:worker", host.HostsComponentType, c.Name()),
+			fmt.Sprintf("%s:%s:worker", host.ComponentType, c.Name()),
 			fmt.Sprintf("MCR '%s' accepts any number of worker hosts as installation targets, using roles: %s", c.id, strings.Join(MCRWorkerHostRoles, ",")),
 			host.HostsRolesFilter{
 				Roles: MCRWorkerHostRoles,

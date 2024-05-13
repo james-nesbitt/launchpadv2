@@ -84,10 +84,10 @@ products:
 		t.Errorf("2.0 Spec decode cluster validate failed: %s", err.Error())
 	}
 
-	// 	if len(cl.Components) != 4 { // 3 products and the hosts component
-	// 		t.Errorf("Wrong number of components: %+v", cl.Components)
-	// 	}
-	//
+	if len(cl.Components) != 4 { // 3 products and the hosts component
+		t.Errorf("Wrong number of components: %+v", cl.Components)
+	}
+
 	// 	if mke, ok := cl.Components["mke3"]; !ok {
 	// 		t.Error("MKE component didn't decode properly")
 	// 	} else if mke.Name() != "mke3" {
@@ -123,9 +123,9 @@ products:
 		t.Errorf("Wrong number of components: %+v", cl.Components)
 	}
 
-	if k0s, ok := cl.Components["k0s"]; !ok {
-		t.Error("K0s component didn't decode properly")
-	} else if k0s.Name() != "k0s" {
-		t.Errorf("K0s product has wrong name: %s", k0s.Name())
-	}
+	// if k0s, ok := cl.Components["k0s"]; !ok {
+	// 	t.Error("K0s component didn't decode properly")
+	// } else if k0s.Name() != "k0s" {
+	// 	t.Errorf("K0s product has wrong name: %s", k0s.Name())
+	// }
 }

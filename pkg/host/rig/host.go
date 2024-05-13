@@ -69,13 +69,13 @@ func (h *Host) Exec(ctx context.Context, cmd string, inr io.Reader, opts host.Ex
 
 	outs := strings.Builder{}
 	outw := io.MultiWriter(
-		LogCmdLogger{level: "out", host: h},
+		LogCmdLogger{level: opts.OutputLevel, host: h},
 		&outs,
 	)
 
 	errs := strings.Builder{}
 	errw := io.MultiWriter(
-		LogCmdLogger{level: "err", host: h},
+		LogCmdLogger{level: opts.OutputLevel, host: h},
 		&errs,
 	)
 

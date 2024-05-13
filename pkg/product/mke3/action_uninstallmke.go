@@ -5,11 +5,14 @@ import (
 	"fmt"
 	"log/slog"
 
+	dockertypessystem "github.com/docker/docker/api/types/system"
+
 	dockerimplementation "github.com/Mirantis/launchpad/pkg/implementation/docker"
 	dockerhost "github.com/Mirantis/launchpad/pkg/implementation/docker/host"
 )
 
 type uninstallMKEStep struct {
+	baseStep
 	id string
 }
 
@@ -18,7 +21,51 @@ func (s uninstallMKEStep) Id() string {
 }
 
 func (s uninstallMKEStep) Run(ctx context.Context) error {
-	slog.InfoContext(ctx, "running MKE3 uninstall step", slog.String("ID", s.Id()))
+	slog.InfoContext(ctx, "MKE3 Uninstall starting. Looking for a manager to operate on")
+
+	mhs, gherr := s.c.GetManagerHosts(ctx)
+	if gherr != nil {
+		return fmt.Errorf("MCR has no hosts to discover: %s", gherr.Error())
+	}
+
+	var m *dockerhost.Host
+	var mi dockertypessystem.Info
+
+	for _, h := range mhs {
+		i, ierr := h.Docker(ctx).Info(ctx)
+		if ierr != nil {
+			slog.WarnContext(ctx, fmt.Sprintf("%s: host is not a docker machine", h.Id()), slog.Any("host", h))
+			continue
+		}
+
+		if i.Swarm.ControlAvailable {
+			slog.DebugContext(ctx, fmt.Sprintf("%s: this host can act as a leader.", h.Id()), slog.Any("host", h))
+
+			m = h
+			mi = i
+
+			break
+		}
+		slog.DebugContext(ctx, fmt.Sprintf("%s: host rejected as leader", h.Id()), slog.Any("info", i))
+	}
+
+	if m == nil {
+		return fmt.Errorf("no swarm leader found")
+	}
+
+	slog.DebugContext(ctx, fmt.Sprintf("%s: Leader found for un-installation", m.Id()), slog.Any("info", mi))
+
+	if err := mkeUninstall(ctx, m, s.c.config); err != nil {
+		return fmt.Errorf("%s: uninstall fail: %s", m.Id(), err.Error())
+	}
+
+	slog.InfoContext(ctx, "Pruning nodes after MKE uninstall")
+	if err := mkePruneAfterInstall(ctx, mhs); err != nil {
+		slog.ErrorContext(ctx, fmt.Sprintf("system prune after uninstall failed: %s", err.Error()))
+	}
+
+	slog.InfoContext(ctx, "MKE3 Uninstall completed")
+
 	return nil
 }
 

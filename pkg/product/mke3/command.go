@@ -32,7 +32,8 @@ func (c *MKE3) CommandBuild(ctx context.Context, cmd *action.Command) error {
 		p := stepped.NewSteppedPhase(CommandPhaseDiscover, rs, ds, []string{dependency.EventKeyActivated})
 		p.Steps().Add(
 			&discoverStep{
-				id: c.Name(),
+				baseStep: bs,
+				id:       c.Name(),
 			},
 		)
 		cmd.Phases.Add(p)
@@ -41,7 +42,8 @@ func (c *MKE3) CommandBuild(ctx context.Context, cmd *action.Command) error {
 		p := stepped.NewSteppedPhase(CommandPhaseApply, rs, ds, []string{dependency.EventKeyActivated})
 		p.Steps().Merge(stepped.Steps{
 			&discoverStep{
-				id: c.Name(),
+				baseStep: bs,
+				id:       c.Name(),
 			},
 			&prepareNodesStep{
 				id: c.Name(),
@@ -71,7 +73,8 @@ func (c *MKE3) CommandBuild(ctx context.Context, cmd *action.Command) error {
 			pd := stepped.NewSteppedPhase(CommandPhaseDiscover, rs, ds, []string{dependency.EventKeyActivated})
 			pd.Steps().Add(
 				&discoverStep{
-					id: c.Name(),
+					baseStep: bs,
+					id:       c.Name(),
 				},
 			)
 			cmd.Phases.Add(pd)
@@ -80,7 +83,8 @@ func (c *MKE3) CommandBuild(ctx context.Context, cmd *action.Command) error {
 		pr := stepped.NewSteppedPhase(CommandPhaseReset, rs, ds, []string{dependency.EventKeyDeActivated})
 		pr.Steps().Merge(stepped.Steps{
 			&uninstallMKEStep{
-				id: c.Name(),
+				baseStep: bs,
+				id:       c.Name(),
 			},
 		})
 		cmd.Phases.Add(pr)

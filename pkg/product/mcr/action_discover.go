@@ -40,7 +40,7 @@ func (s *discoverStep) Run(ctx context.Context) error {
 		if s.failOnError {
 			return fmt.Errorf("docker info update failed: %s", err.Error())
 		}
-		slog.WarnContext(ctx, "At least one host was missing MCR installation")
+		slog.InfoContext(ctx, fmt.Sprintf("At least one host was missing MCR installation: %s", err.Error()))
 	}
 
 	slog.InfoContext(ctx, "MCR discovery succeeded")

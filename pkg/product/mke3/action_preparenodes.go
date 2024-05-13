@@ -7,6 +7,7 @@ import (
 )
 
 type prepareNodesStep struct {
+	baseStep
 	id string
 }
 

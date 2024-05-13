@@ -38,8 +38,6 @@ func NewDockerExec(executor func(ctx context.Context, cmd string, inr io.Reader,
 
 type DockerExec struct {
 	executor func(ctx context.Context, cmd string, inr io.Reader, options RunOptions) (string, string, error)
-
-	di dockertypessystem.Info
 }
 
 func (de DockerExec) dockerCommand(ctx context.Context, args []string, opts RunOptions) (string, string, error) {
@@ -86,22 +84,22 @@ func (de DockerExec) Version(ctx context.Context) (map[string]dockertypes.Versio
 
 // Info retrieve the Docker VInfo from the remote server.
 func (de DockerExec) Info(ctx context.Context) (dockertypessystem.Info, error) {
-	if de.di.ID == "" {
-		o, e, eerr := de.dockerCommand(ctx, []string{"info", "--format=json"}, RunOptions{})
-		if eerr != nil {
-			return de.di, fmt.Errorf("%w; %s : %s", ErrDockerExecuteError, eerr, e)
-		}
+	var di dockertypessystem.Info
 
-		if len(o) == 0 {
-			return de.di, fmt.Errorf("%w: no info retrieved: `%s` / `%s`", ErrDockerExecuteError, o, e)
-		}
-
-		if err := json.Unmarshal([]byte(o), &de.di); err != nil {
-			return de.di, fmt.Errorf("%w; unmarshal error %s `%s`", ErrDockerExecuteError, err, o)
-		}
+	o, e, eerr := de.dockerCommand(ctx, []string{"info", "--format=json"}, RunOptions{})
+	if eerr != nil {
+		return di, fmt.Errorf("%w; %s : %s", ErrDockerExecuteError, eerr, e)
 	}
 
-	return de.di, nil
+	if len(o) == 0 {
+		return di, fmt.Errorf("%w: no info retrieved: `%s` / `%s`", ErrDockerExecuteError, o, e)
+	}
+
+	if err := json.Unmarshal([]byte(o), &di); err != nil {
+		return di, fmt.Errorf("%w; unmarshal error %s `%s`", ErrDockerExecuteError, err, o)
+	}
+
+	return di, nil
 }
 
 // ImagePull
@@ -163,8 +161,6 @@ func (de DockerExec) SwarmInit(ctx context.Context, r dockertypesswarm.InitReque
 	if err != nil {
 		return fmt.Errorf("swarm init failed: %w :: %s", err, e)
 	}
-
-	de.di = dockertypessystem.Info{}
 
 	return nil
 }
@@ -228,8 +224,6 @@ func (de DockerExec) SwarmJoin(ctx context.Context, r dockertypesswarm.JoinReque
 		return fmt.Errorf("swarm join fail: %s :: %s = %+v", err.Error(), e, r)
 	}
 
-	de.di = dockertypessystem.Info{}
-
 	return nil
 }
 
@@ -245,8 +239,6 @@ func (de DockerExec) SwarmLeave(ctx context.Context, force bool) error {
 	if err != nil {
 		return fmt.Errorf("swarm leave fail: %s :: %s", err.Error(), e)
 	}
-
-	de.di = dockertypessystem.Info{}
 
 	return nil
 }

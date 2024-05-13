@@ -87,7 +87,7 @@ func Test_MatchRequirements_ShouldFail(t *testing.T) {
 
 func Test_MatchRequirements_Empty(t *testing.T) {
 	ctx := context.Background()
-	r := mock.Requirement("mock", "", nil)              // only needed as an argument. fds do all of the work
+	r := mock.Requirement("mock", "", nil)     // only needed as an argument. fds do all of the work
 	fds := []dependency.ProvidesDependencies{} // empty list of handlers/fullfillers
 
 	_, err := dependency.MatchRequirementDependency(ctx, r, fds)

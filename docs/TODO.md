@@ -4,6 +4,10 @@
 
 - [ ] (log-sanitize) Sanitize output to prevent logging of sensitive information. Probably components should be able to add sensitive values to a list as they run
 
+## cli 
+
+- [X] (allow-empty-project) we should be able to run some cli commands without a project/config, such as version.
+
 ## Action 
 
 - [X] (phase-overwrite-warn) Phase accessors should probably warn when an existing phase is dropped because a new one with the same name is added.
@@ -26,6 +30,8 @@
 - [ ] (flexible-host) Allow Hosts to have component specific configuration/functionalily so that we can configure host specific things like docker-sudo, mcr-daemon-config. Maybe a plugin system, or allow multiple handlers per host?
 - [ ] (host-hooks) Allow host hooks. Perhaps rely on action.Events or action.Phases as markers.
 - [ ] (host-as-a-component) should we stop treating host components separately from product components.
+- [ ] (log-command-identifier) Log entries for a command should have some identifier to show that they are connected so that you can correlate the various output lines to one execution.
+
 
 ## Component
 

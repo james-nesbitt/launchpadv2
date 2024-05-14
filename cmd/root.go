@@ -12,6 +12,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/Mirantis/launchpad/pkg/component"
 	"github.com/Mirantis/launchpad/pkg/config"
 	"github.com/Mirantis/launchpad/pkg/project"
 
@@ -45,7 +46,7 @@ func Execute() {
 		Long:  `Install various Mirantis products.`,
 	}
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.launchpad.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file path")
 	rootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "increase logging verbosity")
 
 	// This should early pre-populate the above flags, which we will use to build more commands. This will
@@ -57,7 +58,12 @@ func Execute() {
 	}
 
 	slog.DebugContext(rootCmd.Context(), "building project for cli")
-	if err := boostrapBuildProject(rootCmd.Context()); err != nil {
+	if cfgFile == "" {
+		slog.Warn("No project config specified. Using an empty project")
+		cl = &project.Project{
+			Components: component.Components{},
+		}
+	} else if err := boostrapBuildProject(rootCmd.Context()); err != nil {
 		slog.Error("failed to build project", slog.Any("error", err))
 		os.Exit(1)
 	}
@@ -105,19 +111,27 @@ func boostrapBuildProject(ctx context.Context) error {
 }
 
 func bootstrapLaunchpadCmd(cmd *cobra.Command) error {
-
 	cmd.AddGroup(&cobra.Group{
-		ID:    "project",
-		Title: "Project",
+		ID:    "about",
+		Title: "About Launchpad",
 	})
 
-	cmd.AddCommand(statusCmd)
-	cmd.AddCommand(applyCmd)
-	cmd.AddCommand(resetCmd)
+	cmd.AddCommand(versionCmd)
 
 	if cl == nil {
 		slog.WarnContext(cmd.Context(), "no project object was built")
+	} else if len(cl.Components) == 0 {
+		slog.WarnContext(cmd.Context(), "empty project object was built, so no project/component commands are available.")
 	} else {
+		cmd.AddGroup(&cobra.Group{
+			ID:    "project",
+			Title: "Project",
+		})
+
+		cmd.AddCommand(statusCmd)
+		cmd.AddCommand(applyCmd)
+		cmd.AddCommand(resetCmd)
+
 		slog.DebugContext(cmd.Context(), "building cli commands from project")
 
 		for _, c := range cl.Components {

@@ -22,17 +22,8 @@ type Config struct {
 	RegistryUserName string `yaml:"register_username"`
 	RegistryPassword string `yaml:"register_password"`
 
-	AdminUsername string `yaml:"adminUsername,omitempty"`
-	AdminPassword string `yaml:"adminPassword,omitempty"`
-	San           string `yaml:"san,omitempty"`
-
-	SwarmOnly    bool         `yaml:"swarm_only"`
-	InstallFlags common.Flags `yaml:"installFlags,omitempty,flow"`
-	UpgradeFlags common.Flags `yaml:"upgradeFlags,omitempty,flow"`
-
-	ConfigFile      string `yaml:"configFile,omitempty" validate:"omitempty,file"`
-	ConfigData      string `yaml:"configData,omitempty"`
-	LicenseFilePath string `yaml:"licenseFilePath,omitempty" validate:"omitempty,file"`
+	Install ConfigInstall `yaml:"install"`
+	Upgrade ConfigUpgrade `yaml:"upgrade"`
 
 	CACertPath string `yaml:"caCertPath,omitempty" validate:"omitempty,file"`
 	CertPath   string `yaml:"certPath,omitempty" validate:"omitempty,file"`
@@ -44,6 +35,23 @@ type Config struct {
 	NodesHealthRetry uint `yaml:"nodesHealthRetry,omitempty" default:"0"`
 }
 
+type ConfigInstall struct {
+	AdminUsername string `yaml:"adminUsername,omitempty"`
+	AdminPassword string `yaml:"adminPassword,omitempty"`
+	San           string `yaml:"san,omitempty"`
+
+	SwarmOnly bool         `yaml:"swarm_only"`
+	Flags     common.Flags `yaml:"flags,omitempty,flow"`
+
+	ConfigFile      string `yaml:"configFile,omitempty" validate:"omitempty,file"`
+	ConfigData      string `yaml:"configData,omitempty"`
+	LicenseFilePath string `yaml:"licenseFilePath,omitempty" validate:"omitempty,file"`
+}
+
+type ConfigUpgrade struct {
+	Flags common.Flags `yaml:"flags,omitempty,flow"`
+}
+
 // Prepulling images is only required if not from the main repo
 func (c Config) imagePrepullRequired() bool {
 	return c.ImageRepo != MKEProductImageRepo
@@ -51,7 +59,7 @@ func (c Config) imagePrepullRequired() bool {
 
 // SwarmOnly return if this instance will avoid installing any kubernetes components
 func (c Config) isSwarmOnly() bool {
-	return c.SwarmOnly
+	return c.Install.SwarmOnly
 }
 
 // ImagePullOptions create docker image pull options for any image pulls that are needed
@@ -66,24 +74,26 @@ func (c Config) bootstrapperImage() string {
 func (c Config) bootStrapperInstallArgs() []string {
 	ss := []string{
 		"install",
-		fmt.Sprintf("--admin-username='%s'", c.AdminUsername),
-		fmt.Sprintf("--admin-password='%s'", c.AdminPassword),
+		fmt.Sprintf("--admin-username='%s'", c.Install.AdminUsername),
+		fmt.Sprintf("--admin-password='%s'", c.Install.AdminPassword),
 	}
 
 	if c.Pull != "" {
 		ss = append(ss, fmt.Sprintf("--pull='%s'", c.Pull))
 	}
-	if c.San != "" {
-		ss = append(ss, fmt.Sprintf("--san='%s'", c.San))
+	if c.Install.San != "" {
+		ss = append(ss, fmt.Sprintf("--san='%s'", c.Install.San))
 	}
-	if c.SwarmOnly {
+	if c.Install.SwarmOnly {
 		ss = append(ss, "--swarm-only")
 	}
+
 	if c.RegistryUserName != "" {
 		ss = append(ss, fmt.Sprintf("--registry-username='%s'", c.RegistryUserName))
 		ss = append(ss, fmt.Sprintf("--registry-password='%s'", c.RegistryPassword))
 	}
 
+	ss = append(ss, c.Install.Flags...)
 	return ss
 }
 
@@ -97,6 +107,8 @@ func (c Config) bootStrapperUpgradeArgs() []string {
 	ss := []string{
 		"upgrade",
 	}
+
+	ss = append(ss, c.Upgrade.Flags...)
 
 	return ss
 }

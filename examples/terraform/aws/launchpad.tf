@@ -169,15 +169,17 @@ spec:
     mke3:
       version: ${var.launchpad.mke_version}
       imageRepo: docker.io/mirantis
-      adminUsername: "${var.launchpad.mke_connect.username}
-      adminPassword: "${var.launchpad.mke_connect.password}"
-      san: "${local.MKE_URL}"
-      installFlags: 
-      - "--default-node-orchestrator=kubernetes"
-      - "--nodeport-range=32768-35535"
-      upgradeFlags:
-      - "--force-recent-backup"
-      - "--force-minimums"
+      install:
+        adminUsername: "${var.launchpad.mke_connect.username}"
+        adminPassword: "${var.launchpad.mke_connect.password}"
+        san: "${local.MKE_URL}"
+        flags: 
+        - "--default-node-orchestrator=kubernetes"
+        - "--nodeport-range=32768-35535"
+      upgrade:
+        flags:
+        - "--force-recent-backup"
+        - "--force-minimums"
       prune: true
 %{if local.has_msr}
     msr2:

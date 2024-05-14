@@ -7,6 +7,7 @@ import (
 )
 
 type downloadClientBundleStep struct {
+	baseStep
 	id string
 }
 

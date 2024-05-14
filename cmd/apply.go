@@ -13,24 +13,24 @@ import (
 
 // applyCmd represents the apply command.
 var applyCmd = &cobra.Command{
-	GroupID: "cluster",
-	Use:     "cluster:apply",
-	Short:   "Apply any component installs on your cluster",
+	GroupID: "project",
+	Use:     "project:apply",
+	Short:   "Apply any component installs on your project",
 	Long:    ``,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := cmd.Context()
 
 		sc, err := cl.Command(ctx, action.CommandKeyApply)
 		if err != nil {
-			return fmt.Errorf("cluster command build error: %s", err.Error())
+			return fmt.Errorf("project command build error: %s", err.Error())
 		}
 
 		if err := sc.Validate(ctx); err != nil {
-			return fmt.Errorf("cluster command [%s] validation failed: %s", sc.Key, err.Error())
+			return fmt.Errorf("project command [%s] validation failed: %s", sc.Key, err.Error())
 		}
 
 		if err := sc.Run(ctx); err != nil {
-			return fmt.Errorf("cluster command [%s] execution failed: %s", sc.Key, err.Error())
+			return fmt.Errorf("project command [%s] execution failed: %s", sc.Key, err.Error())
 		}
 
 		return nil

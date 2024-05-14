@@ -1,4 +1,4 @@
-package cluster
+package project
 
 import (
 	"context"
@@ -12,61 +12,61 @@ import (
 )
 
 var (
-	ErrClusterValidationFailed   = errors.New("cluster validation failed")
-	ErrClusterDependenciesNotMet = errors.New("cluster dependencies not met")
+	ErrProjectValidationFailed   = errors.New("project validation failed")
+	ErrProjectDependenciesNotMet = errors.New("project dependencies not met")
 )
 
-// Cluster function handler for the complete cluster.
-type Cluster struct {
+// Project function handler for the complete project.
+type Project struct {
 	Components component.Components
 }
 
-// Validate the cluster configuration.
-func (cl *Cluster) Validate(ctx context.Context) error {
+// Validate the project configuration.
+func (p *Project) Validate(ctx context.Context) error {
 	cerrs := []error{}
 
 	// Dependency checking
-	_, _, merr := cl.matchRequirements(ctx)
+	_, _, merr := p.matchRequirements(ctx)
 	if merr != nil {
-		return fmt.Errorf("cluster validate failed on matching requirements: %w", merr)
+		return fmt.Errorf("project validate failed on matching requirements: %w", merr)
 	}
 
 	// Validate components
 	verrs := []error{}
-	for _, c := range cl.Components {
+	for _, c := range p.Components {
 		if err := c.Validate(ctx); err != nil {
 			slog.WarnContext(ctx, "Component validation failure", slog.Any("component", c))
 			verrs = append(verrs, err)
 		}
 	}
 	if len(verrs) > 0 {
-		cerrs = append(cerrs, fmt.Errorf("%w: %s", ErrClusterValidationFailed, errors.Join(verrs...).Error()))
+		cerrs = append(cerrs, fmt.Errorf("%w: %s", ErrProjectValidationFailed, errors.Join(verrs...).Error()))
 	}
 
 	if len(cerrs) > 0 {
-		return fmt.Errorf("%w; component validation errors: \n %s", ErrClusterValidationFailed, errors.Join(cerrs...).Error())
+		return fmt.Errorf("%w; component validation errors: \n %s", ErrProjectValidationFailed, errors.Join(cerrs...).Error())
 	}
 
 	return nil
 }
 
-// Command build a command using the dependencies and components from the cluster.
-func (cl *Cluster) Command(ctx context.Context, key string) (*action.Command, error) {
+// Command build a command using the dependencies and components from the project.
+func (p *Project) Command(ctx context.Context, key string) (*action.Command, error) {
 	slog.InfoContext(ctx, fmt.Sprintf("%s Command build", key))
 
 	cmd := action.NewEmptyCommand(key)
 
 	// Dependency checking
-	_, ds, merr := cl.matchRequirements(ctx)
+	_, ds, merr := p.matchRequirements(ctx)
 	if merr != nil {
-		return cmd, fmt.Errorf("cluster validate failed on matching requirements: %w", merr)
+		return cmd, fmt.Errorf("project validate failed on matching requirements: %w", merr)
 	}
 
-	// add all cluster dependencies to the command
+	// add all project dependencies to the command
 	cmd.Dependencies.Merge(ds)
 
 	errs := []error{}
-	for _, c := range cl.Components {
+	for _, c := range p.Components {
 		cmdb, ok := c.(action.CommandHandler)
 		if !ok {
 			slog.WarnContext(ctx, "component is not a command builder", slog.Any("component", c))
@@ -87,15 +87,15 @@ func (cl *Cluster) Command(ctx context.Context, key string) (*action.Command, er
 	return cmd, nil
 }
 
-// match all requirements from cluster components with dependency fullfillers.
+// match all requirements from project components with dependency fullfillers.
 //
 //	This allows the list of requirements to be analyzed to make sure that
-//	all of the cluster dependencies are met.
-func (cl *Cluster) matchRequirements(ctx context.Context) (dependency.Requirements, dependency.Dependencies, error) {
+//	all of the project dependencies are met.
+func (p *Project) matchRequirements(ctx context.Context) (dependency.Requirements, dependency.Dependencies, error) {
 	// Collect all the things that provide dependencies
 	rds := []dependency.RequiresDependencies{}
 	pds := []dependency.ProvidesDependencies{}
-	for _, c := range cl.Components {
+	for _, c := range p.Components {
 		if rd, ok := c.(dependency.RequiresDependencies); ok {
 			slog.DebugContext(ctx, fmt.Sprintf("including component '%s' as a dependency requirer", c.Name()), slog.Any("component", c))
 			rds = append(rds, rd)
@@ -106,18 +106,18 @@ func (cl *Cluster) matchRequirements(ctx context.Context) (dependency.Requiremen
 		}
 	}
 
-	slog.DebugContext(ctx, "Cluster: start component dependency matching")
+	slog.DebugContext(ctx, "Project: start component dependency matching")
 	rs, ds, merr := dependency.MatchRequirements(ctx, rds, pds)
-	slog.DebugContext(ctx, "Cluster: finished component dependency matching")
+	slog.DebugContext(ctx, "Project: finished component dependency matching")
 	if merr != nil {
-		return rs, ds, fmt.Errorf("cluster dependency matching failed: %s", merr.Error())
+		return rs, ds, fmt.Errorf("project dependency matching failed: %s", merr.Error())
 	}
 
 	if urs := rs.UnMatched(ctx); len(urs) > 0 {
 		for _, ur := range urs {
-			slog.ErrorContext(ctx, "UnMatched cluster dependency requirement", slog.Any("requirement", ur))
+			slog.ErrorContext(ctx, "UnMatched project dependency requirement", slog.Any("requirement", ur))
 		}
-		return rs, ds, fmt.Errorf("%w; Unmet dependencies: %+v", ErrClusterDependenciesNotMet, urs)
+		return rs, ds, fmt.Errorf("%w; Unmet dependencies: %+v", ErrProjectDependenciesNotMet, urs)
 	}
 	return rs, ds, nil
 }

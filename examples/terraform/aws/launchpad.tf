@@ -52,7 +52,7 @@ locals {
   // standard MCR/MKE/MSR firewall rules [here we just leave it open until we can figure this out]
   launchpad_securitygroups = {
     "permissive" = {
-      description = "Common SG for all cluster machines"
+      description = "Common SG for all project machines"
       nodegroups  = [for n, ng in var.nodegroups : n]
       ingress_ipv4 = [
         {
@@ -128,11 +128,11 @@ locals {
 locals {
   launchpad_yaml_20 = <<-EOT
 apiVersion: launchpad.mirantis.com/v2.0
-kind: cluster
+kind: project
 metadata:
   name: ${var.name}
 spec:
-  cluster:
+  project:
     prune: false
   hosts:
 %{~for h in local.launchpad_hosts_ssh}

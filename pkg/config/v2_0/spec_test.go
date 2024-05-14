@@ -20,13 +20,13 @@ import (
 	_ "github.com/Mirantis/launchpad/pkg/product/msr2"
 	_ "github.com/Mirantis/launchpad/pkg/product/msr4"
 
-	"github.com/Mirantis/launchpad/pkg/cluster"
 	v2_0 "github.com/Mirantis/launchpad/pkg/config/v2_0"
+	"github.com/Mirantis/launchpad/pkg/project"
 	"github.com/Mirantis/launchpad/pkg/util/decode"
 )
 
 func Test_DecodeSanity(t *testing.T) {
-	cl := cluster.Cluster{}
+	cl := project.Project{}
 	sy := `
 hosts:
   dummy:
@@ -47,12 +47,12 @@ products:
 	}
 
 	if err := cl.Validate(context.Background()); err != nil {
-		t.Errorf("2.0 Spec decode cluster validate failed: %s", err.Error())
+		t.Errorf("2.0 Spec decode project validate failed: %s", err.Error())
 	}
 }
 
 func TestConfig_CurrentGen(t *testing.T) {
-	cl := cluster.Cluster{}
+	cl := project.Project{}
 	cy := `
 hosts:
   dummy-manager:
@@ -81,7 +81,7 @@ products:
 	}
 
 	if err := cl.Validate(context.Background()); err != nil {
-		t.Errorf("2.0 Spec decode cluster validate failed: %s", err.Error())
+		t.Errorf("2.0 Spec decode project validate failed: %s", err.Error())
 	}
 
 	if len(cl.Components) != 4 { // 3 products and the hosts component
@@ -97,7 +97,7 @@ products:
 }
 
 func TestConfig_NextGen(t *testing.T) {
-	cl := cluster.Cluster{}
+	cl := project.Project{}
 	cy := `
 hosts:
   c1:

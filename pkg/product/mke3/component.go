@@ -44,7 +44,7 @@ func (_ MKE3) Debug() interface{} {
 	return nil
 }
 
-// Validate that the cluster meets the needs of the Product.
+// Validate that the project meets the needs of the Product.
 func (_ MKE3) Validate(context.Context) error {
 	return nil
 }

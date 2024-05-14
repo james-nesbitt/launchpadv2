@@ -31,20 +31,20 @@ func Test_NextGenApplyCommand(t *testing.T) {
 	}
 
 	if valerr := cl.Validate(ctx); valerr != nil {
-		t.Errorf("cluster validation error: %s", valerr.Error())
+		t.Errorf("project validation error: %s", valerr.Error())
 	}
 
 	cmd, err := cl.Command(ctx, action.CommandKeyApply)
 	if err != nil {
-		t.Fatalf("cluster command build error: %s", err.Error())
+		t.Fatalf("project command build error: %s", err.Error())
 	}
 
 	if err := cmd.Validate(ctx); err != nil {
-		t.Errorf("cluster command [%s] validation failed: %s", cmd.Key, err.Error())
+		t.Errorf("project command [%s] validation failed: %s", cmd.Key, err.Error())
 	}
 
 	if err := cmd.Run(ctx); err != nil {
-		t.Errorf("cluster command [%s] execution failed: %s", cmd.Key, err.Error())
+		t.Errorf("project command [%s] execution failed: %s", cmd.Key, err.Error())
 	}
 
 }

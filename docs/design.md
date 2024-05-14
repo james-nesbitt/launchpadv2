@@ -10,7 +10,7 @@ a Launchpad functional module which can participate in Launchpad by:
 2. Provide/Require dependencies to/from other components
 3. Provide Implementation specific code
 
-Components are core functionality, collected into a cluster and used 
+Components are core functionality, collected into a project and used 
 for building all other functionality.
 
 Components work by implementing various Launchpad interfaces, indicating
@@ -44,10 +44,10 @@ how the functionality is provided.  For example, a Component may rely
 on Kubernetes, so it advertises what Kubernetes it needs by providing a
 Requirement; then another component will see the Requirement and fullfill
 it if it can.  Kubernetes could be provided by another Component which 
-discovers a Kubernetes cluster, or by one who will create a Kubernetes 
-cluster.
+discovers a Kubernetes project, or by one who will create a Kubernetes 
+project.
 
-### Cluster 
+### Project 
 
 A set of Components, from which Dependencies are pulled, and Commands 
 are built.

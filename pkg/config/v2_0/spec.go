@@ -31,11 +31,11 @@ package v20
 * ------------------------------
 *
 * NOTES:
-*  - hosts are turned into a HostComponent in the cluster
+*  - hosts are turned into a HostComponent in the project
 *
  */
 
-// Spec defines cluster spec.
+// Spec defines projec spec.
 type Spec struct {
 	Hosts    SpecHosts    `yaml:"hosts" validate:"required,min=1"`
 	Products SpecProducts `yaml:"products" validate:"required,min=1"`

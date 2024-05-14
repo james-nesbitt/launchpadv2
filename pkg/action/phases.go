@@ -9,7 +9,7 @@ import (
 
 const (
 	// Command phase which is used to initialize any components, usually requireing no
-	//   interactions with a cluster
+	//   interactions with a project
 	CommandPhaseInitialize = "initialize"
 	// Command phase which is used to discover state.
 	CommandPhaseDiscover = "discover"

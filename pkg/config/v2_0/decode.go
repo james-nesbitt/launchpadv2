@@ -4,10 +4,10 @@ import (
 	"log/slog"
 	"strings"
 
-	"github.com/Mirantis/launchpad/pkg/cluster"
 	"github.com/Mirantis/launchpad/pkg/component"
 	"github.com/Mirantis/launchpad/pkg/config"
 	"github.com/Mirantis/launchpad/pkg/host"
+	"github.com/Mirantis/launchpad/pkg/project"
 )
 
 const (
@@ -18,8 +18,8 @@ func init() {
 	config.RegisterSpecDecoder(ID, Decode)
 }
 
-// Decode a cluster from the spec.
-func Decode(cl *cluster.Cluster, d func(interface{}) error) error {
+// Decode a project from the spec.
+func Decode(cl *project.Project, d func(interface{}) error) error {
 	var cs Spec
 
 	if err := d(&cs); err != nil {

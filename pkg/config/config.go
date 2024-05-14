@@ -5,25 +5,25 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/Mirantis/launchpad/pkg/cluster"
+	"github.com/Mirantis/launchpad/pkg/project"
 )
 
 // ConfigBase interpretation for what type of config is being handled.
 type ConfigBase struct {
 	APIVersion string     `yaml:"apiVersion" validate:"eq=launchpad.mirantis.com/v2.0"`
-	Kind       string     `yaml:"kind" validate:"eq=cluster"`
+	Kind       string     `yaml:"kind" validate:"eq=project"`
 	Metadata   ConfigMeta `yaml:"metadata"`
 	Spec       yaml.Node  `yaml:"spec"`
 }
 
-// ConfigMeta defines cluster metadata.
+// ConfigMeta defines project metadata.
 type ConfigMeta struct {
 	Name string `yaml:"name" validate:"required"`
 }
 
-// ConfigFromYamllBytes convert bytes of yaml to a cluster object.
-func ConfigFromYamllBytes(b []byte) (cluster.Cluster, error) {
-	var cl cluster.Cluster
+// ConfigFromYamllBytes convert bytes of yaml to a project object.
+func ConfigFromYamllBytes(b []byte) (project.Project, error) {
+	var cl project.Project
 	var cb ConfigBase
 
 	if err := yaml.Unmarshal(b, &cb); err != nil {
@@ -31,7 +31,7 @@ func ConfigFromYamllBytes(b []byte) (cluster.Cluster, error) {
 	}
 
 	if err := DecodeSpec(cb.APIVersion, &cl, cb.Spec.Decode); err != nil {
-		return cl, fmt.Errorf("cluster spec decoding failed: %w", err)
+		return cl, fmt.Errorf("project spec decoding failed: %w", err)
 	}
 
 	return cl, nil

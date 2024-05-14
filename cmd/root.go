@@ -12,8 +12,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/Mirantis/launchpad/pkg/cluster"
 	"github.com/Mirantis/launchpad/pkg/config"
+	"github.com/Mirantis/launchpad/pkg/project"
 
 	// Register v2 spec handler.
 	_ "github.com/Mirantis/launchpad/pkg/config/v2_0"
@@ -35,7 +35,7 @@ import (
 var (
 	debug   bool
 	cfgFile string
-	cl      *cluster.Cluster
+	cl      *project.Project
 )
 
 func Execute() {
@@ -57,8 +57,8 @@ func Execute() {
 	}
 
 	slog.DebugContext(rootCmd.Context(), "building project for cli")
-	if err := boostrapBuildCluster(rootCmd.Context()); err != nil {
-		slog.Error("failed to build cluster", slog.Any("error", err))
+	if err := boostrapBuildProject(rootCmd.Context()); err != nil {
+		slog.Error("failed to build project", slog.Any("error", err))
 		os.Exit(1)
 	}
 	slog.DebugContext(rootCmd.Context(), "finished building project for cli")
@@ -75,7 +75,7 @@ func Execute() {
 	}
 }
 
-func boostrapBuildCluster(ctx context.Context) error {
+func boostrapBuildProject(ctx context.Context) error {
 	if cfgFile == "" {
 		return fmt.Errorf("no config file defined")
 	}
@@ -98,7 +98,7 @@ func boostrapBuildCluster(ctx context.Context) error {
 	cl = &tcl
 
 	if valerr := cl.Validate(ctx); valerr != nil {
-		return fmt.Errorf("cluster validation error: %s", valerr.Error())
+		return fmt.Errorf("project validation error: %s", valerr.Error())
 	}
 
 	return nil
@@ -107,8 +107,8 @@ func boostrapBuildCluster(ctx context.Context) error {
 func bootstrapLaunchpadCmd(cmd *cobra.Command) error {
 
 	cmd.AddGroup(&cobra.Group{
-		ID:    "cluster",
-		Title: "Cluster",
+		ID:    "project",
+		Title: "Project",
 	})
 
 	cmd.AddCommand(statusCmd)
@@ -116,9 +116,9 @@ func bootstrapLaunchpadCmd(cmd *cobra.Command) error {
 	cmd.AddCommand(resetCmd)
 
 	if cl == nil {
-		slog.WarnContext(cmd.Context(), "no cluster object was built")
+		slog.WarnContext(cmd.Context(), "no project object was built")
 	} else {
-		slog.DebugContext(cmd.Context(), "building cli commands from cluster")
+		slog.DebugContext(cmd.Context(), "building cli commands from project")
 
 		for _, c := range cl.Components {
 			if ccb, ok := c.(CliBuilder); ok {

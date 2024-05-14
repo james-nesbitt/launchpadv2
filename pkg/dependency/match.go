@@ -15,32 +15,32 @@ func MatchRequirements(ctx context.Context, rds []RequiresDependencies, pds []Pr
 	rs := Requirements{}
 	ds := Dependencies{}
 
-	slog.DebugContext(ctx, "Cluster: start component dependency matching")
+	slog.DebugContext(ctx, "Project: start component dependency matching")
 	for _, rd := range rds {
-		slog.DebugContext(ctx, "cluster: matching for dependency requirer", slog.Any("requirer", rd))
+		slog.DebugContext(ctx, "project: matching for dependency requirer", slog.Any("requirer", rd))
 		for _, r := range rd.RequiresDependencies(ctx) {
 			if d := r.Matched(ctx); d != nil {
-				slog.DebugContext(ctx, "cluster: requirement already matched", slog.Any("cdependency", d), slog.Any("requirement", r))
+				slog.DebugContext(ctx, "project: requirement already matched", slog.Any("cdependency", d), slog.Any("requirement", r))
 				continue
 			}
 
 			rs = append(rs, r)
 
 			if d, err := MatchRequirementDependency(ctx, r, pds); err != nil {
-				slog.WarnContext(ctx, fmt.Sprintf("cluster: requirement '%s' not matched: %s", r.Id(), err.Error()), slog.Any("requirement", r), slog.Any("error", err))
+				slog.WarnContext(ctx, fmt.Sprintf("project: requirement '%s' not matched: %s", r.Id(), err.Error()), slog.Any("requirement", r), slog.Any("error", err))
 			} else if d == nil { // this should never happen, but nil err sometimes means no match
-				slog.WarnContext(ctx, fmt.Sprintf("cluster: requirement '%s' not matched (empty)", r.Id()), slog.Any("requirement", r), slog.Any("error", err))
+				slog.WarnContext(ctx, fmt.Sprintf("project: requirement '%s' not matched (empty)", r.Id()), slog.Any("requirement", r), slog.Any("error", err))
 			} else if err := r.Match(d); err != nil {
-				slog.WarnContext(ctx, fmt.Sprintf("cluster: component requirement dependency match error %s->%s : %s", r.Id(), d.Id(), err.Error()), slog.Any("requirement", r), slog.Any("dependency", d), slog.Any("error", err))
+				slog.WarnContext(ctx, fmt.Sprintf("project: component requirement dependency match error %s->%s : %s", r.Id(), d.Id(), err.Error()), slog.Any("requirement", r), slog.Any("dependency", d), slog.Any("error", err))
 			} else if d := r.Matched(ctx); d == nil {
-				slog.WarnContext(ctx, fmt.Sprintf("cluster: component requirement dependency match failed (didn't stick) %s", r.Id()), slog.Any("requirement", r), slog.Any("dependency", d))
+				slog.WarnContext(ctx, fmt.Sprintf("project: component requirement dependency match failed (didn't stick) %s", r.Id()), slog.Any("requirement", r), slog.Any("dependency", d))
 			} else {
-				slog.DebugContext(ctx, "cluster: component requirement dependency matched", slog.Any("requirement", r), slog.Any("dependency", d))
+				slog.DebugContext(ctx, "project: component requirement dependency matched", slog.Any("requirement", r), slog.Any("dependency", d))
 				ds = append(ds, d)
 			}
 		}
 	}
-	slog.DebugContext(ctx, "Cluster: start component dependency matching")
+	slog.DebugContext(ctx, "Project: start component dependency matching")
 	return rs, ds, nil
 }
 

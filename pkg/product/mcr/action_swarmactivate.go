@@ -31,7 +31,7 @@ func (s *swarmActivateStep) Run(ctx context.Context) error {
 		return fmt.Errorf("could not retrieve managers to join the swarm: %s", mhsgerr.Error())
 	}
 
-	// 1. Find a swarm cluster OR Create a new one
+	// 1. Find a swarm project OR Create a new one
 
 	var l *dockerhost.Host
 

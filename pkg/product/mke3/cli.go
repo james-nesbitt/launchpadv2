@@ -122,7 +122,7 @@ func (c MKE3) CliBuild(cmd *cobra.Command) error {
 			ctx := cmd.Context()
 			slog.InfoContext(ctx, "MKE3 Uninstall starting. Looking for a manager to operate on")
 
-			slog.DebugContext(ctx, "discovering cluster (retrieving docker info)")
+			slog.DebugContext(ctx, "discovering project (retrieving docker info)")
 			mhs, gherr := c.GetManagerHosts(ctx)
 			if gherr != nil {
 				return fmt.Errorf("MCR has no hosts to discover: %s", gherr.Error())

@@ -63,7 +63,7 @@ func (c *MCR) Debug() interface{} {
 	}
 }
 
-// Validate that the cluster meets the needs of the Product.
+// Validate that the project meets the needs of the Product.
 func (c *MCR) Validate(ctx context.Context) error {
 	errs := []error{}
 

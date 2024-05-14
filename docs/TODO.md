@@ -13,10 +13,11 @@
 ## Dependency 
 
 - [ ] (unique-event-ids) Events and Event keys need to be unique, but the code is very reled about enforcing that. We should probably make the Unique part immutable and unique.
+- [ ] (dependency-selection-direction) Design a system that allows components to be more selective about which depenendcy they use to fullfill their needs. This matters more when there is more that one dependency fulfiller.
 
-## Cluster 
+## Project 
 
-- [ ] (rename) Rename to "project"
+- [X] (rename) Rename "cluster" to "project"
 - [ ] (allow-dep-match-fail) Allow dependency matching to fail, to allow separation of actions for things like the cli. This places the responsibility of Dependency matching on the user
 
 ## Host 
@@ -24,6 +25,7 @@
 - [x] (host-network-discover) Hosts need to be able to discover their networking (internal) so that we can activate swarm using the advertise address
 - [ ] (flexible-host) Allow Hosts to have component specific configuration/functionalily so that we can configure host specific things like docker-sudo, mcr-daemon-config. Maybe a plugin system, or allow multiple handlers per host?
 - [ ] (host-hooks) Allow host hooks. Perhaps rely on action.Events or action.Phases as markers.
+- [ ] (host-as-a-component) should we stop treating host components separately from product components.
 
 ## Component
 

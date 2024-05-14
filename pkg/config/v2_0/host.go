@@ -29,7 +29,7 @@ func (shs *SpecHosts) UnmarshalYAML(py *yaml.Node) error {
 	errs := []error{}
 
 	if len(shsc) == 0 {
-		errs = append(errs, fmt.Errorf("no hosts were found when decoding the cluster"))
+		errs = append(errs, fmt.Errorf("no hosts were found when decoding the project"))
 	}
 	for id, shn := range shsc {
 		pc := struct {

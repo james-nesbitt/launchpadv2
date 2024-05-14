@@ -14,28 +14,28 @@ import (
 
 // statusCmd represents the status command.
 var statusCmd = &cobra.Command{
-	GroupID: "cluster",
-	Use:     "cluster:status",
-	Short:   "Evaluate the component status for your cluster",
+	GroupID: "project",
+	Use:     "project:status",
+	Short:   "Evaluate the component status for your project",
 	Long:    ``,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 
 		if valerr := cl.Validate(ctx); valerr != nil {
-			return fmt.Errorf("cluster validation error: %s", valerr.Error())
+			return fmt.Errorf("project validation error: %s", valerr.Error())
 		}
 
 		sc, err := cl.Command(ctx, action.CommandKeyDiscover)
 		if err != nil {
-			return fmt.Errorf("cluster command build error: %s", err.Error())
+			return fmt.Errorf("project command build error: %s", err.Error())
 		}
 
 		if err := sc.Validate(ctx); err != nil {
-			return fmt.Errorf("cluster command [%s] validation failed: %s", sc.Key, err.Error())
+			return fmt.Errorf("project command [%s] validation failed: %s", sc.Key, err.Error())
 		}
 
 		if err := sc.Run(ctx); err != nil {
-			return fmt.Errorf("cluster command [%s] execution failed: %s", sc.Key, err.Error())
+			return fmt.Errorf("project command [%s] execution failed: %s", sc.Key, err.Error())
 		}
 
 		return nil

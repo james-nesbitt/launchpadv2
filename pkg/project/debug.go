@@ -1,12 +1,12 @@
-package cluster
+package project
 
 import (
 	"context"
 	"time"
 )
 
-// Debug the cluster.
-func (cl *Cluster) Debug(ctx context.Context) interface{} {
+// Debug the project.
+func (cl *Project) Debug(ctx context.Context) interface{} {
 	cld := map[string]interface{}{}
 
 	ctx, c := context.WithTimeout(context.Background(), time.Second*30)
@@ -18,7 +18,7 @@ func (cl *Cluster) Debug(ctx context.Context) interface{} {
 	if err := cl.Validate(ctx); err != nil {
 		cl_v = err.Error()
 	}
-	cld["cluster"] = struct {
+	cld["project"] = struct {
 		Valid string
 	}{
 		Valid: cl_v,

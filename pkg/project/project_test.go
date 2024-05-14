@@ -1,4 +1,4 @@
-package cluster_test
+package project_test
 
 import (
 	"context"
@@ -9,11 +9,11 @@ import (
 	"github.com/Mirantis/launchpad/pkg/dependency"
 	mockdependency "github.com/Mirantis/launchpad/pkg/dependency/mock"
 
-	"github.com/Mirantis/launchpad/pkg/cluster"
 	"github.com/Mirantis/launchpad/pkg/component"
+	"github.com/Mirantis/launchpad/pkg/project"
 )
 
-func Test_ClusterComponentValidation(t *testing.T) {
+func Test_ProjectComponentValidation(t *testing.T) {
 	ctx := context.Background()
 	e := errors.New("validation error")
 	cp := mockcomponent.NewComponent(
@@ -26,7 +26,7 @@ func Test_ClusterComponentValidation(t *testing.T) {
 		t.Errorf("Mock component was supposed to fail validation : %+v", cp)
 	}
 
-	cl := cluster.Cluster{
+	cl := project.Project{
 		Components: component.Components{
 			"mock": cp,
 		},
@@ -38,9 +38,9 @@ func Test_ClusterComponentValidation(t *testing.T) {
 
 }
 
-func Test_ClusterDependencyValidation(t *testing.T) {
+func Test_ProjectDependencyValidation(t *testing.T) {
 	ctx := context.Background()
-	cl := cluster.Cluster{
+	cl := project.Project{
 		Components: component.Components{
 			"one": mockcomponent.NewComponentWDependencies(
 				"one",
@@ -78,6 +78,6 @@ func Test_ClusterDependencyValidation(t *testing.T) {
 	}
 
 	if cl_d := cl.Debug(ctx); cl_d == nil {
-		t.Errorf("cluster debug was empty: %+v", cl_d)
+		t.Errorf("project debug was empty: %+v", cl_d)
 	}
 }

@@ -24,6 +24,13 @@ func NewHostsDependency(id string, describe string, factory func(context.Context
 	}
 }
 
+// HostDependencyFilterFactory factory function for returning a known set of hosts
+func HostDependencyFilterFactory(hs Hosts) func(context.Context) (Hosts, error) {
+	return func(_ context.Context) (Hosts, error) {
+		return hs, nil
+	}
+}
+
 type hostsDep struct {
 	id       string
 	describe string

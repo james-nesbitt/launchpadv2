@@ -1,8 +1,10 @@
-package host
+package roles
 
 import (
 	"errors"
 	"fmt"
+
+	"github.com/Mirantis/launchpad/pkg/host"
 )
 
 var (
@@ -17,26 +19,23 @@ type HostsRolesFilter struct {
 }
 
 // FilterRoles filter hosts down to matching roles, enforcing a minimum and accepting a maximum count.
-func (hs Hosts) FilterRoles(filter HostsRolesFilter) (Hosts, error) {
-	fhs := Hosts{}
+func FilterRoles(hs host.Hosts, filter HostsRolesFilter) (host.Hosts, error) {
+	fhs := host.Hosts{}
 
-	hasRoles := func(h Host, rs []string) bool {
-		if len(rs) == 0 {
-			return true
-		}
-
-		for _, r := range rs {
-			if h.HasRole(r) {
-				return true
+	for _, h := range hs {
+		if len(filter.Roles) == 0 {
+			fhs.Add(h)
+		} else if hgr := HostGetRoleHandler(h); hgr == nil {
+			continue
+		} else {
+			for _, r := range filter.Roles {
+				if hgr.HasRole(r) {
+					fhs.Add(h)
+					break
+				}
 			}
 		}
-		return false
-	}
 
-	for id, h := range hs {
-		if hasRoles(h, filter.Roles) {
-			fhs[id] = h
-		}
 		if filter.Max > 0 && len(fhs) >= filter.Max {
 			break
 		}

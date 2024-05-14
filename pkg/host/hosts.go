@@ -8,10 +8,10 @@ import (
 )
 
 // Hosts collection of Host objects for a cluster.
-type Hosts map[string]Host
+type Hosts map[string]*Host
 
 // NewHosts Hosts constructer.
-func NewHosts(hs ...Host) Hosts {
+func NewHosts(hs ...*Host) Hosts {
 	nhs := Hosts{}
 	for _, h := range hs {
 		nhs[h.Id()] = h
@@ -20,7 +20,7 @@ func NewHosts(hs ...Host) Hosts {
 }
 
 // Add Hosts objects to the Hosts set.
-func (hs Hosts) Add(ahs ...Host) {
+func (hs Hosts) Add(ahs ...*Host) {
 	for _, ah := range ahs {
 		if ah == nil {
 			continue
@@ -40,13 +40,13 @@ func (hs Hosts) Merge(ahs Hosts) {
 }
 
 // Get Host from the Hosts set if it exists, or return nil.
-func (hs Hosts) Get(id string) Host {
+func (hs Hosts) Get(id string) *Host {
 	h, _ := hs[id] //nolint: gosimple
 	return h
 }
 
 // Each Hosts in the set gets the function applied in parallel.
-func (hs Hosts) Each(ctx context.Context, f func(context.Context, Host) error) error {
+func (hs Hosts) Each(ctx context.Context, f func(context.Context, *Host) error) error {
 	errs := []error{}
 
 	wg := sync.WaitGroup{}
@@ -54,7 +54,7 @@ func (hs Hosts) Each(ctx context.Context, f func(context.Context, Host) error) e
 
 	for _, h := range hs {
 		wg.Add(1)
-		go func(ctx context.Context, h Host) {
+		go func(ctx context.Context, h *Host) {
 			err := f(ctx, h)
 			if err != nil {
 				errs = append(errs, err) // @TODO lock this when writing

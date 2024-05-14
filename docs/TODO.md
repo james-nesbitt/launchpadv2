@@ -17,7 +17,7 @@
 ## Dependency 
 
 - [ ] (unique-event-ids) Events and Event keys need to be unique, but the code is very reled about enforcing that. We should probably make the Unique part immutable and unique.
-- [ ] (dependency-selection-direction) Design a system that allows components to be more selective about which depenendcy they use to fullfill their needs. This matters more when there is more that one dependency fulfiller.
+- [ ] (dependency-selection-direction) Design a system that allows components to be more selective about which depenendcy they use to fullfill their needs. This matters more when there is more that one dependency fulfiller for a requirement.
 
 ## Project 
 
@@ -27,7 +27,7 @@
 ## Host 
 
 - [x] (host-network-discover) Hosts need to be able to discover their networking (internal) so that we can activate swarm using the advertise address
-- [ ] (flexible-host) Allow Hosts to have component specific configuration/functionalily so that we can configure host specific things like docker-sudo, mcr-daemon-config. Maybe a plugin system, or allow multiple handlers per host?
+- [ ] (flexible-host) Allow Hosts to have component specific configuration/functionalily so that we can configure host specific things like docker-sudo, mcr-daemon-config. Maybe a plugin system, or allow multiple handlers per host? Currently I am looking at having a system for allowing hosts to be decorated on demand
 - [ ] (host-hooks) Allow host hooks. Perhaps rely on action.Events or action.Phases as markers.
 - [ ] (host-as-a-component) should we stop treating host components separately from product components.
 - [ ] (log-command-identifier) Log entries for a command should have some identifier to show that they are connected so that you can correlate the various output lines to one execution.
@@ -49,3 +49,4 @@
 ## Product:MKE3
 
 - [X] (mke3-config-separate) separate install and upgrade config so that it is obvious to the user what values are supported for each operation.
+- [ ] (mke3-implementation) MKE3 implementation is needed to allow the client-bundle download

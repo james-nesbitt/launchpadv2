@@ -1,16 +1,41 @@
 package mock
 
 import (
+	"context"
+
 	"github.com/Mirantis/launchpad/pkg/host"
+	"github.com/Mirantis/launchpad/pkg/host/network"
+)
+
+const (
+	HostRoleMock = "mock"
 )
 
 func init() {
-	// Register the mock host with the host decoders list
-	host.RegisterDecoder("mock", func(id string, d func(interface{}) error) (host.Host, error) {
-		var h ho
-		err := d(&h)
-		h.id = id
+	host.RegisterPluginDecoder(HostRoleMock, func(ctx context.Context, h *host.Host, d func(interface{}) error) (host.HostPlugin, error) {
+		hp := mockPlugin{
+			h:       h,
+			Network: network.Network{},
+		}
 
-		return h, err
+		if err := d(&hp); err != nil {
+			return hp, err
+		}
+		return hp, nil
+
 	})
+}
+
+func HostGetMock(h *host.Host) *mockPlugin {
+	hgm := h.MatchPlugin(HostRoleMock)
+	if hgm == nil {
+		return nil
+	}
+
+	hm, ok := hgm.(mockPlugin)
+	if !ok {
+		return nil
+	}
+
+	return &hm
 }

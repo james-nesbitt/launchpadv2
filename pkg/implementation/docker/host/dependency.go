@@ -5,24 +5,26 @@ import (
 	"fmt"
 
 	"github.com/Mirantis/launchpad/pkg/dependency"
+	"github.com/Mirantis/launchpad/pkg/host"
 )
 
 type DockerHostsDependency interface {
-	ProvidesDockerHost(context.Context) Hosts
+	ProvidesDockerHost(context.Context) host.Hosts
 }
 
-func NewDockerHostsDependency(id string, description string, factory func(context.Context) (Hosts, error)) *dockerHostsDep {
+func NewDockerHostsDependency(id string, description string, factory func(context.Context) (host.Hosts, error)) *dockerHostsDep {
 	return &dockerHostsDep{
 		id:      id,
 		desc:    description,
-		factory: factory}
+		factory: factory,
+	}
 }
 
 type dockerHostsDep struct {
 	id   string
 	desc string
 
-	factory func(context.Context) (Hosts, error)
+	factory func(context.Context) (host.Hosts, error)
 
 	events dependency.Events
 }
@@ -48,7 +50,7 @@ func (dhd dockerHostsDep) Met(ctx context.Context) error {
 	return err
 }
 
-func (dhd dockerHostsDep) ProvidesDockerHost(ctx context.Context) Hosts {
+func (dhd dockerHostsDep) ProvidesDockerHost(ctx context.Context) host.Hosts {
 	d, _ := dhd.factory(ctx)
 	return d
 }

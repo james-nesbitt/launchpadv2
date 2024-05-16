@@ -9,6 +9,7 @@ import (
 	dockertypesswarm "github.com/docker/docker/api/types/swarm"
 	dockertypessystem "github.com/docker/docker/api/types/system"
 
+	"github.com/Mirantis/launchpad/pkg/host"
 	dockerhost "github.com/Mirantis/launchpad/pkg/implementation/docker/host"
 	"github.com/Mirantis/launchpad/pkg/implementation/docker/swarm"
 )
@@ -33,7 +34,7 @@ func (s *swarmActivateStep) Run(ctx context.Context) error {
 
 	// 1. Find a swarm project OR Create a new one
 
-	var l *dockerhost.Host
+	var l *host.Host
 
 	if dl, err := discoverLeader(ctx, mhs); err == nil {
 		slog.InfoContext(ctx, fmt.Sprintf("%s: discovered as state leader", dl.Id()), slog.Any("leader", dl))
@@ -44,6 +45,8 @@ func (s *swarmActivateStep) Run(ctx context.Context) error {
 	} else {
 		return fmt.Errorf("could not initialize swarm")
 	}
+
+	ld := getHostDocker(h)
 
 	li, lierr := l.Docker(ctx).Info(ctx)
 	if lierr != nil {
@@ -60,7 +63,7 @@ func (s *swarmActivateStep) Run(ctx context.Context) error {
 
 	// at this point the state should have swarm info populated
 	// so all we need to do is to join the rest of the hosts
-	if err := mhs.Each(ctx, func(ctx context.Context, h *dockerhost.Host) error {
+	if err := mhs.Each(ctx, func(ctx context.Context, h *host.Host) error {
 		slog.InfoContext(ctx, fmt.Sprintf("%s: swarm manager join", h.Id()), slog.Any("host", h))
 		return joinSwarm(ctx, h, li, si, ni, "manager")
 	}); err != nil {
@@ -71,7 +74,7 @@ func (s *swarmActivateStep) Run(ctx context.Context) error {
 	if whsgerr != nil {
 		return fmt.Errorf("could not retrieve workers to join the swarm: %s", whsgerr.Error())
 	}
-	if err := whs.Each(ctx, func(ctx context.Context, h *dockerhost.Host) error {
+	if err := whs.Each(ctx, func(ctx context.Context, h *host.Host) error {
 		slog.InfoContext(ctx, fmt.Sprintf("%s: swarm worker join", h.Id()), slog.Any("host", h))
 		return joinSwarm(ctx, h, li, si, ni, "worker")
 	}); err != nil {
@@ -81,7 +84,7 @@ func (s *swarmActivateStep) Run(ctx context.Context) error {
 	return nil
 }
 
-func discoverLeader(ctx context.Context, mhs dockerhost.Hosts) (*dockerhost.Host, error) {
+func discoverLeader(ctx context.Context, mhs dockerhost.Hosts) (*host.Host, error) {
 	for _, h := range mhs {
 		i, ierr := h.Docker(ctx).Info(ctx)
 		if ierr != nil {
@@ -96,7 +99,7 @@ func discoverLeader(ctx context.Context, mhs dockerhost.Hosts) (*dockerhost.Host
 	return nil, fmt.Errorf("No swarm leader discovered")
 }
 
-func initSwarm(ctx context.Context, mhs dockerhost.Hosts) (*dockerhost.Host, error) {
+func initSwarm(ctx context.Context, mhs host.Hosts) (*host.Host, error) {
 	for _, h := range mhs {
 		n, nerr := h.Network(ctx)
 		if nerr != nil {
@@ -127,7 +130,7 @@ func initSwarm(ctx context.Context, mhs dockerhost.Hosts) (*dockerhost.Host, err
 // @NOTE We have to check if the host is already in the swarm
 //
 //	and we may need to leave a/the swarm first
-func joinSwarm(ctx context.Context, h *dockerhost.Host, li dockertypessystem.Info, si dockertypesswarm.Swarm, ni []dockertypesswarm.Node, role string) error {
+func joinSwarm(ctx context.Context, h *host.Host, li dockertypessystem.Info, si dockertypesswarm.Swarm, ni []dockertypesswarm.Node, role string) error {
 	// @NOTE The following three docker commands are repeated on the leader on every swarm join (probably could be cached)
 
 	if hi, err := h.Docker(ctx).Info(ctx); err == nil && hi.Swarm.LocalNodeState != "inactive" {

@@ -2,11 +2,30 @@ package host
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
 	"github.com/Mirantis/launchpad/pkg/dependency"
 )
 
-func NewHostsFilterRequirement(id string, description string, filter func(context.Context, Hosts) (Hosts, error)) *hostsFilterRequirement {
+var (
+	ErrHostsFilterInsufficient = errors.New("not enough hosts in filter")
+)
+
+type HostsFilter func(context.Context, Hosts) (Hosts, error)
+
+func HostsDependencyFilterFactory(hs Hosts, filter HostsFilter) func(context.Context) (Hosts, error) {
+	return func(ctx context.Context) (Hosts, error) {
+		hs, err := filter(ctx, hs)
+		if err != nil {
+			return hs, fmt.Errorf("Hosts filter produced an error: %s", err.Error())
+		}
+
+		return hs, nil
+	}
+}
+
+func NewHostsFilterRequirement(id string, description string, filter HostsFilter) *hostsFilterRequirement {
 	return &hostsFilterRequirement{
 		id:     id,
 		des:    description,
@@ -15,14 +34,14 @@ func NewHostsFilterRequirement(id string, description string, filter func(contex
 }
 
 type RequiresFilteredHosts interface {
-	RequireFilteredHosts(context.Context) func(context.Context, Hosts) (Hosts, error)
+	FilteredHosts(context.Context) HostsFilter
 }
 
 type hostsFilterRequirement struct {
 	id  string
 	des string
 
-	filter func(context.Context, Hosts) (Hosts, error)
+	filter HostsFilter
 
 	dep dependency.Dependency
 }
@@ -49,6 +68,6 @@ func (hrr hostsFilterRequirement) Matched(_ context.Context) dependency.Dependen
 }
 
 // RequiresHostsFilter.
-func (hrr hostsFilterRequirement) RequireHostsFilter(context.Context) func(context.Context, Hosts) (Hosts, error) {
+func (hrr hostsFilterRequirement) HostsFilter(context.Context) HostsFilter {
 	return hrr.filter
 }

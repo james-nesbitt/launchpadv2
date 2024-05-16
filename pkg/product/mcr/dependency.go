@@ -14,32 +14,42 @@ import (
 
 // Requires declare that we need a HostsRoles dependency.
 func (c *MCR) RequiresDependencies(_ context.Context) dependency.Requirements {
-	if c.mhr == nil {
-		c.mhr = host.NewHostsRolesRequirement(
-			fmt.Sprintf("%s:%s:manager", host.ComponentType, c.Name()),
-			fmt.Sprintf("MCR '%s' needs at least one manager host as installation targets, using roles: %s", c.id, strings.Join(MCRManagerHostRoles, ",")),
-			host.HostsRolesFilter{
-				Roles: MCRManagerHostRoles,
-				Min:   1,
-				Max:   0,
-			},
-		)
-	}
-	if c.whr == nil {
-		c.whr = host.NewHostsRolesRequirement(
-			fmt.Sprintf("%s:%s:worker", host.ComponentType, c.Name()),
-			fmt.Sprintf("MCR '%s' accepts any number of worker hosts as installation targets, using roles: %s", c.id, strings.Join(MCRWorkerHostRoles, ",")),
-			host.HostsRolesFilter{
-				Roles: MCRWorkerHostRoles,
-				Min:   0,
-				Max:   0,
+	if c.hr == nil {
+
+		c.hr = host.NewHostsFilterRequirement(
+			fmt.Sprintf("%s:%s:mcr", host.ComponentType, c.Name()),
+			fmt.Sprintf("MCR '%s' takes all nodes marked with MCR; needs at least one manager host as installation targets, using roles: %s", c.id, strings.Join(MCRManagerHostRoles, ",")),
+			func(ctx context.Context, hs host.Hosts) (host.Hosts, error) {
+				// filter for any nodes with an MCR plugin
+				// - we also check to make sure that there is at least one manager
+
+				fhs := host.NewHosts()
+
+				mc := 0
+				for _, h := range hs {
+					mh := HostGetMCR(h)
+					if mh == nil {
+						continue
+					}
+
+					if mh.MCRConfig().IsManager() {
+						mc = mc + 1
+					}
+
+					fhs.Add(h)
+				}
+
+				if mc == 0 {
+					return fhs, fmt.Errorf("%s: no managers in cluster", c.Name())
+				}
+
+				return fhs, nil
 			},
 		)
 	}
 
 	return dependency.Requirements{
-		c.mhr,
-		c.whr,
+		c.hr,
 	}
 }
 

@@ -12,13 +12,6 @@ const (
 	ComponentType = "mcr"
 )
 
-var (
-	// MCRManagerHostRoles the Host roles accepted for managers.
-	MCRManagerHostRoles = []string{"manager"}
-	// MCRWorkerHostRoles the Host roles accepted for workers.
-	MCRWorkerHostRoles = []string{"worker"}
-)
-
 // NewMCR constructor for MCR from config.
 func NewMCR(id string, c Config) *MCR {
 	return &MCR{
@@ -33,8 +26,7 @@ type MCR struct {
 	id string
 
 	// host roles req
-	mhr dependency.Requirement // manager hosts requirement
-	whr dependency.Requirement // worker hosts requirement
+	hr dependency.Requirement // mcr hosts requirement
 
 	// dependencies given out
 	dhd dependency.Dependency // docker (host) dependency

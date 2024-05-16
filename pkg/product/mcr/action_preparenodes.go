@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"log/slog"
 
-	dockerhost "github.com/Mirantis/launchpad/pkg/implementation/docker/host"
+	"github.com/Mirantis/launchpad/pkg/host"
+	"github.com/Mirantis/launchpad/pkg/host/exec"
 )
 
 var (
@@ -34,11 +35,14 @@ func (s prepareMCRNodesStep) Run(ctx context.Context) error {
 	return nil
 }
 
-func installBasePackages(ctx context.Context, h *dockerhost.Host) error {
-	if h.IsWindows(ctx) {
+func installBasePackages(ctx context.Context, h *host.Host) error {
+	he := exec.HostGetExecutor(h)
+	hp := exec.HostGetPlatform(h)
+
+	if hp.IsWindows(ctx) {
 		return nil
 	}
 
 	slog.InfoContext(ctx, fmt.Sprintf("%s: installing base packages", h.Id()), slog.Any("packages", basePackages))
-	return h.InstallPackages(ctx, basePackages)
+	return he.InstallPackages(ctx, basePackages)
 }

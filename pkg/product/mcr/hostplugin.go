@@ -16,6 +16,11 @@ const (
 	HostRoleMCR = "mcr"
 )
 
+var (
+	// MCRManagerHostRoles the Host roles accepted for managers.
+	MCRManagerHostRoles = []string{"manager"}
+)
+
 func init() {
 	host.RegisterPluginDecoder(HostRoleMCR, func(ctx context.Context, h *host.Host, d func(interface{}) error) (host.HostPlugin, error) {
 		p := mcrHost{h: h}
@@ -26,13 +31,14 @@ func init() {
 	})
 }
 
-func HostGetMCR(h *host.Host) HostMCR {
+// Get the MCR plugin from a Host
+func HostGetMCR(h *host.Host) *mcrHost {
 	hgmcr := h.MatchPlugin(HostRoleMCR)
 	if hgmcr == nil {
 		return nil
 	}
 
-	hmcr, ok := hgmcr.(HostMCR)
+	hmcr, ok := hgmcr.(*mcrHost)
 	if !ok {
 		return nil
 	}
@@ -40,15 +46,9 @@ func HostGetMCR(h *host.Host) HostMCR {
 	return hmcr
 }
 
-type HostMCR interface {
-	// MCRConfig get the daemon.json contents for the host
-	MCRConfig() mcrHost
-	// SudoDocker should docker be run with sudo on this host
-	SudoDocker() bool
-}
-
 type mcrHost struct {
 	h                *host.Host
+	SwarmRole        string `yaml:"swarm_role"`
 	ShouldSudoDocker bool   `yaml:"sudo_docker"`
 	DaemonJson       string `yaml:"daemon_json"`
 }
@@ -78,4 +78,13 @@ func (mhc mcrHost) MCRConfig() string {
 
 func (mhc mcrHost) SudoDocker() bool {
 	return mhc.ShouldSudoDocker
+}
+
+func (mhc mcrHost) IsManager() bool {
+	for _, r := range MCRManagerHostRoles {
+		if mhc.SwarmRole == r {
+			return true
+		}
+	}
+	return false
 }

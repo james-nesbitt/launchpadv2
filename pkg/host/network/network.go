@@ -10,7 +10,7 @@ const (
 	HostRoleNetwork = "network"
 )
 
-func HostGetExecutor(h *host.Host) HostNetwork {
+func HostGetNetwork(h *host.Host) HostNetwork {
 	hgn := h.MatchPlugin(HostRoleNetwork)
 	if hgn == nil {
 		return nil

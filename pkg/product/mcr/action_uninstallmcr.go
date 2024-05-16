@@ -6,7 +6,8 @@ import (
 	"log/slog"
 	"strings"
 
-	dockerhost "github.com/Mirantis/launchpad/pkg/implementation/docker/host"
+	"github.com/Mirantis/launchpad/pkg/host"
+	"github.com/Mirantis/launchpad/pkg/host/exec"
 )
 
 var (
@@ -31,8 +32,8 @@ func (s *uninstallMCRStep) Run(ctx context.Context) error {
 		return hsgerr
 	}
 
-	if err := hs.Each(ctx, func(ctx context.Context, h *dockerhost.Host) error {
-		i, ierr := h.Docker(ctx).Info(ctx)
+	if err := hs.Each(ctx, func(ctx context.Context, h *host.Host) error {
+		i, ierr := getHostDocker(h).Info(ctx)
 		if ierr != nil {
 			slog.InfoContext(ctx, fmt.Sprintf("%s: MCR not installed", h.Id()), slog.Any("host", h))
 		}
@@ -56,20 +57,20 @@ func (s *uninstallMCRStep) Run(ctx context.Context) error {
 	return nil
 }
 
-func disableMCRService(ctx context.Context, h *dockerhost.Host) error {
+func disableMCRService(ctx context.Context, h *host.Host) error {
 	slog.InfoContext(ctx, fmt.Sprintf("%s: disabling MCR services: %s", h.Id(), strings.Join(MCRServices, ", ")), slog.Any("host", h))
 
-	if err := h.ServiceDisable(ctx, MCRServices); err != nil {
+	if err := exec.HostGetExecutor(h).ServiceDisable(ctx, MCRServices); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func uninstallMCR(ctx context.Context, h *dockerhost.Host) error {
+func uninstallMCR(ctx context.Context, h *host.Host) error {
 	slog.InfoContext(ctx, fmt.Sprintf("%s: uninstall MCR: %s", h.Id(), strings.Join(MCRServices, ", ")), slog.Any("host", h))
 
-	if err := h.RemovePackages(ctx, MCRUninstallPackages); err != nil {
+	if err := exec.HostGetExecutor(h).RemovePackages(ctx, MCRUninstallPackages); err != nil {
 		return err
 	}
 

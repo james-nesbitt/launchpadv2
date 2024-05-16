@@ -12,22 +12,17 @@ var (
 	ErrNoHostsFunction = errors.New("No hosts dependency option")
 )
 
+// HostsDepencency a Depencency that provides hosts
 type HostsDependency interface {
-	ProduceHosts(context.Context) Hosts
+	ProduceHosts(context.Context) (Hosts, error)
 }
 
+// NewHostsDependency constructor for a hostsDep using a factory for retrieving hosts
 func NewHostsDependency(id string, describe string, factory func(context.Context) (Hosts, error)) *hostsDep {
 	return &hostsDep{
 		id:       id,
 		describe: describe,
 		factory:  factory,
-	}
-}
-
-// HostDependencyFilterFactory factory function for returning a known set of hosts
-func HostDependencyFilterFactory(hs Hosts) func(context.Context) (Hosts, error) {
-	return func(_ context.Context) (Hosts, error) {
-		return hs, nil
 	}
 }
 
@@ -56,10 +51,6 @@ func (hd hostsDep) Met(ctx context.Context) error {
 }
 
 // Validate the the dependency thinks it has what it needs to fulfill it
-//
-//	Validation does not meet the dependency, it only confirms that the dependency can be met
-//	when it is needed.  Each requirement will have its own interface for individual types of
-//	requirements.
 func (hd hostsDep) Validate(context.Context) error {
 	if hd.factory == nil {
 		return ErrNoHostsFunction
@@ -69,9 +60,8 @@ func (hd hostsDep) Validate(context.Context) error {
 }
 
 // ProduceHosts is the dependency fulfilled, or is it still blocked/waiting for fulfillment.
-func (hd hostsDep) ProduceHosts(ctx context.Context) Hosts {
-	hs, _ := hd.factory(ctx)
-	return hs
+func (hd hostsDep) ProduceHosts(ctx context.Context) (Hosts, error) {
+	return hd.factory(ctx)
 }
 
 func (hd *hostsDep) DeliversEvents(ctx context.Context) dependency.Events {

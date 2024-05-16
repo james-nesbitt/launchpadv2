@@ -4,6 +4,13 @@ import (
 	"github.com/Mirantis/launchpad/pkg/host"
 )
 
+/**
+ * A Host plugin that allows hosts to have roles
+ *
+ * The roles can then be used to filter the hosts for
+ * hosts that match desired roles.
+ */
+
 const (
 	HostRoleRole = "role"
 )
@@ -28,12 +35,12 @@ type HostRoleHandler interface {
 
 func NewHostRolesPlugin(roles []string) hostRoles {
 	return hostRoles{
-		Roles: roles,
+		roles: roles,
 	}
 }
 
 type hostRoles struct {
-	Roles []string `yaml:"roles"`
+	roles []string `yaml:"roles"`
 }
 
 func (hr hostRoles) Id() string {
@@ -54,7 +61,7 @@ func (mhc hostRoles) RoleMatch(role string) bool {
 }
 
 func (hr hostRoles) HasRole(r string) bool {
-	for _, hr := range hr.Roles {
+	for _, hr := range hr.roles {
 		if hr == r {
 			return true
 		}

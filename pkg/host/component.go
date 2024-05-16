@@ -3,7 +3,6 @@ package host
 import (
 	"context"
 	"fmt"
-	"log/slog"
 
 	"github.com/Mirantis/launchpad/pkg/dependency"
 )
@@ -36,8 +35,8 @@ func (hc HostsComponent) Name() string {
 
 func (hc HostsComponent) Debug() interface{} {
 	return struct {
-		ID    string
-		Hosts Hosts
+		ID    string `json:"ID"`
+		Hosts Hosts  `json:"Hosts"`
 	}{
 		ID:    hc.id,
 		Hosts: hc.hosts,
@@ -48,25 +47,6 @@ func (hc HostsComponent) Validate(_ context.Context) error {
 	return nil
 }
 
-// Provides a dependency for some type of Requirements.
-func (hc *HostsComponent) ProvidesDependencies(ctx context.Context, req dependency.Requirement) (dependency.Dependency, error) {
-	if rhr, ok := req.(RequiresHostsRoles); ok {
-		f := rhr.RequireHostsRoles(ctx)
-
-		d := NewHostsDependency(
-			fmt.Sprintf("%s:%s:%s", hc.id, RequiresHostsRolesType, req.Id()),
-			req.Describe(),
-			func(ctx context.Context) (Hosts, error) {
-				hs, err := hc.hosts.FilterRoles(f)
-				return hs, err
-			},
-		)
-		slog.DebugContext(ctx, fmt.Sprintf("%s added a HostDependency '%s'for Requirement '%s'", ComponentType, d.Id(), req.Id()), slog.Any("dependency", d), slog.Any("requirement", req))
-
-		hc.deps = append(hc.deps, d)
-
-		return d, nil
-	}
-
-	return nil, nil
+func (hc HostsComponent) Hosts() Hosts {
+	return hc.hosts
 }

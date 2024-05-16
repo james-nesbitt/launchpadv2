@@ -23,6 +23,8 @@ func (mhc rigHostPlugin) Validate() error {
 
 func (mhc rigHostPlugin) RoleMatch(role string) bool {
 	switch role {
+	case host.HostRoleDiscover:
+		return true
 	case exec.HostRoleExecutor:
 		return true
 	case network.HostRoleNetwork:

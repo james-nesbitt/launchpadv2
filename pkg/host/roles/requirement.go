@@ -6,6 +6,13 @@ import (
 	"github.com/Mirantis/launchpad/pkg/dependency"
 )
 
+/**
+ * Requirement for Hosts that match roles
+ *
+ * Use this to require hosts that match roles from a
+ * dependency provider that can match roles.
+ */
+
 var (
 	RequiresHostsRolesType = "host-roles"
 )

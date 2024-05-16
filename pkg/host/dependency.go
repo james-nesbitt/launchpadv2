@@ -2,88 +2,30 @@ package host
 
 import (
 	"context"
-	"errors"
 	"fmt"
+	"log/slog"
 
 	"github.com/Mirantis/launchpad/pkg/dependency"
 )
 
-var (
-	ErrNoHostsFunction = errors.New("No hosts dependency option")
-)
+// Provides a dependency for some type of Requirements.
+func (hc *HostsComponent) ProvidesDependencies(ctx context.Context, req dependency.Requirement) (dependency.Dependency, error) {
+	if fhr, ok := req.(RequiresFilteredHosts); ok {
+		ff := fhr.RequireFilteredHosts(ctx)
 
-type HostsDependency interface {
-	ProduceHosts(context.Context) Hosts
-}
-
-func NewHostsDependency(id string, describe string, factory func(context.Context) (Hosts, error)) *hostsDep {
-	return &hostsDep{
-		id:       id,
-		describe: describe,
-		factory:  factory,
-	}
-}
-
-// HostDependencyFilterFactory factory function for returning a known set of hosts
-func HostDependencyFilterFactory(hs Hosts) func(context.Context) (Hosts, error) {
-	return func(_ context.Context) (Hosts, error) {
-		return hs, nil
-	}
-}
-
-type hostsDep struct {
-	id       string
-	describe string
-	factory  func(context.Context) (Hosts, error)
-
-	events dependency.Events
-}
-
-// Id uniquely identify the Dependency.
-func (hd hostsDep) Id() string {
-	return hd.id
-}
-
-// Describe the dependency for logging and auditing.
-func (hd hostsDep) Describe() string {
-	return hd.describe
-}
-
-// Validate the the dependency thinks it has what it needs to fulfill it
-//
-//	Validation does not meet the dependency, it only confirms that the dependency can be met
-//	when it is needed.  Each requirement will have its own interface for individual types of
-//	requirements.
-func (hd hostsDep) Validate(context.Context) error {
-	if hd.factory == nil {
-		return ErrNoHostsFunction
-	}
-
-	return nil
-}
-
-// Met is the dependency fulfilled, or is it still blocked/waiting for fulfillment.
-func (hd hostsDep) Met(ctx context.Context) error {
-	_, err := hd.factory(ctx)
-	return err
-}
-
-// ProduceHosts is the dependency fulfilled, or is it still blocked/waiting for fulfillment.
-func (hd hostsDep) ProduceHosts(ctx context.Context) Hosts {
-	hs, _ := hd.factory(ctx)
-	return hs
-}
-
-func (hd *hostsDep) DeliversEvents(ctx context.Context) dependency.Events {
-	if hd.events == nil {
-		hd.events = dependency.Events{
-			dependency.EventKeyActivated: &dependency.Event{
-				Id: fmt.Sprintf("%s:%s", hd.Id(), dependency.EventKeyActivated),
+		d := NewHostsDependency(
+			fmt.Sprintf("%s:%s:%s", hc.id, "filter", req.Id()),
+			req.Describe(),
+			func(ctx context.Context) (Hosts, error) {
+				return ff(ctx, hc.hosts)
 			},
-			dependency.EventKeyDeActivated: &dependency.Event{
-				Id: fmt.Sprintf("%s:%s", hd.Id(), dependency.EventKeyDeActivated),
-			},
-		}
+		)
+		slog.DebugContext(ctx, fmt.Sprintf("%s added a HostDependency '%s'for Requirement '%s'", ComponentType, d.Id(), req.Id()), slog.Any("dependency", d), slog.Any("requirement", req))
+
+		hc.deps = append(hc.deps, d)
+
+		return d, nil
 	}
-	return hd.events
+
+	return nil, nil
 }

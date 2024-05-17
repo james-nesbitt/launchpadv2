@@ -18,13 +18,17 @@ const (
 	CommandPhaseKubernetesConf = "K0S Kubernetes Configuration"
 )
 
-func (c Component) CommandBuild(ctx context.Context, cmd *action.Command) error {
+func (c *Component) CommandBuild(ctx context.Context, cmd *action.Command) error {
 	rs := dependency.Requirements{ // Requirements that we need
 		c.hs,
 	}
 	ds := dependency.Dependencies{ // Dependencies that our phases typically deliver
 		c.k8sd,
 		c.k0sd,
+	}
+
+	bs := baseStep{
+		c: c,
 	}
 
 	switch cmd.Key {
@@ -47,7 +51,8 @@ func (c Component) CommandBuild(ctx context.Context, cmd *action.Command) error 
 				id: c.Name(),
 			},
 			&installK0sStep{
-				id: c.Name(),
+				baseStep: bs,
+				id:       c.Name(),
 			},
 			&configureK0sStep{
 				id: c.Name(),

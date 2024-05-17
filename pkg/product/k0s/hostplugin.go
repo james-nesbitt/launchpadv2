@@ -17,7 +17,7 @@ const (
 
 var (
 	// K0SManagerHostRoles the Host roles accepted for managers.
-	K0SManagerHostRoles = []string{"manager"}
+	K0SManagerHostRoles = []string{"controller"}
 )
 
 func init() {

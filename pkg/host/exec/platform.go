@@ -29,4 +29,6 @@ func HostGetPlatform(h *host.Host) HostPlatform {
 type HostPlatform interface {
 	// IsWindows check, could require a connection
 	IsWindows(context.Context) bool
+	// Arch what CPU Architecture is the host using
+	Arch(ctx context.Context) string
 }

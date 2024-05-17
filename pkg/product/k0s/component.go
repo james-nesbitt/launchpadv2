@@ -29,8 +29,7 @@ type K0S struct {
 	id string
 
 	// controller and worker host roles req (hosts onto which we will install)
-	chr dependency.Requirement
-	whr dependency.Requirement
+	hr dependency.Requirement
 
 	// dependencies given out to any component that says that it needs access to our kubernetes/k0s-api
 	k8sd dependency.Dependency

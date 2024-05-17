@@ -53,11 +53,6 @@ func (de DockerExec) Run(ctx context.Context, args []string, ro RunOptions) (str
 	return de.dockerCommand(ctx, args, ro)
 }
 
-type RunOptions struct {
-	ShowOutput bool
-	ShowError  bool
-}
-
 // Version retrieve the Docker Version from the remote server.
 func (de DockerExec) Version(ctx context.Context) (map[string]dockertypes.Version, error) {
 	var dv map[string]dockertypes.Version

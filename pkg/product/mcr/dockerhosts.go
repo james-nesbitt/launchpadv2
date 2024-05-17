@@ -2,60 +2,88 @@ package mcr
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log/slog"
 
 	"github.com/Mirantis/launchpad/pkg/dependency"
 	"github.com/Mirantis/launchpad/pkg/host"
-	dockerhost "github.com/Mirantis/launchpad/pkg/implementation/docker/host"
+	"github.com/Mirantis/launchpad/pkg/host/exec"
 )
 
 // GetManagerHosts get the docker hosts for managers.
-func (c MCR) GetManagerHosts(ctx context.Context) (dockerhost.Hosts, error) {
-	hs, err := getRequirementHosts(ctx, c.mhr)
+func (c MCR) GetManagerHosts(ctx context.Context) (host.Hosts, error) {
+	hs, err := c.GetAllHosts(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("Manager hosts retrieval error; %w", err)
-	}
-	if len(hs) == 0 {
-		return nil, fmt.Errorf("MCR manager dependency has no hosts")
+		return hs, fmt.Errorf("MCR manager hosts retrieval error; %w", err)
 	}
 
-	return hs, nil
+	mhs := host.NewHosts()
+	for _, h := range hs {
+		// we don't ask Docker if the host is a manager,
+		// because MCR may not be installed yet.
+		mcrh := HostGetMCR(h)
+		if !mcrh.IsManager() {
+			continue
+		}
+
+		mhs.Add(h)
+	}
+
+	return mhs, nil
 }
 
 // GetWorkerHosts get the docker hosts for workers.
-func (c MCR) GetWorkerHosts(ctx context.Context) (dockerhost.Hosts, error) {
-	hs, err := getRequirementHosts(ctx, c.whr)
+func (c MCR) GetWorkerHosts(ctx context.Context) (host.Hosts, error) {
+	hs, err := c.GetAllHosts(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("Worker hosts retrieval error; %w", err)
-	}
-	if len(hs) == 0 {
-		slog.WarnContext(ctx, "MCR worker dependency has no hosts.")
+		return nil, fmt.Errorf("MCR worker hosts retrieval error; %w", err)
 	}
 
-	return hs, nil
+	whs := host.NewHosts()
+	for _, h := range hs {
+		// we don't ask Docker if the host is a manager,
+		// because MCR may not be installed yet.
+		mh := HostGetMCR(h)
+		if mh.IsManager() {
+			continue
+		}
+
+		whs.Add(h)
+	}
+
+	return whs, nil
 }
 
 // GetAllHosts get the docker hosts for all hosts.
-func (c MCR) GetAllHosts(ctx context.Context) (dockerhost.Hosts, error) {
-	errs := []error{}
-	hs := dockerhost.Hosts{}
-
-	if mhs, err := c.GetManagerHosts(ctx); err != nil {
-		errs = append(errs, err)
-	} else {
-		hs.Merge(mhs)
+func (c MCR) GetAllHosts(ctx context.Context) (host.Hosts, error) {
+	ghs, err := getRequirementHosts(ctx, c.hr)
+	if err != nil {
+		return nil, fmt.Errorf("hosts retrieval error; %w", err)
 	}
-	if whs, err := c.GetWorkerHosts(ctx); err != nil {
-		errs = append(errs, err)
-	} else {
-		hs.Merge(whs)
+	if len(ghs) == 0 {
+		return nil, fmt.Errorf("MCR has no hosts to install on; %w", err)
 	}
 
-	if len(errs) > 0 {
-		return hs, errors.Join(errs...)
+	hs := host.NewHosts()
+	for _, h := range ghs {
+		if m := HostGetMCR(h); m == nil {
+			slog.WarnContext(ctx, fmt.Sprintf("%s: host provided to MCR has no MCR plugin", h.Id()))
+			continue
+		}
+
+		if e := exec.HostGetExecutor(h); e == nil {
+			slog.WarnContext(ctx, fmt.Sprintf("%s: host provided to MCR has no exec plugin", h.Id()))
+			continue
+		}
+
+		if p := exec.HostGetPlatform(h); p == nil {
+			slog.WarnContext(ctx, fmt.Sprintf("%s: host provided to MCR has no platform plugin", h.Id()))
+			continue
+		}
+
+		hs.Add(h)
 	}
+
 	return hs, nil
 }
 
@@ -65,8 +93,7 @@ func (c MCR) GetAllHosts(ctx context.Context) (dockerhost.Hosts, error) {
 //  1. is the requirement nil
 //  2. was the requirement matched with a dependency
 //  3. was the requirement matched with the right kind of dependency
-//  4. get the hosts from the dependency and convert to DockerHosts
-func getRequirementHosts(ctx context.Context, r dependency.Requirement) (dockerhost.Hosts, error) {
+func getRequirementHosts(ctx context.Context, r dependency.Requirement) (host.Hosts, error) {
 	if r == nil {
 		return nil, fmt.Errorf("requirement empty")
 	}
@@ -80,7 +107,5 @@ func getRequirementHosts(ctx context.Context, r dependency.Requirement) (dockerh
 		return nil, fmt.Errorf("%w; %s Dependency is the wrong type", dependency.ErrDependencyNotMatched, mhd.Id())
 	}
 
-	hs := mhddh.ProduceHosts(ctx) // get the Hosts
-
-	return dockerhost.NewDockerHosts(hs, dockerhost.HostsOptions{SudoDocker: true}), nil // convert the hosts to Docker hosts
+	return mhddh.ProduceHosts(ctx) // get the Hosts
 }

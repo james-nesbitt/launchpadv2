@@ -138,26 +138,26 @@ spec:
 %{~for h in local.launchpad_hosts_ssh}
     # ${h.label} (ssh)
     ${h.id}:
-      handler: rig
-      roles:
-      - ${h.role}
-      ssh:
-        address: ${h.ssh_address}
-        user: ${h.ssh_user}
-        keyPath: ${h.ssh_key_path}
+      mcr:
+        role: ${h.role}
+      rig: 
+        ssh:
+          address: ${h.ssh_address}
+          user: ${h.ssh_user}
+          keyPath: ${h.ssh_key_path}
 %{~endfor}
 %{~for h in local.launchpad_hosts_winrm}
     # ${h.label} (winrm)
     ${h.id}:
-      handler: rig
-      roles:
-      - ${h.role}
-      winRM:
-        address: ${h.winrm_address}
-        user: ${h.winrm_user}
-        password: ${h.winrm_password}
-        useHTTPS: ${h.winrm_useHTTPS}
-        insecure: ${h.winrm_insecure}
+      mcr:
+        role: ${h.role}
+      rig:
+        winRM:
+          address: ${h.winrm_address}
+          user: ${h.winrm_user}
+          password: ${h.winrm_password}
+          useHTTPS: ${h.winrm_useHTTPS}
+          insecure: ${h.winrm_insecure}
 %{~endfor}
   products:
     mcr:

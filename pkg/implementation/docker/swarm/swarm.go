@@ -1,6 +1,7 @@
 package swarm
 
 import (
+	"context"
 	"fmt"
 
 	dockerimplementation "github.com/Mirantis/launchpad/pkg/implementation/docker"
@@ -25,4 +26,13 @@ func (s Swarm) ValidateVersion(version dockerimplementation.Version) error {
 // SwarmAddress convert an IP into a address
 func SwarmAddress(ip string) string {
 	return fmt.Sprintf("%s:%d", ip, 2377)
+}
+
+// IsDockerSwarmManager return is a docker implementation points to a swarm manager
+func IsDockerSwarmManager(ctx context.Context, de dockerimplementation.DockerImplementation) bool {
+	dei, err := de.Info(ctx)
+	if err != nil {
+		return false
+	}
+	return dei.Swarm.ControlAvailable
 }

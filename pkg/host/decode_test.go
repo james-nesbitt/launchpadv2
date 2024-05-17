@@ -1,36 +1,48 @@
 package host_test
 
 import (
+	"context"
 	"testing"
 
-	"github.com/Mirantis/launchpad/pkg/host/mock"
+	"gopkg.in/yaml.v3"
 
 	"github.com/Mirantis/launchpad/pkg/host"
+	"github.com/Mirantis/launchpad/pkg/host/mock"
+	_ "github.com/Mirantis/launchpad/pkg/host/mock"
 )
 
-func Test_DecodeHost(t *testing.T) {
-	host.RegisterDecoder("dummy", func(id string, _ func(interface{}) error) (host.Host, error) {
-		h := mock.NewHost(
-			id,
-			[]string{"test"},
-			nil,
-		)
-		return h, nil
-	})
+func Test_HostV2DecodeMock(t *testing.T) {
+	ctx := context.Background()
+	id := "test"
+	y := `
+mock:
+  network:
+    private_address: 10.0.0.1
+    public_address: mock.example.org
+    private_interface: mock0
+`
 
-	dhd := func(dh interface{}) error {
-		return nil
+	hpsc := map[string]yaml.Node{} // container for the plugins
+	if err := yaml.Unmarshal([]byte(y), &hpsc); err != nil {
+		t.Fatalf("yaml unmarshalling fail: %s", err.Error())
 	}
 
-	dh, err := host.DecodeHost("dummy", "one", dhd)
+	hpds := map[string]func(interface{}) error{}
+	for k, hpd := range hpsc {
+		hpds[k] = hpd.Decode
+	}
+
+	h, err := host.DecodeHost(ctx, id, hpds)
 	if err != nil {
-		t.Errorf("DummyHost decode returned an unepected error: %s", err.Error())
+		t.Fatalf("host decode failed: %s", err.Error())
 	}
 
-	if dh.Id() != "one" {
-		t.Errorf("host decode has the wrong id: %s", dh.Id())
+	if h == nil {
+		t.Error("host decode gave a nil")
 	}
-	if !dh.HasRole("test") {
-		t.Errorf("host decode missing expected role: %+v", dh)
+
+	mp := h.MatchPlugin(mock.HostRoleMock)
+	if mp == nil {
+		t.Error("decoded host didn't have the mock plugin role satisfied")
 	}
 }

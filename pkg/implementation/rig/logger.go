@@ -1,20 +1,18 @@
-package righost
+package rig
 
 import (
 	"fmt"
 	"log/slog"
-
-	"github.com/Mirantis/launchpad/pkg/host"
 )
 
 // LogCmdLogger write slogs.
 type LogCmdLogger struct {
-	host  host.Host
+	id    string
 	level string
 }
 
 func (rlcl LogCmdLogger) Write(p []byte) (n int, err error) {
-	msg := fmt.Sprintf("%s: %s", rlcl.host.Id(), string(p))
+	msg := fmt.Sprintf("%s: %s", rlcl.id, string(p))
 
 	switch rlcl.level {
 

@@ -3,12 +3,17 @@ package host
 import (
 	"fmt"
 	"log/slog"
-	"os"
-	"strings"
 
 	"github.com/spf13/cobra"
 )
 
+type HostFactoryCliBuilder interface {
+	CliBuild(cmd *cobra.Command, c HostsComponent) error
+}
+
+// CliBuild build command cli for launchpad
+//
+// The hosts component allows HostPluginFactories to also build CLI
 func (c HostsComponent) CliBuild(cmd *cobra.Command) error {
 
 	g := &cobra.Group{
@@ -17,35 +22,16 @@ func (c HostsComponent) CliBuild(cmd *cobra.Command) error {
 	}
 	cmd.AddGroup(g)
 
-	var exec_hn string
-	exec := &cobra.Command{
-		GroupID: g.ID,
-		Use:     fmt.Sprintf("%s:execute", c.Name()),
-		Short:   "Execute a command on a host",
-		Long:    ``,
-		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx := cmd.Context()
+	for key, hpf := range hostPluginFactories {
+		hpfcb, ok := hpf.(HostFactoryCliBuilder)
+		if !ok {
+			slog.Debug(fmt.Sprintf("%s host plugin factory doesn't build clis", key))
+		}
 
-			h := c.hosts.Get(exec_hn)
-			if h == nil {
-
-				for id, h := range c.hosts {
-					slog.Info("host", slog.String("id", id), slog.Any("host", h))
-				}
-				return fmt.Errorf("%s: host not found", exec_hn)
-			}
-
-			o, e, err := h.Exec(ctx, strings.Join(args, " "), os.Stdin, ExecOptions{})
-			if err != nil {
-				return fmt.Errorf("%s: exec error: %s :: %s", h.Id(), err.Error(), e)
-			}
-			fmt.Println(o)
-
-			return nil
-		},
+		if err := hpfcb.CliBuild(cmd, c); err != nil {
+			slog.Warn(fmt.Sprintf("%s host plugin factory cli build error", key))
+		}
 	}
-	exec.Flags().StringVar(&exec_hn, "host", "", "host to execute on")
-	cmd.AddCommand(exec)
 
 	return nil
 }

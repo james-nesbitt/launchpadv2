@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 
+	"github.com/Mirantis/launchpad/pkg/host"
 	dockerhost "github.com/Mirantis/launchpad/pkg/implementation/docker/host"
 )
 
@@ -27,10 +28,10 @@ func (s *discoverStep) Run(ctx context.Context) error {
 		return fmt.Errorf("MCR has no hosts to discover: %s", gherr.Error())
 	}
 
-	if err := hs.Each(ctx, func(ctx context.Context, h *dockerhost.Host) error {
+	if err := hs.Each(ctx, func(ctx context.Context, h *host.Host) error {
 		slog.InfoContext(ctx, fmt.Sprintf("%s: discovering MCR state", h.Id()), slog.Any("host", h))
 
-		if _, err := h.Docker(ctx).Info(ctx); err != nil {
+		if _, err := dockerhost.HostGetDockerExec(h).Info(ctx); err != nil {
 			slog.DebugContext(ctx, fmt.Sprintf("%s: MCR state discovery failure", h.Id()), slog.Any("host", h), slog.Any("error", err))
 			return fmt.Errorf("%s: failed to update docker info: %s", h.Id(), err.Error())
 		}

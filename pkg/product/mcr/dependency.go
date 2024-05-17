@@ -3,6 +3,7 @@ package mcr
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"strings"
 
 	"github.com/Mirantis/launchpad/pkg/dependency"
@@ -13,33 +14,52 @@ import (
 )
 
 // Requires declare that we need a HostsRoles dependency.
-func (c *MCR) RequiresDependencies(_ context.Context) dependency.Requirements {
-	if c.mhr == nil {
-		c.mhr = host.NewHostsRolesRequirement(
-			fmt.Sprintf("%s:%s:manager", host.ComponentType, c.Name()),
-			fmt.Sprintf("MCR '%s' needs at least one manager host as installation targets, using roles: %s", c.id, strings.Join(MCRManagerHostRoles, ",")),
-			host.HostsRolesFilter{
-				Roles: MCRManagerHostRoles,
-				Min:   1,
-				Max:   0,
+func (c *MCR) RequiresDependencies(ctx context.Context) dependency.Requirements {
+	if c.hr == nil {
+
+		c.hr = host.NewHostsFilterRequirement(
+			fmt.Sprintf("%s:%s:mcr", host.ComponentType, c.Name()),
+			fmt.Sprintf("MCR '%s' takes all nodes marked with MCR; needs at least one manager host as installation targets, using roles: %s", c.id, strings.Join(MCRManagerHostRoles, ",")),
+			func(ctx context.Context, hs host.Hosts) (host.Hosts, error) {
+				// filter for any nodes with an MCR plugin
+				// - we also check to make sure that there is at least one manager
+
+				fhs := host.NewHosts()
+
+				if len(hs) == 0 {
+					return fhs, fmt.Errorf("%s: no hosts in cluster", c.Name())
+				}
+
+				mc := 0
+				for _, h := range hs {
+					mhp := HostGetMCR(h)
+					if mhp == nil {
+						slog.WarnContext(ctx, fmt.Sprintf("%s: host '%s' is not an MCR host, ignoring", c.Name(), h.Id()))
+						continue
+					}
+
+					if mhp.IsManager() {
+						slog.InfoContext(ctx, fmt.Sprintf("%s: host '%s' is included as a manager", c.Name(), h.Id()))
+						mc = mc + 1
+					} else {
+						slog.InfoContext(ctx, fmt.Sprintf("%s: host '%s' is included as a worker", c.Name(), h.Id()))
+					}
+
+					fhs.Add(h)
+				}
+
+				if mc == 0 {
+					return fhs, fmt.Errorf("%s: no managers in cluster", c.Name())
+				}
+
+				return fhs, nil
 			},
 		)
-	}
-	if c.whr == nil {
-		c.whr = host.NewHostsRolesRequirement(
-			fmt.Sprintf("%s:%s:worker", host.ComponentType, c.Name()),
-			fmt.Sprintf("MCR '%s' accepts any number of worker hosts as installation targets, using roles: %s", c.id, strings.Join(MCRWorkerHostRoles, ",")),
-			host.HostsRolesFilter{
-				Roles: MCRWorkerHostRoles,
-				Min:   0,
-				Max:   0,
-			},
-		)
+
 	}
 
 	return dependency.Requirements{
-		c.mhr,
-		c.whr,
+		c.hr,
 	}
 }
 
@@ -60,7 +80,7 @@ func (c *MCR) ProvidesDependencies(ctx context.Context, r dependency.Requirement
 			c.dhd = dockerhost.NewDockerHostsDependency(
 				fmt.Sprintf("%s:%s", ComponentType, dockerhost.ImplementationType),
 				fmt.Sprintf("Docker hosts for requirement: %s", r.Describe()),
-				func(ctx context.Context) (dockerhost.Hosts, error) {
+				func(ctx context.Context) (host.Hosts, error) {
 					dh, err := c.GetAllHosts(ctx)
 					if err != nil {
 						return nil, err

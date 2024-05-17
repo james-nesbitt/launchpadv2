@@ -13,6 +13,8 @@ import (
 	dockertypesswarm "github.com/docker/docker/api/types/swarm"
 	dockertypessystem "github.com/docker/docker/api/types/system"
 
+	"github.com/Mirantis/launchpad/pkg/host"
+	"github.com/Mirantis/launchpad/pkg/host/exec"
 	dockerhost "github.com/Mirantis/launchpad/pkg/implementation/docker/host"
 )
 
@@ -40,11 +42,11 @@ func (c MCR) CliBuild(cmd *cobra.Command) error {
 			info := map[string]dockertypessystem.Info{}
 			infomu := sync.Mutex{}
 
-			if err := hs.Each(ctx, func(ctx context.Context, h *dockerhost.Host) error {
-				h.Connect(ctx)
+			if err := hs.Each(ctx, func(ctx context.Context, h *host.Host) error {
+				exec.HostGetExecutor(h).Connect(ctx)
 				slog.InfoContext(ctx, fmt.Sprintf("%s: discovering MCR state", h.Id()), slog.Any("host", h))
 
-				i, err := h.Docker(ctx).Info(ctx)
+				i, err := dockerhost.HostGetDockerExec(h).Info(ctx)
 				if err != nil {
 					slog.WarnContext(ctx, fmt.Sprintf("%s: MCR state discovery failure", h.Id()), slog.Any("host", h), slog.Any("error", err))
 					return fmt.Errorf("%s: failed to update docker info: %s", h.Id(), err.Error())
@@ -80,10 +82,10 @@ func (c MCR) CliBuild(cmd *cobra.Command) error {
 				return fmt.Errorf("MCR has no hosts to discover: %s", gherr.Error())
 			}
 
-			var l *dockerhost.Host
+			var l *host.Host
 
 			for _, h := range mhs {
-				i, ierr := h.Docker(ctx).Info(ctx)
+				i, ierr := dockerhost.HostGetDockerExec(h).Info(ctx)
 				if ierr != nil {
 					continue
 				}
@@ -99,15 +101,17 @@ func (c MCR) CliBuild(cmd *cobra.Command) error {
 				return fmt.Errorf("no swarm leader found")
 			}
 
-			li, lierr := l.Docker(ctx).Info(ctx)
+			ld := dockerhost.HostGetDockerExec(l)
+
+			li, lierr := ld.Info(ctx)
 			if lierr != nil {
 				return fmt.Errorf("%s: swarm join failed because leader docker info error: %s", l.Id(), lierr.Error())
 			}
-			si, sierr := l.Docker(ctx).SwarmInspect(ctx)
+			si, sierr := ld.SwarmInspect(ctx)
 			if sierr != nil {
 				return fmt.Errorf("%s: swarm join failed because leader docker swarm inspect error: %s", l.Id(), sierr.Error())
 			}
-			ni, nierr := l.Docker(ctx).NodeList(ctx, dockertypes.NodeListOptions{})
+			ni, nierr := ld.NodeList(ctx, dockertypes.NodeListOptions{})
 			if nierr != nil {
 				return fmt.Errorf("%s: swarm join failed because leader docker swarm node list error: %s", l.Id(), nierr.Error())
 			}

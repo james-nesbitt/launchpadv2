@@ -19,6 +19,8 @@ var (
 //
 //	For all commands, we effectively do discovery for the hosts
 func (hc *HostsComponent) CommandBuild(ctx context.Context, cmd *action.Command) error {
+	bs := baseStep{c: hc}
+
 	if len(hc.deps) > 0 { // only discover if something else needs us
 		p := stepped.NewSteppedPhase(CommandKeyDiscover, dependency.Requirements{}, hc.deps, []string{dependency.EventKeyActivated})
 
@@ -29,8 +31,9 @@ func (hc *HostsComponent) CommandBuild(ctx context.Context, cmd *action.Command)
 			}
 
 			p.Steps().Add(&discoverStep{
-				id: fmt.Sprintf("%s", d.Id()),
-				d:  d,
+				baseStep: bs,
+				id:       fmt.Sprintf("%s", d.Id()),
+				d:        d,
 			})
 		}
 

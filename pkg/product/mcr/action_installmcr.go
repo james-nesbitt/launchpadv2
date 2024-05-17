@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/Mirantis/launchpad/pkg/host"
+	"github.com/Mirantis/launchpad/pkg/host/exec"
 	dockerhost "github.com/Mirantis/launchpad/pkg/implementation/docker/host"
 )
 
@@ -34,8 +35,9 @@ func (s *installMCRStep) Run(ctx context.Context) error {
 		return hsgerr
 	}
 
-	if err := hs.Each(ctx, func(ctx context.Context, h *dockerhost.Host) error {
-		i, ierr := h.Docker(ctx).Info(ctx)
+	if err := hs.Each(ctx, func(ctx context.Context, h *host.Host) error {
+		d := dockerhost.HostGetDockerExec(h)
+		i, ierr := d.Info(ctx)
 
 		if ierr == nil && i.ServerVersion == s.c.config.Version {
 			slog.InfoContext(ctx, fmt.Sprintf("%s: MCR already at version %s", h.Id(), i.ServerVersion), slog.Any("host", h))
@@ -60,7 +62,7 @@ func (s *installMCRStep) Run(ctx context.Context) error {
 				}
 			}
 
-			if _, err := h.Docker(ctx).Info(ctx); err != nil {
+			if _, err := d.Info(ctx); err != nil {
 				return fmt.Errorf("%s: MCR discovery error after install", h.Id())
 			}
 		}
@@ -73,7 +75,7 @@ func (s *installMCRStep) Run(ctx context.Context) error {
 	return nil
 }
 
-func (s installMCRStep) downloadMCRInstaller(ctx context.Context, h *dockerhost.Host) error {
+func (s installMCRStep) downloadMCRInstaller(ctx context.Context, h *host.Host) error {
 	ir := s.c.config.InstallURLLinux
 
 	slog.InfoContext(ctx, fmt.Sprintf("%s: downloading MCR Installer: %s", h.Id(), ir), slog.Any("host", h))
@@ -84,27 +86,27 @@ func (s installMCRStep) downloadMCRInstaller(ctx context.Context, h *dockerhost.
 
 	defer irs.Body.Close()
 
-	if err := h.Upload(ctx, irs.Body, MCRInstallerPath, 0777, host.ExecOptions{Sudo: true}); err != nil {
+	if err := exec.HostGetExecutor(h).Upload(ctx, irs.Body, MCRInstallerPath, 0777, exec.ExecOptions{}); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (s installMCRStep) runMCRInstaller(ctx context.Context, h *dockerhost.Host) error {
+func (s installMCRStep) runMCRInstaller(ctx context.Context, h *host.Host) error {
 	slog.InfoContext(ctx, fmt.Sprintf("%s: running MCR Installer (%s)", h.Id(), MCRInstallerPath), slog.Any("host", h))
 
 	cmd := fmt.Sprintf("DOCKER_URL=%s CHANNEL=%s VERSION=%s bash %s", s.c.config.RepoURL, s.c.config.Channel, s.c.config.Version, MCRInstallerPath)
-	if _, e, err := h.Exec(ctx, cmd, nil, host.ExecOptions{Sudo: true}); err != nil {
+	if _, e, err := exec.HostGetExecutor(h).Exec(ctx, cmd, nil, exec.ExecOptions{Sudo: true}); err != nil {
 		return fmt.Errorf("%s: mcr installer fail: %s \n %s", h.Id(), err.Error(), e)
 	}
 	return nil
 }
 
-func (s installMCRStep) enableMCRService(ctx context.Context, h *dockerhost.Host) error {
+func (s installMCRStep) enableMCRService(ctx context.Context, h *host.Host) error {
 	slog.InfoContext(ctx, fmt.Sprintf("%s: enabling MCR services: %s", h.Id(), strings.Join(MCRServices, ", ")), slog.Any("host", h))
 
-	if err := h.ServiceEnable(ctx, MCRServices); err != nil {
+	if err := exec.HostGetExecutor(h).ServiceEnable(ctx, MCRServices); err != nil {
 		return err
 	}
 

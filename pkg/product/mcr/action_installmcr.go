@@ -9,6 +9,7 @@ import (
 
 	"github.com/Mirantis/launchpad/pkg/host"
 	"github.com/Mirantis/launchpad/pkg/host/exec"
+	dockerhost "github.com/Mirantis/launchpad/pkg/implementation/docker/host"
 )
 
 var (
@@ -35,7 +36,8 @@ func (s *installMCRStep) Run(ctx context.Context) error {
 	}
 
 	if err := hs.Each(ctx, func(ctx context.Context, h *host.Host) error {
-		i, ierr := getHostDocker(ctx, h).Info(ctx)
+		d := dockerhost.HostGetDockerExec(h)
+		i, ierr := d.Info(ctx)
 
 		if ierr == nil && i.ServerVersion == s.c.config.Version {
 			slog.InfoContext(ctx, fmt.Sprintf("%s: MCR already at version %s", h.Id(), i.ServerVersion), slog.Any("host", h))
@@ -60,7 +62,7 @@ func (s *installMCRStep) Run(ctx context.Context) error {
 				}
 			}
 
-			if _, err := getHostDocker(ctx, h).Info(ctx); err != nil {
+			if _, err := d.Info(ctx); err != nil {
 				return fmt.Errorf("%s: MCR discovery error after install", h.Id())
 			}
 		}

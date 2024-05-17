@@ -26,9 +26,12 @@ mock:
 		t.Error("could not unmarshal")
 	}
 
-	hp, err := host.HostPluginDecoders[mock.HostRoleMock](ctx, nil, ynd.Decode)
-	if err != nil {
-		t.Fatalf("mock decoder produced an unexpected error: %s", err.Error())
+	pf := mock.MockHostPluginFactory{}
+	h := host.NewHost("test")
+
+	hp, hpderr := pf.Decode(ctx, h, ynd.Decode)
+	if hpderr != nil {
+		t.Fatal("failed to decode mock host plugin")
 	}
 
 	if hp.Id() != mock.HostRoleMock {
@@ -43,12 +46,12 @@ mock:
 
 func Test_RolesPlugin_HostGetMock(t *testing.T) {
 	h := host.NewHost("test")
-	var mp host.HostPlugin = mock.NewMockPlugin(h)
+	var mp host.HostPlugin = mock.NewMockHostPlugin(h)
 
 	h.AddPlugin(mp)
 
 	hgmp := mock.HostGetMock(h)
 	if hgmp == nil {
-		t.Error("couldn't get the mock out of the host")
+		t.Errorf("couldn't get the mock out of the host: %+v", h)
 	}
 }

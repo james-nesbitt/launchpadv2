@@ -13,9 +13,10 @@ const (
 )
 
 type discoverStep struct {
-	id string
+	baseStep
 
-	d dependency.Dependency
+	id string
+	d  dependency.Dependency
 }
 
 func (ds discoverStep) Id() string {
@@ -28,7 +29,10 @@ func (ds discoverStep) Validate(ctx context.Context) error {
 		return fmt.Errorf("%w; %s has a Dependency of the wrong type", dependency.ErrDependencyNotMatched, ds.Id())
 	}
 
-	hs := hd.ProduceHosts(ctx)
+	hs, err := hd.ProduceHosts(ctx)
+	if err != nil {
+		return fmt.Errorf("%w; %s failed to1 produce hosts: %s", dependency.ErrDependencyNotMatched, ds.Id(), err.Error())
+	}
 	if len(hs) == 0 {
 		slog.WarnContext(ctx, "HostComponent:DiscoverStep dependency has no hosts.")
 		return nil
@@ -43,7 +47,10 @@ func (ds discoverStep) Run(ctx context.Context) error {
 		return fmt.Errorf("%w; %s has a Dependency of the wrong type", dependency.ErrDependencyNotMatched, ds.Id())
 	}
 
-	hs := hd.ProduceHosts(ctx)
+	hs, err := hd.ProduceHosts(ctx)
+	if err != nil {
+		return fmt.Errorf("%w; %s failed to produce hosts: %s", dependency.ErrDependencyNotMatched, ds.Id(), err.Error())
+	}
 	if len(hs) == 0 {
 		slog.WarnContext(ctx, "HostComponent:DiscoverStep dependency has no hosts.")
 		return nil
@@ -51,7 +58,7 @@ func (ds discoverStep) Run(ctx context.Context) error {
 
 	cerr := hs.Each(ctx, func(ctx context.Context, h *Host) error {
 		hd := HostGetDiscover(h)
-		if hd != nil {
+		if hd == nil {
 			return fmt.Errorf("%s host discover impossible. No host plugin registered that performs discovery", h.Id())
 		}
 

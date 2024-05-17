@@ -34,7 +34,7 @@ func NewHostsFilterRequirement(id string, description string, filter HostsFilter
 }
 
 type RequiresFilteredHosts interface {
-	FilteredHosts(context.Context) HostsFilter
+	HostsFilter(context.Context) HostsFilter
 }
 
 type hostsFilterRequirement struct {

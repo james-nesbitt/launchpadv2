@@ -19,8 +19,7 @@ const (
 
 func (c K0S) CommandBuild(ctx context.Context, cmd *action.Command) error {
 	rs := dependency.Requirements{ // Requirements that we need
-		c.chr,
-		c.whr,
+		c.hr,
 	}
 	ds := dependency.Dependencies{ // Dependencies that our phases typically deliver
 		c.k8sd,

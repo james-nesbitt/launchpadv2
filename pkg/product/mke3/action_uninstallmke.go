@@ -7,6 +7,7 @@ import (
 
 	dockertypessystem "github.com/docker/docker/api/types/system"
 
+	"github.com/Mirantis/launchpad/pkg/host"
 	dockerimplementation "github.com/Mirantis/launchpad/pkg/implementation/docker"
 	dockerhost "github.com/Mirantis/launchpad/pkg/implementation/docker/host"
 )
@@ -28,11 +29,11 @@ func (s uninstallMKEStep) Run(ctx context.Context) error {
 		return fmt.Errorf("MCR has no hosts to discover: %s", gherr.Error())
 	}
 
-	var m *dockerhost.Host
+	var m *host.Host
 	var mi dockertypessystem.Info
 
 	for _, h := range mhs {
-		i, ierr := h.Docker(ctx).Info(ctx)
+		i, ierr := dockerhost.HostGetDockerExec(h).Info(ctx)
 		if ierr != nil {
 			slog.WarnContext(ctx, fmt.Sprintf("%s: host is not a docker machine", h.Id()), slog.Any("host", h))
 			continue
@@ -69,8 +70,13 @@ func (s uninstallMKEStep) Run(ctx context.Context) error {
 	return nil
 }
 
-func mkeUninstall(ctx context.Context, h *dockerhost.Host, c Config) error {
-	i, ierr := h.Docker(ctx).Info(ctx)
+func mkeUninstall(ctx context.Context, h *host.Host, c Config) error {
+	d := dockerhost.HostGetDockerExec(h)
+	if d == nil {
+		return fmt.Errorf("%s: has has no docker plugin, so can't be used to uninstall", h.Id())
+	}
+
+	i, ierr := d.Info(ctx)
 	if ierr != nil {
 		return fmt.Errorf("%s: has no docker info, so can't be used to uninstall", h.Id())
 	}
@@ -82,7 +88,7 @@ func mkeUninstall(ctx context.Context, h *dockerhost.Host, c Config) error {
 	cmd = append(cmd, fmt.Sprintf("--id=%s", i.Swarm.Cluster.ID))
 	cmd = append(cmd, c.bootStrapperUninstallArgs()...)
 
-	o, e, err := h.Docker(ctx).Run(ctx, cmd, dockerimplementation.RunOptions{ShowOutput: true, ShowError: true})
+	o, e, err := d.Run(ctx, cmd, dockerimplementation.RunOptions{ShowOutput: true, ShowError: true})
 	if err != nil {
 		return fmt.Errorf("MKE bootstrap failed: %s :: %s", err.Error(), e)
 	}
@@ -92,9 +98,9 @@ func mkeUninstall(ctx context.Context, h *dockerhost.Host, c Config) error {
 	return nil
 }
 
-func mkePruneAfterInstall(ctx context.Context, hs dockerhost.Hosts) error {
-	if err := hs.Each(ctx, func(ctx context.Context, h *dockerhost.Host) error {
-		o, e, err := h.Docker(ctx).Run(ctx, []string{"system", "prune", "--all", "--force"}, dockerimplementation.RunOptions{ShowOutput: true, ShowError: true})
+func mkePruneAfterInstall(ctx context.Context, hs host.Hosts) error {
+	if err := hs.Each(ctx, func(ctx context.Context, h *host.Host) error {
+		o, e, err := dockerhost.HostGetDockerExec(h).Run(ctx, []string{"system", "prune", "--all", "--force"}, dockerimplementation.RunOptions{ShowOutput: true, ShowError: true})
 		if err != nil {
 			return fmt.Errorf("%s: prune failed: %s :: %s", h.Id(), err.Error(), e)
 		}

@@ -30,9 +30,7 @@ func Test_DecodeSanity(t *testing.T) {
 	sy := `
 hosts:
   dummy:
-    handler: mock
-    roles:
-    - dummy
+    mock: {}
 products:
   dummy:
     handler: mock
@@ -56,15 +54,10 @@ func TestConfig_CurrentGen(t *testing.T) {
 	cy := `
 hosts:
   dummy-manager:
-    handler: mock
-    roles:
-    - dummy
-    - manager    
+    mcr:
+      role: manager
   dummy-worker:
-    handler: mock
-    roles:
-    - dummy
-    - worker
+    mcr: {}
 products:
   mcr:
     version: 23.0.10
@@ -100,10 +93,9 @@ func TestConfig_NextGen(t *testing.T) {
 	cl := project.Project{}
 	cy := `
 hosts:
-  c1:
-    handler: mock
-    roles:
-    - controller
+  dummy-controller:
+    k0s:
+      role: controller
 products:
   k0s:
     version: v1.28.4+k0s.0

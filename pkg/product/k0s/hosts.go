@@ -1,4 +1,4 @@
-package mke3
+package k0s
 
 import (
 	"context"
@@ -8,27 +8,19 @@ import (
 	"github.com/Mirantis/launchpad/pkg/dependency"
 	"github.com/Mirantis/launchpad/pkg/host"
 	"github.com/Mirantis/launchpad/pkg/host/exec"
-	dockerhost "github.com/Mirantis/launchpad/pkg/implementation/docker/host"
 )
 
-func IsDockerSwarmManager(ctx context.Context, h *host.Host) bool {
-	dhi, err := dockerhost.HostGetDockerExec(h).Info(ctx)
-	if err != nil {
-		return false
-	}
-	return dhi.Swarm.ControlAvailable
-}
-
 // GetManagerHosts get the docker hosts for managers.
-func (c MKE3) GetManagerHosts(ctx context.Context) (host.Hosts, error) {
+func (c K0S) GetManagerHosts(ctx context.Context) (host.Hosts, error) {
 	hs, err := c.GetAllHosts(ctx)
 	if err != nil {
-		return hs, fmt.Errorf("MCR manager hosts retrieval error; %w", err)
+		return hs, fmt.Errorf("K0S manager hosts retrieval error; %w", err)
 	}
 
 	mhs := host.NewHosts()
 	for _, h := range hs {
-		if !IsDockerSwarmManager(ctx, h) {
+		k0sh := HostGetK0S(h)
+		if !k0sh.IsController() {
 			continue
 		}
 
@@ -39,15 +31,16 @@ func (c MKE3) GetManagerHosts(ctx context.Context) (host.Hosts, error) {
 }
 
 // GetWorkerHosts get the docker hosts for workers.
-func (c MKE3) GetWorkerHosts(ctx context.Context) (host.Hosts, error) {
+func (c K0S) GetWorkerHosts(ctx context.Context) (host.Hosts, error) {
 	hs, err := c.GetAllHosts(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("MCR worker hosts retrieval error; %w", err)
+		return nil, fmt.Errorf("K0S worker hosts retrieval error; %w", err)
 	}
 
 	whs := host.NewHosts()
 	for _, h := range hs {
-		if IsDockerSwarmManager(ctx, h) {
+		mh := HostGetK0S(h)
+		if mh.IsController() {
 			continue
 		}
 
@@ -58,29 +51,29 @@ func (c MKE3) GetWorkerHosts(ctx context.Context) (host.Hosts, error) {
 }
 
 // GetAllHosts get the docker hosts for all hosts.
-func (c MKE3) GetAllHosts(ctx context.Context) (host.Hosts, error) {
-	ghs, err := getRequirementHosts(ctx, c.dhr)
+func (c K0S) GetAllHosts(ctx context.Context) (host.Hosts, error) {
+	ghs, err := getRequirementHosts(ctx, c.hr)
 	if err != nil {
 		return nil, fmt.Errorf("hosts retrieval error; %w", err)
 	}
 	if len(ghs) == 0 {
-		return nil, fmt.Errorf("MCR has no hosts to install on; %w", err)
+		return nil, fmt.Errorf("K0S has no hosts to install on; %w", err)
 	}
 
 	hs := host.NewHosts()
 	for _, h := range ghs {
-		if d := dockerhost.HostGetDockerExec(h); d == nil {
-			slog.WarnContext(ctx, fmt.Sprintf("%s: host provided to MKE3 has no docker-exec plugin", h.Id()))
+		if m := HostGetK0S(h); m == nil {
+			slog.WarnContext(ctx, fmt.Sprintf("%s: host provided to K0S has no K0S plugin", h.Id()))
 			continue
 		}
 
 		if e := exec.HostGetExecutor(h); e == nil {
-			slog.WarnContext(ctx, fmt.Sprintf("%s: host provided to MKE3 has no exec plugin", h.Id()))
+			slog.WarnContext(ctx, fmt.Sprintf("%s: host provided to K0S has no exec plugin", h.Id()))
 			continue
 		}
 
 		if p := exec.HostGetPlatform(h); p == nil {
-			slog.WarnContext(ctx, fmt.Sprintf("%s: host provided to MKE3 has no platform plugin", h.Id()))
+			slog.WarnContext(ctx, fmt.Sprintf("%s: host provided to K0S has no platform plugin", h.Id()))
 			continue
 		}
 

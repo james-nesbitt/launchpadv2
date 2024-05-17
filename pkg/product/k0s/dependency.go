@@ -15,33 +15,44 @@ import (
 // Requires declare requirements needed for this component
 //  1. at least one host with role "controller"
 //  2. any workers with role "worker" (optional)
-func (p *K0S) RequiresDependencies(_ context.Context) dependency.Requirements {
-	if p.chr == nil {
-		p.chr = host.NewHostsRolesRequirement(
-			p.Name(),
-			fmt.Sprintf("K0S '%s' needs hosts as controller installation targets, using role: %s", p.id, ControllerHostRole),
-			host.HostsRolesFilter{
-				Roles: []string{ControllerHostRole},
-				Min:   1,
-				Max:   0,
+func (c *K0S) RequiresDependencies(_ context.Context) dependency.Requirements {
+	if c.hr == nil {
+
+		c.hr = host.NewHostsFilterRequirement(
+			fmt.Sprintf("%s:%s:mcr", host.ComponentType, c.Name()),
+			fmt.Sprintf("MCR '%s' takes all nodes marked with MCR; needs at least one manager host as installation targets", c.Name()),
+			func(ctx context.Context, hs host.Hosts) (host.Hosts, error) {
+				// filter for any nodes with an K0S plugin
+				// - we also check to make sure that there is at least one controller
+				fhs := host.NewHosts()
+
+				chc := 0 // count how many controllers we find
+				for _, h := range hs {
+					hk := HostGetK0S(h) // get the host K0s plugin
+					if hk == nil {
+						// node has no k0s plugin, so it is not a target for install
+						continue
+					}
+
+					if hk.IsController() {
+						chc = chc + 1
+					}
+
+					fhs.Add(h)
+				}
+
+				if chc == 0 {
+					return fhs, fmt.Errorf("%s: no controllers in cluster", c.Name())
+				}
+
+				return fhs, nil
 			},
 		)
-	}
-	if p.whr == nil {
-		p.whr = host.NewHostsRolesRequirement(
-			p.Name(),
-			fmt.Sprintf("K0S '%s' needs hosts as worker installation targets, using role: %s", p.id, WorkerHostRole),
-			host.HostsRolesFilter{
-				Roles: []string{WorkerHostRole},
-				Min:   0,
-				Max:   0,
-			},
-		)
+
 	}
 
 	return dependency.Requirements{
-		p.chr,
-		p.whr,
+		c.hr,
 	}
 }
 

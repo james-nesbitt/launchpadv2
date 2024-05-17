@@ -8,6 +8,7 @@ import (
 
 	"github.com/Mirantis/launchpad/pkg/host"
 	"github.com/Mirantis/launchpad/pkg/host/exec"
+	dockerhost "github.com/Mirantis/launchpad/pkg/implementation/docker/host"
 )
 
 var (
@@ -33,7 +34,7 @@ func (s *uninstallMCRStep) Run(ctx context.Context) error {
 	}
 
 	if err := hs.Each(ctx, func(ctx context.Context, h *host.Host) error {
-		i, ierr := getHostDocker(h).Info(ctx)
+		i, ierr := dockerhost.HostGetDockerExec(h).Info(ctx)
 		if ierr != nil {
 			slog.InfoContext(ctx, fmt.Sprintf("%s: MCR not installed", h.Id()), slog.Any("host", h))
 		}

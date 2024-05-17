@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 
+	"github.com/Mirantis/launchpad/pkg/host"
 	dockerimplementation "github.com/Mirantis/launchpad/pkg/implementation/docker"
 	dockerhost "github.com/Mirantis/launchpad/pkg/implementation/docker/host"
 )
@@ -41,11 +42,11 @@ func (s *runMKEBootstrapper) Run(ctx context.Context) error {
 	return nil
 }
 
-func mkeInstall(ctx context.Context, h *dockerhost.Host, c Config) error {
+func mkeInstall(ctx context.Context, h *host.Host, c Config) error {
 	cmd := []string{"run", "--volume='/var/run/docker.sock:/var/run/docker.sock'", c.bootstrapperImage()}
 	cmd = append(cmd, c.bootStrapperInstallArgs()...)
 
-	o, e, err := h.Docker(ctx).Run(ctx, cmd, dockerimplementation.RunOptions{ShowOutput: true, ShowError: true})
+	o, e, err := dockerhost.HostGetDockerExec(h).Run(ctx, cmd, dockerimplementation.RunOptions{ShowOutput: true, ShowError: true})
 	if err != nil {
 		return fmt.Errorf("MKE bootstrap failed: %s :: %s", err.Error(), e)
 	}

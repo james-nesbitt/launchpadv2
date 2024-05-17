@@ -17,8 +17,7 @@ const (
 
 func (c *MCR) CommandBuild(ctx context.Context, cmd *action.Command) error {
 	rs := dependency.Requirements{ // Requirements that we need
-		c.mhr,
-		c.whr,
+		c.hr,
 	}
 	ds := dependency.Dependencies{ // Dependencies that we deliver
 		c.dhd,

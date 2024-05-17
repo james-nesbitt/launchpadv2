@@ -11,6 +11,10 @@ import (
 	"github.com/Mirantis/launchpad/pkg/host/network"
 )
 
+var (
+	sbinPath = "PATH=/usr/local/sbin:/usr/sbin:/sbin:$PATH"
+)
+
 // Network retrieve the Network information for the machine
 func (p rigHostPlugin) Network(ctx context.Context) (network.Network, error) {
 	n := network.Network{}

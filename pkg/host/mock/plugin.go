@@ -1,31 +1,48 @@
 package mock
 
 import (
+	"log/slog"
+
 	"github.com/Mirantis/launchpad/pkg/host"
 	"github.com/Mirantis/launchpad/pkg/host/network"
 )
 
-func NewMockPlugin(h *host.Host) mockPlugin {
-	return mockPlugin{
+func HostGetMock(h *host.Host) *mockHostPlugin {
+	hgm := h.MatchPlugin(HostRoleMock)
+	if hgm == nil {
+		return nil
+	}
+
+	hm, ok := hgm.(mockHostPlugin)
+	if !ok {
+		slog.Warn("could not convert mock plugin")
+		return nil
+	}
+
+	return &hm
+}
+
+func NewMockHostPlugin(h *host.Host) mockHostPlugin {
+	return mockHostPlugin{
 		h: h,
 	}
 }
 
-type mockPlugin struct {
+type mockHostPlugin struct {
 	h *host.Host
 
 	Network network.Network `yaml:"network"`
 }
 
-func (p mockPlugin) Id() string {
+func (p mockHostPlugin) Id() string {
 	return "mock"
 }
 
-func (p mockPlugin) Validate() error {
+func (p mockHostPlugin) Validate() error {
 	return nil
 }
 
-func (p mockPlugin) RoleMatch(role string) bool {
+func (p mockHostPlugin) RoleMatch(role string) bool {
 	switch role {
 	case HostRoleMock:
 		return true

@@ -25,7 +25,7 @@ func HostGetNetwork(h *host.Host) HostNetwork {
 }
 
 type HostNetwork interface {
-	Network(ctx context.Context) Network
+	Network(ctx context.Context) (Network, error)
 }
 
 // Network networking information about the Host

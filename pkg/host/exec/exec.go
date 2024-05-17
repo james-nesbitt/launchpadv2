@@ -8,10 +8,22 @@ import (
 	"github.com/Mirantis/launchpad/pkg/host"
 )
 
+// HostExecutor
+//
+// A plugin role that indicated that commands can be
+// executed on the host.
+// Additionally the host can manage services and packages.
+//
+// Currently we have only one plugin for this role: rig
+
 const (
 	HostRoleExecutor = "execute"
 )
 
+// HostGetExecutor get the host plugin that can execute.
+//
+// If the hosts doesn't have an appropriate plugin then
+// nil is returned.
 func HostGetExecutor(h *host.Host) HostExecutor {
 	hge := h.MatchPlugin(HostRoleExecutor)
 	if hge == nil {

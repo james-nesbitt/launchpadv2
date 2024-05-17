@@ -9,7 +9,7 @@ import (
 
 func Test_RolesPlugin_PluginSanty(t *testing.T) {
 	h := host.NewHost("test")
-	var mp host.HostPlugin = mock.NewMockPlugin(h)
+	var mp host.HostPlugin = mock.NewMockHostPlugin(h)
 
 	h.AddPlugin(mp)
 

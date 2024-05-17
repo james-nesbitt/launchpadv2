@@ -10,6 +10,7 @@ import (
 
 	dockertypesimage "github.com/docker/docker/api/types/image"
 
+	"github.com/Mirantis/launchpad/pkg/host"
 	dockerimplementation "github.com/Mirantis/launchpad/pkg/implementation/docker"
 	dockerhost "github.com/Mirantis/launchpad/pkg/implementation/docker/host"
 )
@@ -36,7 +37,7 @@ func (s prePullImagesStep) Run(ctx context.Context) error {
 
 	var dpo dockertypesimage.PullOptions = s.c.config.imagePullOptions()
 
-	if err := hs.Each(ctx, func(ctx context.Context, h *dockerhost.Host) error {
+	if err := hs.Each(ctx, func(ctx context.Context, h *host.Host) error {
 		slog.InfoContext(ctx, fmt.Sprintf("%s: prepulling images", h.Id()), slog.Any("host", h))
 		is, err := listImages(ctx, h, s.c.config)
 		if err != nil {
@@ -52,10 +53,10 @@ func (s prePullImagesStep) Run(ctx context.Context) error {
 	return nil
 }
 
-func listImages(ctx context.Context, h *dockerhost.Host, c Config) ([]string, error) {
+func listImages(ctx context.Context, h *host.Host, c Config) ([]string, error) {
 	is := []string{}
 
-	o, e, err := h.Docker(ctx).Run(ctx, []string{"run", c.bootstrapperImage(), "images", "--list"}, dockerimplementation.RunOptions{})
+	o, e, err := dockerhost.HostGetDockerExec(h).Run(ctx, []string{"run", c.bootstrapperImage(), "images", "--list"}, dockerimplementation.RunOptions{})
 	if err != nil {
 		return is, fmt.Errorf("failed to list images: %s : %s", err.Error(), e)
 	}
@@ -72,8 +73,8 @@ func listImages(ctx context.Context, h *dockerhost.Host, c Config) ([]string, er
 	return is, nil
 }
 
-func prePullImages(ctx context.Context, h *dockerhost.Host, images []string, dpo dockertypesimage.PullOptions) error {
-	d := h.Docker(ctx)
+func prePullImages(ctx context.Context, h *host.Host, images []string, dpo dockertypesimage.PullOptions) error {
+	d := dockerhost.HostGetDockerExec(h)
 
 	errs := []error{}
 	for _, i := range images {

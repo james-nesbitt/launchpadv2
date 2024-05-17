@@ -14,7 +14,7 @@ func (hc *HostsComponent) ProvidesDependencies(ctx context.Context, req dependen
 		// RequiersFiltertHosts requirements want a dependency that will return a filtered set of the component hosts.
 		// We use the HostDependency to fulfill that, and use the FilterFactory function as the dependency factory.
 
-		ff := fhr.FilteredHosts(ctx) // get the filter object from the requirement
+		ff := fhr.HostsFilter(ctx) // get the filter object from the requirement
 
 		d := NewHostsDependency(
 			fmt.Sprintf("%s:%s:%s", hc.id, "filter", req.Id()),

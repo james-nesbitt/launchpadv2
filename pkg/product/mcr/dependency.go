@@ -3,6 +3,7 @@ package mcr
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"strings"
 
 	"github.com/Mirantis/launchpad/pkg/dependency"
@@ -13,7 +14,7 @@ import (
 )
 
 // Requires declare that we need a HostsRoles dependency.
-func (c *MCR) RequiresDependencies(_ context.Context) dependency.Requirements {
+func (c *MCR) RequiresDependencies(ctx context.Context) dependency.Requirements {
 	if c.hr == nil {
 
 		c.hr = host.NewHostsFilterRequirement(
@@ -25,15 +26,23 @@ func (c *MCR) RequiresDependencies(_ context.Context) dependency.Requirements {
 
 				fhs := host.NewHosts()
 
+				if len(hs) == 0 {
+					return fhs, fmt.Errorf("%s: no hosts in cluster", c.Name())
+				}
+
 				mc := 0
 				for _, h := range hs {
-					mh := HostGetMCR(h)
-					if mh == nil {
+					mhp := HostGetMCR(h)
+					if mhp == nil {
+						slog.WarnContext(ctx, fmt.Sprintf("%s: host '%s' is not an MCR host, ignoring", c.Name(), h.Id()))
 						continue
 					}
 
-					if mh.MCRConfig().IsManager() {
+					if mhp.IsManager() {
+						slog.InfoContext(ctx, fmt.Sprintf("%s: host '%s' is included as a manager", c.Name(), h.Id()))
 						mc = mc + 1
+					} else {
+						slog.InfoContext(ctx, fmt.Sprintf("%s: host '%s' is included as a worker", c.Name(), h.Id()))
 					}
 
 					fhs.Add(h)
@@ -46,6 +55,7 @@ func (c *MCR) RequiresDependencies(_ context.Context) dependency.Requirements {
 				return fhs, nil
 			},
 		)
+
 	}
 
 	return dependency.Requirements{
@@ -70,7 +80,7 @@ func (c *MCR) ProvidesDependencies(ctx context.Context, r dependency.Requirement
 			c.dhd = dockerhost.NewDockerHostsDependency(
 				fmt.Sprintf("%s:%s", ComponentType, dockerhost.ImplementationType),
 				fmt.Sprintf("Docker hosts for requirement: %s", r.Describe()),
-				func(ctx context.Context) (dockerhost.Hosts, error) {
+				func(ctx context.Context) (host.Hosts, error) {
 					dh, err := c.GetAllHosts(ctx)
 					if err != nil {
 						return nil, err

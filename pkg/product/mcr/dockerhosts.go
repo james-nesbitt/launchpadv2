@@ -3,43 +3,12 @@ package mcr
 import (
 	"context"
 	"fmt"
-	"io"
 	"log/slog"
 
 	"github.com/Mirantis/launchpad/pkg/dependency"
 	"github.com/Mirantis/launchpad/pkg/host"
 	"github.com/Mirantis/launchpad/pkg/host/exec"
-	dockerimplementation "github.com/Mirantis/launchpad/pkg/implementation/docker"
 )
-
-// getHostDocker get a DockerExec instance for a host (nil if not possible, which should never happen)
-func getHostDocker(h *host.Host) *dockerimplementation.DockerExec {
-	e := exec.HostGetExecutor(h)
-	if e == nil {
-		return nil
-	}
-	//e.Connect(ctx)
-
-	m := HostGetMCR(h)
-	if m == nil {
-		return nil
-	}
-
-	def := func(ctx context.Context, cmd string, i io.Reader, rops dockerimplementation.RunOptions) (string, string, error) {
-		hopts := exec.ExecOptions{Sudo: m.SudoDocker()}
-
-		if rops.ShowOutput {
-			hopts.OutputLevel = "info"
-		}
-		if rops.ShowError {
-			hopts.ErrorLevel = "warn"
-		}
-
-		return e.Exec(ctx, cmd, i, hopts)
-	}
-
-	return dockerimplementation.NewDockerExec(def)
-}
 
 // GetManagerHosts get the docker hosts for managers.
 func (c MCR) GetManagerHosts(ctx context.Context) (host.Hosts, error) {
@@ -50,8 +19,9 @@ func (c MCR) GetManagerHosts(ctx context.Context) (host.Hosts, error) {
 
 	mhs := host.NewHosts()
 	for _, h := range hs {
+		// we don't ask Docker if the host is a manager,
+		// because MCR may not be installed yet.
 		mcrh := HostGetMCR(h)
-
 		if !mcrh.IsManager() {
 			continue
 		}
@@ -71,8 +41,9 @@ func (c MCR) GetWorkerHosts(ctx context.Context) (host.Hosts, error) {
 
 	whs := host.NewHosts()
 	for _, h := range hs {
+		// we don't ask Docker if the host is a manager,
+		// because MCR may not be installed yet.
 		mh := HostGetMCR(h)
-
 		if mh.IsManager() {
 			continue
 		}
@@ -95,8 +66,7 @@ func (c MCR) GetAllHosts(ctx context.Context) (host.Hosts, error) {
 
 	hs := host.NewHosts()
 	for _, h := range ghs {
-		m := HostGetMCR(h)
-		if m == nil {
+		if m := HostGetMCR(h); m == nil {
 			slog.WarnContext(ctx, fmt.Sprintf("%s: host provided to MCR has no MCR plugin", h.Id()))
 			continue
 		}
@@ -123,7 +93,6 @@ func (c MCR) GetAllHosts(ctx context.Context) (host.Hosts, error) {
 //  1. is the requirement nil
 //  2. was the requirement matched with a dependency
 //  3. was the requirement matched with the right kind of dependency
-//  4. get the hosts from the dependency and convert to DockerHosts
 func getRequirementHosts(ctx context.Context, r dependency.Requirement) (host.Hosts, error) {
 	if r == nil {
 		return nil, fmt.Errorf("requirement empty")

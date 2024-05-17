@@ -1,9 +1,10 @@
 package v20
 
 import (
+	"context"
 	"errors"
 	"fmt"
-	"log/slog"
+	"time"
 
 	"gopkg.in/yaml.v3"
 
@@ -19,41 +20,35 @@ func (shs SpecHosts) hosts() host.Hosts {
 }
 
 func (shs *SpecHosts) UnmarshalYAML(py *yaml.Node) error {
-	shs.hs = host.Hosts{}
-	shsc := map[string]yaml.Node{}
+	ctx, c := context.WithTimeout(context.Background(), time.Second*30)
+	defer c()
 
+	shs.hs = host.NewHosts()
+
+	// decode into a map of hosts, where each host is a map of host plugins
+	shsc := map[string]map[string]yaml.Node{}
 	if err := py.Decode(&shsc); err != nil {
 		return fmt.Errorf("failed to decode spec hosts: %s", err.Error())
 	}
 
-	errs := []error{}
-
 	if len(shsc) == 0 {
-		errs = append(errs, fmt.Errorf("no hosts were found when decoding the project"))
+		return fmt.Errorf("no hosts were found when decoding the project")
 	}
-	for id, shn := range shsc {
-		pc := struct {
-			Id      string   `yaml:"id"`
-			Handler string   `yaml:"handler"`
-			Roles   []string `yaml:"roles"`
-		}{}
 
-		if err := shn.Decode(&pc); err != nil {
-			slog.Debug("Decode of host gave suspiscious results")
+	errs := []error{}
+	for id, shc := range shsc {
+		ds := map[string]func(interface{}) error{}
+		for k, d := range shc { // collect all of the plugin node .Decode functions
+			ds[k] = d.Decode
 		}
 
-		if pc.Handler == "" {
-			errs = append(errs, fmt.Errorf("no 'handler' specified for host '%s'", id))
-			continue
-		}
-
-		h, err := host.DecodeHost(pc.Handler, id, shn.Decode)
+		h, err := host.DecodeHost(ctx, id, ds)
 		if err != nil {
 			errs = append(errs, fmt.Errorf("%s: %s", id, err.Error()))
 			continue
 		}
 
-		shs.hs[id] = h
+		shs.hs.Add(h)
 	}
 
 	if len(errs) > 0 {

@@ -8,6 +8,7 @@ import (
 
 	dockertypessystem "github.com/docker/docker/api/types/system"
 
+	"github.com/Mirantis/launchpad/pkg/host"
 	dockerhost "github.com/Mirantis/launchpad/pkg/implementation/docker/host"
 )
 
@@ -58,7 +59,7 @@ func (c MKE3) CliBuild(cmd *cobra.Command) error {
 				return fmt.Errorf("MCR has no hosts to discover: %s", gherr.Error())
 			}
 
-			var m *dockerhost.Host
+			var m *host.Host
 			var mi dockertypessystem.Info
 
 			if install_mn != DefaultLeaderMananger {
@@ -67,7 +68,7 @@ func (c MKE3) CliBuild(cmd *cobra.Command) error {
 				if h == nil {
 					return fmt.Errorf("%s: host not found", install_mn)
 				}
-				i, ierr := h.Docker(ctx).Info(ctx)
+				i, ierr := dockerhost.HostGetDockerExec(h).Info(ctx)
 				if ierr != nil {
 					return fmt.Errorf("%s: host is not a docker machine", install_mn)
 				}
@@ -77,7 +78,7 @@ func (c MKE3) CliBuild(cmd *cobra.Command) error {
 			} else {
 				slog.InfoContext(ctx, "no suggested manager, looking for first swarm manager", slog.Any("managers", mhs))
 				for _, h := range mhs {
-					i, ierr := h.Docker(ctx).Info(ctx)
+					i, ierr := dockerhost.HostGetDockerExec(h).Info(ctx)
 					if ierr != nil {
 						slog.WarnContext(ctx, fmt.Sprintf("%s: host is not a docker machine", h.Id()), slog.Any("host", h))
 						continue
@@ -128,7 +129,7 @@ func (c MKE3) CliBuild(cmd *cobra.Command) error {
 				return fmt.Errorf("MCR has no hosts to discover: %s", gherr.Error())
 			}
 
-			var m *dockerhost.Host
+			var m *host.Host
 			var mi dockertypessystem.Info
 
 			if uninstall_mn != DefaultLeaderMananger {
@@ -137,7 +138,7 @@ func (c MKE3) CliBuild(cmd *cobra.Command) error {
 				if h == nil {
 					return fmt.Errorf("%s: host not found", uninstall_mn)
 				}
-				i, ierr := h.Docker(ctx).Info(ctx)
+				i, ierr := dockerhost.HostGetDockerExec(h).Info(ctx)
 				if ierr != nil {
 					return fmt.Errorf("%s: host is not a docker machine", uninstall_mn)
 				}
@@ -147,7 +148,7 @@ func (c MKE3) CliBuild(cmd *cobra.Command) error {
 			} else {
 				slog.InfoContext(ctx, "no suggested manager, looking for first swarm manager", slog.Any("managers", mhs))
 				for _, h := range mhs {
-					i, ierr := h.Docker(ctx).Info(ctx)
+					i, ierr := dockerhost.HostGetDockerExec(h).Info(ctx)
 					if ierr != nil {
 						slog.WarnContext(ctx, fmt.Sprintf("%s: host is not a docker machine", h.Id()), slog.Any("host", h))
 						continue

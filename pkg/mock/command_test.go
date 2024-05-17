@@ -6,30 +6,29 @@ import (
 	"testing"
 
 	"github.com/Mirantis/launchpad/pkg/action"
-	actionmock "github.com/Mirantis/launchpad/pkg/action/mock"
 	"github.com/Mirantis/launchpad/pkg/dependency"
-	depmock "github.com/Mirantis/launchpad/pkg/dependency/mock"
+	"github.com/Mirantis/launchpad/pkg/mock"
 )
 
 func Test_CommandHandlerSanity(t *testing.T) {
 	ctx := context.Background()
-	ch1 := actionmock.NewCommandHandler(
+	ch1 := mock.NewCommandHandler(
 		action.NewPhases(
-			actionmock.NewPhase("one", nil, nil, nil, nil, nil),
-			actionmock.NewPhase("two", nil, nil, nil, nil, nil),
-			actionmock.NewPhase("three", nil, nil, nil, nil, nil),
-			actionmock.NewPhase("four", nil, nil, nil, nil, nil),
+			mock.NewPhase("one", nil, nil, nil, nil, nil),
+			mock.NewPhase("two", nil, nil, nil, nil, nil),
+			mock.NewPhase("three", nil, nil, nil, nil, nil),
+			mock.NewPhase("four", nil, nil, nil, nil, nil),
 		),
 		dependency.NewDependencies(
-			depmock.Dependency("A", "Dep A", nil, nil),
-			depmock.Dependency("B", "Dep B", nil, nil),
-			depmock.Dependency("C", "Dep C", nil, nil),
+			mock.Dependency("A", "Dep A", nil, nil),
+			mock.Dependency("B", "Dep B", nil, nil),
+			mock.Dependency("C", "Dep C", nil, nil),
 		),
 		dependency.Events{},
 		nil,
 	)
 
-	ch2 := actionmock.NewCommandHandler(
+	ch2 := mock.NewCommandHandler(
 		action.Phases{},
 		dependency.Dependencies{},
 		dependency.Events{},

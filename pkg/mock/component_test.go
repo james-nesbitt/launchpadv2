@@ -6,23 +6,22 @@ import (
 	"testing"
 
 	"github.com/Mirantis/launchpad/pkg/component"
-	mockcomponent "github.com/Mirantis/launchpad/pkg/component/mock"
 	"github.com/Mirantis/launchpad/pkg/dependency"
-	mockdependency "github.com/Mirantis/launchpad/pkg/dependency/mock"
+	"github.com/Mirantis/launchpad/pkg/mock"
 )
 
-func Test_MockSanity(t *testing.T) {
+func Test_MockComponentSanity(t *testing.T) {
 	debug := "test"
 	validate := errors.New("an error")
 
-	var mc component.Component = mockcomponent.NewComponentWDependencies(
+	var mc component.Component = mock.NewComponentWDependencies(
 		"one",
 		debug,
 		validate,
 		dependency.Requirements{
-			mockdependency.Requirement("first", "handled as the first", nil),
+			mock.Requirement("first", "handled as the first", nil),
 		},
-		mockdependency.Dependency("only", "should get used for all requirements", nil, nil),
+		mock.Dependency("only", "should get used for all requirements", nil, nil),
 		dependency.ErrNotHandled,
 	)
 
@@ -35,16 +34,16 @@ func Test_MockSanity(t *testing.T) {
 	}
 }
 
-func Test_MockDependencySanity(t *testing.T) {
+func Test_MockComponentDependencySanity(t *testing.T) {
 	ctx := context.Background()
-	mc := mockcomponent.NewComponentWDependencies(
+	mc := mock.NewComponentWDependencies(
 		"one",
 		nil,
 		nil,
 		dependency.Requirements{
-			mockdependency.Requirement("first", "handled as the first", nil),
+			mock.Requirement("first", "handled as the first", nil),
 		},
-		mockdependency.Dependency("only", "should get used for all requirements", nil, nil),
+		mock.Dependency("only", "should get used for all requirements", nil, nil),
 		dependency.ErrNotHandled,
 	)
 

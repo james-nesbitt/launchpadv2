@@ -5,9 +5,9 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/Mirantis/launchpad/pkg/action/mock"
 	"github.com/Mirantis/launchpad/pkg/action/stepped"
 	"github.com/Mirantis/launchpad/pkg/dependency"
+	"github.com/Mirantis/launchpad/pkg/mock"
 )
 
 func Test_StepSanity(t *testing.T) {

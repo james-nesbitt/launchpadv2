@@ -5,12 +5,12 @@ import (
 	"testing"
 
 	"github.com/Mirantis/launchpad/pkg/dependency"
-	mockdependency "github.com/Mirantis/launchpad/pkg/dependency/mock"
+	"github.com/Mirantis/launchpad/pkg/mock"
 )
 
-func Test_MockSanity(t *testing.T) {
+func Test_MockDependencySanity(t *testing.T) {
 	ctx := context.Background()
-	var r dependency.Requirement = mockdependency.Requirement(
+	var r dependency.Requirement = mock.Requirement(
 		"first",
 		"handled as the first",
 		nil,
@@ -20,7 +20,7 @@ func Test_MockSanity(t *testing.T) {
 		t.Errorf("Unexpected requirement description: %s", r.Describe())
 	}
 
-	var d dependency.Dependency = mockdependency.Dependency(
+	var d dependency.Dependency = mock.Dependency(
 		"handler-first",
 		"handle the first dependency",
 		nil,

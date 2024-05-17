@@ -6,8 +6,9 @@ import (
 	"testing"
 
 	"github.com/Mirantis/launchpad/pkg/action"
-	actionmock "github.com/Mirantis/launchpad/pkg/action/mock"
 	"github.com/Mirantis/launchpad/pkg/dependency"
+	"github.com/Mirantis/launchpad/pkg/mock"
+
 )
 
 func Test_PhasesAddMerge(t *testing.T) {
@@ -15,7 +16,7 @@ func Test_PhasesAddMerge(t *testing.T) {
 
 	var p action.Phase
 
-	p = actionmock.NewPhase("one", nil, nil, nil, nil, nil)
+	p = mock.NewPhase("one", nil, nil, nil, nil, nil)
 
 	phs.Add(p)
 
@@ -23,7 +24,7 @@ func Test_PhasesAddMerge(t *testing.T) {
 		t.Errorf("phases add didn't result in the right number of phases: %+v", phs)
 	}
 
-	p = actionmock.NewPhase("two", nil, nil, nil, nil, nil)
+	p = mock.NewPhase("two", nil, nil, nil, nil, nil)
 	phs.Add(p)
 
 	if len(phs) != 2 {
@@ -31,15 +32,15 @@ func Test_PhasesAddMerge(t *testing.T) {
 	}
 
 	phs.Merge(action.NewPhases(
-		actionmock.NewPhase("three", nil, nil, nil, nil, nil),
-		actionmock.NewPhase("four", nil, nil, nil, nil, nil),
+		mock.NewPhase("three", nil, nil, nil, nil, nil),
+		mock.NewPhase("four", nil, nil, nil, nil, nil),
 	))
 
 	if len(phs) != 4 {
 		t.Errorf("phases merge result in the right number of phases: %+v", phs)
 	}
 
-	phs.Add(actionmock.NewPhase("four", nil, nil, nil, nil, nil)) // repeats id
+	phs.Add(mock.NewPhase("four", nil, nil, nil, nil, nil)) // repeats id
 
 	if len(phs) != 4 {
 		t.Errorf("phases add with a repeat didn't result in the correct number of phases: %+v", phs)
@@ -54,8 +55,8 @@ func Test_PhasesAddMerge(t *testing.T) {
 
 func Test_PhasesContains(t *testing.T) {
 	phs := action.NewPhases(
-		actionmock.NewPhase("yes", nil, nil, nil, nil, nil),
-		actionmock.NewPhase("also", nil, nil, nil, nil, nil),
+		mock.NewPhase("yes", nil, nil, nil, nil, nil),
+		mock.NewPhase("also", nil, nil, nil, nil, nil),
 	)
 
 	if !phs.Contains("yes") {
@@ -88,15 +89,15 @@ func Test_PhasesOrder(t *testing.T) {
 	//     - Before means that the event must run before this Phase (thereforce the Phase that delivers the event comes before)
 	//     - After means that the event must run after this Phase (therefore the Phase that delivers the event comes after)
 	ps := action.NewPhases(
-		actionmock.NewPhase("6", nil, nil, dependency.NewEvents(&ee, &ef), dependency.NewEvents(&ed), nil),
-		actionmock.NewPhase("3", nil, nil, dependency.NewEvents(&eb), dependency.NewEvents(&ea), nil),
-		actionmock.NewPhase("5", nil, nil, dependency.NewEvents(&ec, &ed), dependency.NewEvents(&ea, &eb), nil),
-		actionmock.NewPhase("7", nil, nil, dependency.NewEvents(&ef), dependency.NewEvents(&ec, &ee), nil),
-		actionmock.NewPhase("1", nil, nil, dependency.NewEvents(&ea), nil, dependency.NewEvents(&eb)),
-		actionmock.NewPhase("4", nil, nil, nil, dependency.NewEvents(&eb), dependency.NewEvents(&ed, &ee)),
-		actionmock.NewPhase("8", nil, nil, nil, dependency.NewEvents(&ef), nil),
-		actionmock.NewPhase("0", nil, nil, nil, nil, dependency.NewEvents(&ea, &eb)),
-		actionmock.NewPhase("2", nil, nil, dependency.NewEvents(&ea, &eb), nil, nil),
+		mock.NewPhase("6", nil, nil, dependency.NewEvents(&ee, &ef), dependency.NewEvents(&ed), nil),
+		mock.NewPhase("3", nil, nil, dependency.NewEvents(&eb), dependency.NewEvents(&ea), nil),
+		mock.NewPhase("5", nil, nil, dependency.NewEvents(&ec, &ed), dependency.NewEvents(&ea, &eb), nil),
+		mock.NewPhase("7", nil, nil, dependency.NewEvents(&ef), dependency.NewEvents(&ec, &ee), nil),
+		mock.NewPhase("1", nil, nil, dependency.NewEvents(&ea), nil, dependency.NewEvents(&eb)),
+		mock.NewPhase("4", nil, nil, nil, dependency.NewEvents(&eb), dependency.NewEvents(&ed, &ee)),
+		mock.NewPhase("8", nil, nil, nil, dependency.NewEvents(&ef), nil),
+		mock.NewPhase("0", nil, nil, nil, nil, dependency.NewEvents(&ea, &eb)),
+		mock.NewPhase("2", nil, nil, dependency.NewEvents(&ea, &eb), nil, nil),
 	)
 
 	ops, err := ps.Order(ctx)

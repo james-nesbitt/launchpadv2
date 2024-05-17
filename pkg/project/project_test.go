@@ -5,18 +5,16 @@ import (
 	"errors"
 	"testing"
 
-	mockcomponent "github.com/Mirantis/launchpad/pkg/component/mock"
 	"github.com/Mirantis/launchpad/pkg/dependency"
-	mockdependency "github.com/Mirantis/launchpad/pkg/dependency/mock"
-
 	"github.com/Mirantis/launchpad/pkg/component"
+	"github.com/Mirantis/launchpad/pkg/mock"
 	"github.com/Mirantis/launchpad/pkg/project"
 )
 
 func Test_ProjectComponentValidation(t *testing.T) {
 	ctx := context.Background()
 	e := errors.New("validation error")
-	cp := mockcomponent.NewComponent(
+	cp := mock.NewComponent(
 		"mock",
 		nil,
 		e,
@@ -42,32 +40,32 @@ func Test_ProjectDependencyValidation(t *testing.T) {
 	ctx := context.Background()
 	cl := project.Project{
 		Components: component.Components{
-			"one": mockcomponent.NewComponentWDependencies(
+			"one": mock.NewComponentWDependencies(
 				"one",
 				nil,
 				nil,
 				dependency.Requirements{
-					mockdependency.Requirement("first", "handled as the first", nil),
+					mock.Requirement("first", "handled as the first", nil),
 				},
 				nil,
 				dependency.ErrNotHandled,
 			),
-			"two": mockcomponent.NewComponentWDependencies(
+			"two": mock.NewComponentWDependencies(
 				"two",
 				nil,
 				nil,
 				dependency.Requirements{
-					mockdependency.Requirement("second", "handled as the second", nil),
+					mock.Requirement("second", "handled as the second", nil),
 				},
 				nil,
 				dependency.ErrNotHandled,
 			),
-			"three": mockcomponent.NewComponentWDependencies(
+			"three": mock.NewComponentWDependencies(
 				"three",
 				nil,
 				nil,
 				dependency.Requirements{},
-				mockdependency.Dependency("only", "should get used for all requirements", nil, nil),
+				mock.Dependency("only", "should get used for all requirements", nil, nil),
 				nil,
 			),
 		},

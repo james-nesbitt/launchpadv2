@@ -10,7 +10,6 @@ import (
 	"github.com/Mirantis/launchpad/pkg/action"
 	_ "github.com/Mirantis/launchpad/pkg/config/v2_0"
 	// Register Host handlers
-	_ "github.com/Mirantis/launchpad/pkg/host/mock"
 	_ "github.com/Mirantis/launchpad/pkg/implementation/rig"
 	// Register actual product handlers for testing
 	_ "github.com/Mirantis/launchpad/pkg/product/mcr"

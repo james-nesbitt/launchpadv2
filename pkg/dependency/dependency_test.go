@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/Mirantis/launchpad/pkg/dependency"
-	"github.com/Mirantis/launchpad/pkg/dependency/mock"
+	"github.com/Mirantis/launchpad/pkg/mock"
 )
 
 // --- test Functions ---

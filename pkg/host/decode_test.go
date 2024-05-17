@@ -7,8 +7,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/Mirantis/launchpad/pkg/host"
-	"github.com/Mirantis/launchpad/pkg/host/mock"
-	_ "github.com/Mirantis/launchpad/pkg/host/mock"
+	"github.com/Mirantis/launchpad/pkg/mock"
 )
 
 func Test_HostV2DecodeMock(t *testing.T) {

@@ -18,8 +18,8 @@ import (
 
 	// Register v2 spec handler.
 	_ "github.com/Mirantis/launchpad/pkg/config/v2_0"
+
 	// Register Host handlers.
-	_ "github.com/Mirantis/launchpad/pkg/host/mock"
 	_ "github.com/Mirantis/launchpad/pkg/implementation/rig"
 
 	// Register legacy product handlers for testing.
@@ -31,6 +31,10 @@ import (
 	_ "github.com/Mirantis/launchpad/pkg/product/k0s"
 	_ "github.com/Mirantis/launchpad/pkg/product/mke4"
 	_ "github.com/Mirantis/launchpad/pkg/product/msr4"
+
+	// Register mock stuff, in case it gets used
+	_ "github.com/Mirantis/launchpad/pkg/mock"
+
 )
 
 var (

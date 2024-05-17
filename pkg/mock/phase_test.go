@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/Mirantis/launchpad/pkg/action"
-	"github.com/Mirantis/launchpad/pkg/action/mock"
 	"github.com/Mirantis/launchpad/pkg/dependency"
+	"github.com/Mirantis/launchpad/pkg/mock"
 )
 
 func Test_PhaseSanity(t *testing.T) {

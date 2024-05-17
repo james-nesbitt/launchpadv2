@@ -5,9 +5,8 @@ import (
 	"testing"
 
 	"github.com/Mirantis/launchpad/pkg/action"
-	actionmock "github.com/Mirantis/launchpad/pkg/action/mock"
 	"github.com/Mirantis/launchpad/pkg/dependency"
-	depmock "github.com/Mirantis/launchpad/pkg/dependency/mock"
+	"github.com/Mirantis/launchpad/pkg/mock"
 )
 
 func Test_CommandBuild(t *testing.T) {
@@ -15,25 +14,25 @@ func Test_CommandBuild(t *testing.T) {
 	cmd := action.NewEmptyCommand("test")
 
 	chs := []action.CommandHandler{
-		actionmock.NewCommandHandler(
+		mock.NewCommandHandler(
 			action.NewPhases(
-				actionmock.NewPhase("one", nil, nil, nil, nil, nil),
-				actionmock.NewPhase("two", nil, nil, nil, nil, nil),
+				mock.NewPhase("one", nil, nil, nil, nil, nil),
+				mock.NewPhase("two", nil, nil, nil, nil, nil),
 			),
 			dependency.Dependencies{
-				depmock.Dependency("A", "Dep A", nil, nil),
+				mock.Dependency("A", "Dep A", nil, nil),
 			},
 			dependency.Events{},
 			nil,
 		),
-		actionmock.NewCommandHandler(
+		mock.NewCommandHandler(
 			action.NewPhases(
-				actionmock.NewPhase("three", nil, nil, nil, nil, nil),
-				actionmock.NewPhase("four", nil, nil, nil, nil, nil),
+				mock.NewPhase("three", nil, nil, nil, nil, nil),
+				mock.NewPhase("four", nil, nil, nil, nil, nil),
 			),
 			dependency.Dependencies{
-				depmock.Dependency("B", "Dep B", nil, nil),
-				depmock.Dependency("C", "Dep C", nil, nil),
+				mock.Dependency("B", "Dep B", nil, nil),
+				mock.Dependency("C", "Dep C", nil, nil),
 			},
 			dependency.Events{},
 			nil,

@@ -9,8 +9,7 @@ import (
 	"testing"
 
 	// Register mock Host and Product handlers.
-	_ "github.com/Mirantis/launchpad/pkg/host/mock"
-	_ "github.com/Mirantis/launchpad/pkg/product/mock"
+	_ "github.com/Mirantis/launchpad/pkg/mock"
 
 	// Register actual product handlers for testing.
 	_ "github.com/Mirantis/launchpad/pkg/product/k0s"

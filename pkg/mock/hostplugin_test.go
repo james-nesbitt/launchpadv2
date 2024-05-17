@@ -7,7 +7,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/Mirantis/launchpad/pkg/host"
-	"github.com/Mirantis/launchpad/pkg/host/mock"
+	"github.com/Mirantis/launchpad/pkg/mock"
 )
 
 func Test_MockDecode(t *testing.T) {
@@ -44,7 +44,7 @@ mock:
 
 }
 
-func Test_RolesPlugin_HostGetMock(t *testing.T) {
+func Test_HostGetMock(t *testing.T) {
 	h := host.NewHost("test")
 	var mp host.HostPlugin = mock.NewMockHostPlugin(h)
 
@@ -53,5 +53,17 @@ func Test_RolesPlugin_HostGetMock(t *testing.T) {
 	hgmp := mock.HostGetMock(h)
 	if hgmp == nil {
 		t.Errorf("couldn't get the mock out of the host: %+v", h)
+	}
+}
+
+func Test_PluginSanty(t *testing.T) {
+	h := host.NewHost("test")
+	var mp host.HostPlugin = mock.NewMockHostPlugin(h)
+
+	h.AddPlugin(mp)
+
+	hmp := h.MatchPlugin(mock.HostRoleMock)
+	if hmp == nil {
+		t.Error("host couldn't match mock plugin")
 	}
 }

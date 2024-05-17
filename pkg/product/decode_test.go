@@ -4,15 +4,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Mirantis/launchpad/pkg/product/mock"
-
 	"github.com/Mirantis/launchpad/pkg/component"
+	"github.com/Mirantis/launchpad/pkg/mock"
 	"github.com/Mirantis/launchpad/pkg/product"
 )
 
 func Test_Decode(t *testing.T) {
 	product.RegisterDecoder("dummy", func(id string, _ func(interface{}) error) (component.Component, error) {
-		p := mock.NewProduct(id)
+		p := mock.NewComponent(id, nil, nil)
 		return p, nil
 	})
 

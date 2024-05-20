@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/fs"
 	"log/slog"
 	"strings"
 
@@ -66,29 +65,6 @@ func (p *rigHostPlugin) InstallPackages(ctx context.Context, packages []string) 
 func (p *rigHostPlugin) RemovePackages(ctx context.Context, packages []string) error {
 	slog.DebugContext(ctx, fmt.Sprintf("%s: RIG install packages", p.hid()), slog.Any("packages", packages))
 	return p.rig.Sudo().PackageManagerService.PackageManager().Remove(ctx, packages...)
-}
-
-// Upload from an io.Reader to a file path on the Host.
-func (p *rigHostPlugin) Upload(ctx context.Context, src io.Reader, dst string, fm fs.FileMode, opts hostexec.ExecOptions) error {
-	slog.DebugContext(ctx, fmt.Sprintf("%s: Rig Upload: %s", p.hid(), dst))
-
-	rigc := p.rig.Client
-	if opts.Sudo {
-		rigc = rigc.Sudo()
-	}
-
-	fs := rigc.FS()
-
-	bs, rerr := io.ReadAll(src)
-	if rerr != nil {
-		return rerr
-	}
-
-	if err := fs.WriteFile(dst, bs, fm); err != nil {
-		return err
-	}
-
-	return nil
 }
 
 // ServiceEnable enable and start some services.
@@ -166,6 +142,30 @@ func (p *rigHostPlugin) ServiceDisable(ctx context.Context, services []string) e
 
 		if err := s.Disable(ctx); err != nil {
 			errs = append(errs, fmt.Errorf("%s: service '%s' disable failed: %s", p.hid(), sn, err.Error()))
+		}
+	}
+
+	if len(errs) > 0 {
+		return errors.Join(errs...)
+	}
+
+	return nil
+}
+
+// ServiceIsRunning is the service running
+func (p *rigHostPlugin) ServiceIsRunning(ctx context.Context, services []string) error {
+	rigc := p.rig.Sudo()
+
+	errs := []error{}
+	for _, sn := range services {
+		s, sgerr := rigc.Service(sn)
+		if sgerr != nil {
+			errs = append(errs, fmt.Errorf("%s: service '%s' unknown: %s", p.hid(), sn, sgerr.Error()))
+			continue
+		}
+
+		if !s.IsRunning(ctx) {
+			errs = append(errs, fmt.Errorf("%s: service '%s' is not running", p.hid(), sn))
 		}
 	}
 

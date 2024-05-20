@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -23,9 +24,12 @@ func Test_DownloadQueue(t *testing.T) {
 
 	dq := download.NewQueueDownload(ts.Client())
 
-	d1, d1err := dq.Download(ctx, ts.URL)
+	d1, fn, d1err := dq.Download(ctx, ts.URL)
 	if d1err != nil {
 		t.Fatalf("error occurred downloading: %s", d1err.Error())
+	}
+	if filepath.Base(fn) != "filename.jpg" {
+		t.Fatalf("wrong filename returned: %s", fn)
 	}
 	defer d1.Close()
 }

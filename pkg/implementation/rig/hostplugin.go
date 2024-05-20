@@ -15,15 +15,15 @@ const (
 )
 
 func init() {
-	host.RegisterHostPluginFactory(HostRoleRig, &rigHostPluginFactory{})
+	host.RegisterHostPluginFactory(HostRoleRig, &RigHostPluginFactory{})
 }
 
-type rigHostPluginFactory struct {
+type RigHostPluginFactory struct {
 	ps []*rigHostPlugin
 }
 
 // HostPlugin build a new host plugin
-func (rpf *rigHostPluginFactory) HostPlugin(_ context.Context, h *host.Host) host.HostPlugin {
+func (rpf *RigHostPluginFactory) HostPlugin(_ context.Context, h *host.Host) host.HostPlugin {
 	p := &rigHostPlugin{
 		h:   h,
 		rig: &rig.ClientWithConfig{},
@@ -38,7 +38,7 @@ func (rpf *rigHostPluginFactory) HostPlugin(_ context.Context, h *host.Host) hos
 //
 // The decoder function is ugly, but it is meant to to take a
 // yaml/json .HostPluginDecode() function, and turn it into a plugin
-func (rpf *rigHostPluginFactory) HostPluginDecode(_ context.Context, h *host.Host, d func(interface{}) error) (host.HostPlugin, error) {
+func (rpf *RigHostPluginFactory) HostPluginDecode(_ context.Context, h *host.Host, d func(interface{}) error) (host.HostPlugin, error) {
 	p := &rigHostPlugin{
 		rig: &rig.ClientWithConfig{},
 		h:   h,
@@ -80,6 +80,8 @@ func (mhc rigHostPlugin) RoleMatch(role string) bool {
 	case exec.HostRoleExecutor:
 		return true
 	case network.HostRoleNetwork:
+		return true
+	case exec.HostRoleFiles:
 		return true
 	case exec.HostRolePlatform:
 		return true

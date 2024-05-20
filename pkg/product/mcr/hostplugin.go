@@ -57,11 +57,14 @@ func (pf *hostPluginFactory) HostPlugin(_ context.Context, h *host.Host) host.Ho
 // yaml/json .HostPluginDecode() function, and turn it into a plugin
 func (pf *hostPluginFactory) HostPluginDecode(_ context.Context, h *host.Host, d func(interface{}) error) (host.HostPlugin, error) {
 	p := &hostPlugin{h: h}
+
+	if err := d(p); err != nil {
+		return p, err
+	}
+
 	pf.ps = append(pf.ps, p)
 
-	err := d(p)
-
-	return p, err
+	return p, nil
 }
 
 // Get the MCR plugin from a Host

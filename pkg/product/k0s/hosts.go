@@ -10,8 +10,33 @@ import (
 	"github.com/Mirantis/launchpad/pkg/host/exec"
 )
 
-// GetManagerHosts get the docker hosts for managers.
-func (c Component) GetManagerHosts(ctx context.Context) (host.Hosts, error) {
+// GetLeaderHost find a leader or chose one host as leader
+//
+// @NOTE this function needs a lot of cleaning up
+func (c Component) GetLeaderHost(ctx context.Context) *host.Host {
+	controllers, cerr := c.GetControllerHosts(ctx)
+	if cerr != nil && len(controllers) == 0 {
+		return nil
+	}
+
+	// Pick the first controller that reports to be running and persist the choice
+	for _, h := range controllers {
+		hk := HostGetK0s(h)
+		if !hk.Reset && hk.Metadata.K0sBinaryVersion != nil && hk.Metadata.K0sRunningVersion != nil {
+			return h
+		}
+	}
+
+	// Still nil?  Fall back to first "controller" host, do not persist selection.
+	for _, h := range controllers {
+		return h
+	}
+
+	return nil
+}
+
+// GetControllerHosts get the docker hosts for managers.
+func (c Component) GetControllerHosts(ctx context.Context) (host.Hosts, error) {
 	hs, err := c.GetAllHosts(ctx)
 	if err != nil {
 		return hs, fmt.Errorf("K0S manager hosts retrieval error; %w", err)
@@ -19,7 +44,7 @@ func (c Component) GetManagerHosts(ctx context.Context) (host.Hosts, error) {
 
 	mhs := host.NewHosts()
 	for _, h := range hs {
-		k0sh := HostGetK0S(h)
+		k0sh := HostGetK0s(h)
 		if !k0sh.IsController() {
 			continue
 		}
@@ -39,7 +64,7 @@ func (c Component) GetWorkerHosts(ctx context.Context) (host.Hosts, error) {
 
 	whs := host.NewHosts()
 	for _, h := range hs {
-		mh := HostGetK0S(h)
+		mh := HostGetK0s(h)
 		if mh.IsController() {
 			continue
 		}
@@ -62,13 +87,18 @@ func (c Component) GetAllHosts(ctx context.Context) (host.Hosts, error) {
 
 	hs := host.NewHosts()
 	for _, h := range ghs {
-		if m := HostGetK0S(h); m == nil {
+		if m := HostGetK0s(h); m == nil {
 			slog.WarnContext(ctx, fmt.Sprintf("%s: host provided to K0S has no K0S plugin", h.Id()))
 			continue
 		}
 
 		if e := exec.HostGetExecutor(h); e == nil {
 			slog.WarnContext(ctx, fmt.Sprintf("%s: host provided to K0S has no exec plugin", h.Id()))
+			continue
+		}
+
+		if e := exec.HostGetFiles(h); e == nil {
+			slog.WarnContext(ctx, fmt.Sprintf("%s: host provided to K0S has no files plugin: %+v", h.Id(), h))
 			continue
 		}
 

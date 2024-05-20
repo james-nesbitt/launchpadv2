@@ -12,7 +12,6 @@ import (
 
 func Test_k0sProductSanity(t *testing.T) {
 	var k0sp component.Component = k0s.NewComponent("dummy", k0s.Config{
-		Version: "v1.28.4+k0s.0",
 		Version: *version.MustParse("v1.28.4+k0s.0"),
 	})
 

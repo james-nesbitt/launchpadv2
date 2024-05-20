@@ -28,7 +28,7 @@ func (c *Component) RequiresDependencies(_ context.Context) dependency.Requireme
 
 				chc := 0 // count how many controllers we find
 				for _, h := range hs {
-					hk := HostGetK0S(h) // get the host K0s plugin
+					hk := HostGetK0s(h) // get the host K0s plugin
 					if hk == nil {
 						// node has no k0s plugin, so it is not a target for install
 						continue

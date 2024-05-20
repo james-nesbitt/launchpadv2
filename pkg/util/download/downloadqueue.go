@@ -62,5 +62,5 @@ func (qd *QueueDownload) Download(ctx context.Context, url string) (io.ReadClose
 		return nil, cfs, cferr
 	}
 
-	return cf, filepath.Base(cfs), nil
+	return cf, cfs, nil
 }

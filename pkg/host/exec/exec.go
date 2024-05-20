@@ -3,7 +3,6 @@ package exec
 import (
 	"context"
 	"io"
-	"io/fs"
 
 	"github.com/Mirantis/launchpad/pkg/host"
 )
@@ -50,13 +49,12 @@ type HostExecutor interface {
 	// RemovePackages uninstall some packages
 	RemovePackages(ctx context.Context, packages []string) error
 
-	// Upload content from a io.Reader to a path on the Host
-	Upload(ctx context.Context, src io.Reader, dst string, fm fs.FileMode, opts ExecOptions) error
-
 	// ServiceEnable activate and start system services
 	ServiceEnable(ctx context.Context, services []string) error
 	// ServiceRestart stop and restart system services
 	ServiceRestart(ctx context.Context, services []string) error
 	// ServiceDisable stop and disable system services
 	ServiceDisable(ctx context.Context, services []string) error
+	// ServiceIsRunning is the service running
+	ServiceIsRunning(ctx context.Context, services []string) error
 }

@@ -5,7 +5,7 @@ import (
 
 	dockertypesimage "github.com/docker/docker/api/types/image"
 
-	"github.com/Mirantis/launchpad/pkg/product/common"
+	"github.com/Mirantis/launchpad/pkg/util/flags"
 )
 
 var (
@@ -40,8 +40,8 @@ type ConfigInstall struct {
 	AdminPassword string `yaml:"adminPassword,omitempty"`
 	San           string `yaml:"san,omitempty"`
 
-	SwarmOnly bool         `yaml:"swarm_only"`
-	Flags     common.Flags `yaml:"flags,omitempty,flow"`
+	SwarmOnly bool        `yaml:"swarm_only"`
+	Flags     flags.Flags `yaml:"flags,omitempty,flow"`
 
 	ConfigFile      string `yaml:"configFile,omitempty" validate:"omitempty,file"`
 	ConfigData      string `yaml:"configData,omitempty"`
@@ -49,7 +49,7 @@ type ConfigInstall struct {
 }
 
 type ConfigUpgrade struct {
-	Flags common.Flags `yaml:"flags,omitempty,flow"`
+	Flags flags.Flags `yaml:"flags,omitempty,flow"`
 }
 
 // Prepulling images is only required if not from the main repo

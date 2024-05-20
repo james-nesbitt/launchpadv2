@@ -53,16 +53,34 @@ func TestConfig_CurrentGen(t *testing.T) {
 	cl := project.Project{}
 	cy := `
 hosts:
-  dummy-manager:
+  # jnlp2-ACon-0 (ssh)
+  ACon_0:
     mcr:
       role: manager
-  dummy-worker:
-    mcr: {}
+  # jnlp2-AWrk_Ubu22-0 (ssh)
+  AWrk_Ubu22_0:
+    mcr:
+      role: worker
 products:
   mcr:
-    version: 23.0.10
+    version: 23.0.9
+    repoURL: https://repos.mirantis.com
+    installURLLinux: https://get.mirantis.com/
+    installURLWindows: https://get.mirantis.com/install.ps1
+    channel: stable
   mke3:
-    version: 3.7.2
+    version: 3.7.5
+    imageRepo: docker.io/mirantis
+    install:
+      adminUsername: "admin"
+      flags: 
+      - "--default-node-orchestrator=kubernetes"
+      - "--nodeport-range=32768-35535"
+    upgrade:
+      flags:
+      - "--force-recent-backup"
+      - "--force-minimums"
+    prune: true
   msr2:
     version: 2.9.10
 `
@@ -92,13 +110,42 @@ products:
 func TestConfig_NextGen(t *testing.T) {
 	cl := project.Project{}
 	cy := `
+project:
+  prune: false
 hosts:
-  dummy-controller:
+  # jnlp2-ACon-0 (ssh)
+  ACon_0:
     k0s:
-      role: controller
+      role:controller
+  # jnlp2-AWrk_Ubu22-0 (ssh)
+  AWrk_Ubu22_0:
+    k0s:
+      role: worker
 products:
   k0s:
     version: v1.28.4+k0s.0
+    config:
+      apiVersion: k0s.k0sproject.io/v1beta1"
+      kind: ClusterConfig
+      metadata:
+        name: k0s
+      spec:
+        controllerManager: {}
+        extensions:
+          helm:
+            concurrencyLevel: 5
+            charts: null
+            repositories: null
+          storage:
+            create_default_storage_class: true
+            type: openebs_local_storage
+        installConfig:
+          users:
+            etcdUser: etcd
+            kineUser: kube-apiserver
+            konnectivityUser: konnectivity-server
+            kubeAPIserverUser: kube-apiserver
+            kubeSchedulerUser: kube-scheduler
   mke4:
     version: 4.0.0
   msr4:

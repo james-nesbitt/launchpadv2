@@ -6,6 +6,7 @@ import (
 	"github.com/Mirantis/launchpad/pkg/action"
 	"github.com/Mirantis/launchpad/pkg/action/stepped"
 	"github.com/Mirantis/launchpad/pkg/dependency"
+	"github.com/Mirantis/launchpad/pkg/project"
 )
 
 const (
@@ -14,7 +15,7 @@ const (
 	CommandPhaseReset    = "MSR2-Reset"
 )
 
-func (c MSR2) CommandBuild(ctx context.Context, cmd *action.Command) error {
+func (c Component) CommandBuild(ctx context.Context, cmd *action.Command) error {
 	// our requirements
 	rs := dependency.Requirements{
 		c.mke3r,
@@ -26,7 +27,7 @@ func (c MSR2) CommandBuild(ctx context.Context, cmd *action.Command) error {
 	}
 
 	switch cmd.Key {
-	case action.CommandKeyDiscover:
+	case project.CommandKeyDiscover:
 		p := stepped.NewSteppedPhase(CommandPhaseDiscover, rs, ds, []string{dependency.EventKeyActivated})
 		p.Steps().Add(
 			&discoverStep{
@@ -35,7 +36,7 @@ func (c MSR2) CommandBuild(ctx context.Context, cmd *action.Command) error {
 		)
 		cmd.Phases.Add(p)
 
-	case action.CommandKeyApply:
+	case project.CommandKeyApply:
 		p := stepped.NewSteppedPhase(CommandPhaseApply, rs, ds, []string{dependency.EventKeyActivated})
 		p.Steps().Merge(stepped.Steps{
 			&discoverStep{
@@ -53,7 +54,7 @@ func (c MSR2) CommandBuild(ctx context.Context, cmd *action.Command) error {
 		})
 		cmd.Phases.Add(p)
 
-	case action.CommandKeyReset:
+	case project.CommandKeyReset:
 		pd := stepped.NewSteppedPhase(CommandPhaseDiscover, rs, ds, []string{dependency.EventKeyActivated})
 		pd.Steps().Add(
 			&discoverStep{

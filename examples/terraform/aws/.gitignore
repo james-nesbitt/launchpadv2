@@ -9,4 +9,4 @@ terraform.tfstate*
 
 .terraform
 
-launchpad.yaml
+*.yaml

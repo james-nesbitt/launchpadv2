@@ -3,7 +3,7 @@ module github.com/Mirantis/launchpad
 go 1.22.2
 
 require (
-	github.com/docker/docker v26.1.1+incompatible
+	github.com/docker/docker v26.1.3+incompatible
 	github.com/k0sproject/rig/v2 v2.0.0-alpha.2
 	github.com/spf13/cobra v1.8.0
 	github.com/yourbasic/graph v0.0.0-20210606180040-8ecfec1c2869
@@ -19,7 +19,7 @@ require (
 	github.com/davidmz/go-pageant v1.0.2 // indirect
 	github.com/docker/go-connections v0.5.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
-	github.com/go-logr/logr v1.4.1 // indirect
+	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/gofrs/uuid v4.4.0+incompatible // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect

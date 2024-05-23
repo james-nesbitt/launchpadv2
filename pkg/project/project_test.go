@@ -5,8 +5,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/Mirantis/launchpad/pkg/dependency"
 	"github.com/Mirantis/launchpad/pkg/component"
+	"github.com/Mirantis/launchpad/pkg/dependency"
 	"github.com/Mirantis/launchpad/pkg/mock"
 	"github.com/Mirantis/launchpad/pkg/project"
 )

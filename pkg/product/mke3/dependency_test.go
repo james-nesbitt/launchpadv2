@@ -18,7 +18,7 @@ func Test_ProvidesMKE3(t *testing.T) {
 	ctx := context.Background()
 
 	dc := mke3implementation.MKE3DependencyConfig{Version: "3.7.7"}
-	m := mke3.NewMKE3("test", mke3.Config{Version: dc.Version})
+	m := mke3.NewComponent("test", mke3.Config{Version: dc.Version})
 	var mc component.Component = m
 
 	r := mke3implementation.NewMKE3Requirement(
@@ -52,7 +52,7 @@ func Test_ProvidesMKE3(t *testing.T) {
 func Test_ProvidesK8s(t *testing.T) {
 	ctx := context.Background()
 
-	m := mke3.NewMKE3("test", mke3.Config{Version: "3.7.7"})
+	m := mke3.NewComponent("test", mke3.Config{Version: "3.7.7"})
 	var mc component.Component = m
 
 	kver := kubernetes.Version{Version: "1.28"}

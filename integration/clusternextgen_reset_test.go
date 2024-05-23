@@ -7,6 +7,7 @@ import (
 
 	// Register v2 spec handler
 	"github.com/Mirantis/launchpad/pkg/action"
+	"github.com/Mirantis/launchpad/pkg/project"
 	_ "github.com/Mirantis/launchpad/pkg/config/v2_0"
 	// Register Host handlers
 	_ "github.com/Mirantis/launchpad/pkg/implementation/rig"
@@ -34,7 +35,7 @@ func Test_NextGenResetCommand(t *testing.T) {
 		t.Errorf("project validation error: %s", valerr.Error())
 	}
 
-	cmd, err := cl.Command(ctx, action.CommandKeyReset)
+	cmd, err := cl.Command(ctx, project.CommandKeyReset)
 	if err != nil {
 		t.Fatalf("project command build error: %s", err.Error())
 	}

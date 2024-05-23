@@ -11,7 +11,7 @@ import (
 )
 
 // GetManagerHosts get the docker hosts for managers.
-func (c K0S) GetManagerHosts(ctx context.Context) (host.Hosts, error) {
+func (c Component) GetManagerHosts(ctx context.Context) (host.Hosts, error) {
 	hs, err := c.GetAllHosts(ctx)
 	if err != nil {
 		return hs, fmt.Errorf("K0S manager hosts retrieval error; %w", err)
@@ -31,7 +31,7 @@ func (c K0S) GetManagerHosts(ctx context.Context) (host.Hosts, error) {
 }
 
 // GetWorkerHosts get the docker hosts for workers.
-func (c K0S) GetWorkerHosts(ctx context.Context) (host.Hosts, error) {
+func (c Component) GetWorkerHosts(ctx context.Context) (host.Hosts, error) {
 	hs, err := c.GetAllHosts(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("K0S worker hosts retrieval error; %w", err)
@@ -51,8 +51,8 @@ func (c K0S) GetWorkerHosts(ctx context.Context) (host.Hosts, error) {
 }
 
 // GetAllHosts get the docker hosts for all hosts.
-func (c K0S) GetAllHosts(ctx context.Context) (host.Hosts, error) {
-	ghs, err := getRequirementHosts(ctx, c.hr)
+func (c Component) GetAllHosts(ctx context.Context) (host.Hosts, error) {
+	ghs, err := getRequirementHosts(ctx, c.hs)
 	if err != nil {
 		return nil, fmt.Errorf("hosts retrieval error; %w", err)
 	}

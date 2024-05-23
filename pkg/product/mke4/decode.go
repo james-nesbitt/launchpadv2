@@ -8,14 +8,14 @@ import (
 )
 
 func init() {
-	product.RegisterDecoder("mke4", DecodeMKE4Component)
+	product.RegisterDecoder(ComponentType, DecodeMKE4Component)
 }
 func DecodeMKE4Component(id string, d func(interface{}) error) (component.Component, error) {
 	c := Config{}
 
 	if err := d(&c); err != nil {
-		return nil, fmt.Errorf("Failure to unmarshal product 'MKE4' : %w", err)
+		return nil, fmt.Errorf("Failure to decode product '%s' : %w", ComponentType, err)
 	}
 
-	return NewMKE4(id, c), nil
+	return NewComponent(id, c), nil
 }

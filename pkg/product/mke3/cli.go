@@ -16,7 +16,7 @@ const (
 	DefaultLeaderMananger = "<default>"
 )
 
-func (c MKE3) CliBuild(cmd *cobra.Command) error {
+func (c Component) CliBuild(cmd *cobra.Command) error {
 
 	g := &cobra.Group{
 		ID:    c.Name(),

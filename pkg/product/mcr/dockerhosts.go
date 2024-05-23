@@ -11,7 +11,7 @@ import (
 )
 
 // GetManagerHosts get the docker hosts for managers.
-func (c MCR) GetManagerHosts(ctx context.Context) (host.Hosts, error) {
+func (c Component) GetManagerHosts(ctx context.Context) (host.Hosts, error) {
 	hs, err := c.GetAllHosts(ctx)
 	if err != nil {
 		return hs, fmt.Errorf("MCR manager hosts retrieval error; %w", err)
@@ -33,7 +33,7 @@ func (c MCR) GetManagerHosts(ctx context.Context) (host.Hosts, error) {
 }
 
 // GetWorkerHosts get the docker hosts for workers.
-func (c MCR) GetWorkerHosts(ctx context.Context) (host.Hosts, error) {
+func (c Component) GetWorkerHosts(ctx context.Context) (host.Hosts, error) {
 	hs, err := c.GetAllHosts(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("MCR worker hosts retrieval error; %w", err)
@@ -55,7 +55,7 @@ func (c MCR) GetWorkerHosts(ctx context.Context) (host.Hosts, error) {
 }
 
 // GetAllHosts get the docker hosts for all hosts.
-func (c MCR) GetAllHosts(ctx context.Context) (host.Hosts, error) {
+func (c Component) GetAllHosts(ctx context.Context) (host.Hosts, error) {
 	ghs, err := getRequirementHosts(ctx, c.hr)
 	if err != nil {
 		return nil, fmt.Errorf("hosts retrieval error; %w", err)

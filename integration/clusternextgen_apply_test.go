@@ -1,5 +1,4 @@
 //go:build integration
-
 package integration_test
 
 import (
@@ -7,7 +6,7 @@ import (
 	"testing"
 
 	// Register v2 spec handler
-	"github.com/Mirantis/launchpad/pkg/action"
+	"github.com/Mirantis/launchpad/pkg/project"
 	_ "github.com/Mirantis/launchpad/pkg/config/v2_0"
 	// Register Host handlers
 	_ "github.com/Mirantis/launchpad/pkg/implementation/rig"
@@ -35,7 +34,7 @@ func Test_NextGenApplyCommand(t *testing.T) {
 		t.Errorf("project validation error: %s", valerr.Error())
 	}
 
-	cmd, err := cl.Command(ctx, action.CommandKeyApply)
+	cmd, err := cl.Command(ctx, project.CommandKeyApply)
 	if err != nil {
 		t.Fatalf("project command build error: %s", err.Error())
 	}

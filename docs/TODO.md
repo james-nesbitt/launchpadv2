@@ -27,11 +27,10 @@
 ## Host 
 
 - [x] (host-network-discover) Hosts need to be able to discover their networking (internal) so that we can activate swarm using the advertise address
-- [ ] (flexible-host) Allow Hosts to have component specific configuration/functionalily so that we can configure host specific things like docker-sudo, mcr-daemon-config. Maybe a plugin system, or allow multiple handlers per host? Currently I am looking at having a system for allowing hosts to be decorated on demand
+- [x] (flexible-host) Allow Hosts to have component specific configuration/functionalily so that we can configure host specific things like docker-sudo, mcr-daemon-config. Maybe a plugin system, or allow multiple handlers per host? Currently I am looking at having a system for allowing hosts to be decorated on demand
 - [ ] (host-hooks) Allow host hooks. Perhaps rely on action.Events or action.Phases as markers.
 - [ ] (host-as-a-component) should we stop treating host components separately from product components.
 - [ ] (log-command-identifier) Log entries for a command should have some identifier to show that they are connected so that you can correlate the various output lines to one execution.
-
 
 ## Component
 
@@ -50,3 +49,12 @@
 
 - [X] (mke3-config-separate) separate install and upgrade config so that it is obvious to the user what values are supported for each operation.
 - [ ] (mke3-implementation) MKE3 implementation is needed to allow the client-bundle download
+
+## Product:K0s
+
+- [X] (k0s-initial) start K0s component 
+
+## Product:MKEx 
+
+- [X] (mkex-initial) start mkex component 
+- [X] (mkex-swarm-initialize) get mkex to activate swarm

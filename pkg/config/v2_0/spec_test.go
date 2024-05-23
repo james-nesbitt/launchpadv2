@@ -16,6 +16,7 @@ import (
 	_ "github.com/Mirantis/launchpad/pkg/product/mcr"
 	_ "github.com/Mirantis/launchpad/pkg/product/mke3"
 	_ "github.com/Mirantis/launchpad/pkg/product/mke4"
+	_ "github.com/Mirantis/launchpad/pkg/product/mkex"
 	_ "github.com/Mirantis/launchpad/pkg/product/msr2"
 	_ "github.com/Mirantis/launchpad/pkg/product/msr4"
 
@@ -108,6 +109,39 @@ products:
 
 	if err := v2_0.Decode(&cl, df); err != nil {
 		t.Fatalf("NextGen 2.0 Spec decode failed unexpectedly: %s", err.Error())
+	}
+
+	if len(cl.Components) != 4 { // 3 products and the hosts component
+		t.Errorf("Wrong number of components: %+v", cl.Components)
+	}
+
+	// if k0s, ok := cl.Components["k0s"]; !ok {
+	// 	t.Error("K0s component didn't decode properly")
+	// } else if k0s.Name() != "k0s" {
+	// 	t.Errorf("K0s product has wrong name: %s", k0s.Name())
+	// }
+}
+
+func TestConfig_MKEx(t *testing.T) {
+	cl := project.Project{}
+	cy := `
+hosts:
+  dummy-controller:
+    mkex:
+      role: controller
+products:
+  mkex:
+    version: v1.28.4+k0s.0
+  mke3:
+    version: 3.7.6
+  msr2:
+    version: 2.9.10
+`
+
+	df := decode.DecodeTestYaml([]byte(cy))
+
+	if err := v2_0.Decode(&cl, df); err != nil {
+		t.Fatalf("MKEX 2.0 Spec decode failed unexpectedly: %s", err.Error())
 	}
 
 	if len(cl.Components) != 4 { // 3 products and the hosts component

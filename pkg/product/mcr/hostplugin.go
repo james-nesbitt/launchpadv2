@@ -2,7 +2,13 @@ package mcr
 
 import (
 	"context"
+	"fmt"
 	"io"
+	"log/slog"
+	"net/http"
+	"strings"
+
+	dockertypessystem "github.com/docker/docker/api/types/system"
 
 	"github.com/Mirantis/launchpad/pkg/host"
 	"github.com/Mirantis/launchpad/pkg/host/exec"
@@ -20,24 +26,27 @@ const (
 )
 
 var (
-	// MCRManagerHostRoles the Host roles accepted for managers.
-	MCRManagerHostRoles = []string{"manager"}
+	// ManagerRoles the Host roles accepted for managers.
+	ManagerRoles = []string{"manager"}
+
+	MCRInstallerPath = "mcr-install"
+	MCRServices      = []string{"docker", "containerd"}
 )
 
 func init() {
-	host.RegisterHostPluginFactory(HostRoleMCR, &mcrHostPluginFactory{})
+	host.RegisterHostPluginFactory(HostRoleMCR, &hostPluginFactory{})
 }
 
-type mcrHostPluginFactory struct {
-	ps []*mcrHostPlugin
+type hostPluginFactory struct {
+	ps []*hostPlugin
 }
 
-// Plugin build a new host plugin
-func (mpf *mcrHostPluginFactory) Plugin(_ context.Context, h *host.Host) host.HostPlugin {
-	p := &mcrHostPlugin{
+// HostPlugin build a new host plugin
+func (pf *hostPluginFactory) HostPlugin(_ context.Context, h *host.Host) host.HostPlugin {
+	p := &hostPlugin{
 		h: h,
 	}
-	mpf.ps = append(mpf.ps, p)
+	pf.ps = append(pf.ps, p)
 
 	return p
 }
@@ -45,10 +54,10 @@ func (mpf *mcrHostPluginFactory) Plugin(_ context.Context, h *host.Host) host.Ho
 // Decoder provide a Host Plugin decoder function
 //
 // The decoder function is ugly, but it is meant to to take a
-// yaml/json .Decode() function, and turn it into a plugin
-func (mpf *mcrHostPluginFactory) Decode(_ context.Context, h *host.Host, d func(interface{}) error) (host.HostPlugin, error) {
-	p := &mcrHostPlugin{h: h}
-	mpf.ps = append(mpf.ps, p)
+// yaml/json .HostPluginDecode() function, and turn it into a plugin
+func (pf *hostPluginFactory) HostPluginDecode(_ context.Context, h *host.Host, d func(interface{}) error) (host.HostPlugin, error) {
+	p := &hostPlugin{h: h}
+	pf.ps = append(pf.ps, p)
 
 	err := d(p)
 
@@ -56,13 +65,13 @@ func (mpf *mcrHostPluginFactory) Decode(_ context.Context, h *host.Host, d func(
 }
 
 // Get the MCR plugin from a Host
-func HostGetMCR(h *host.Host) *mcrHostPlugin {
+func HostGetMCR(h *host.Host) *hostPlugin {
 	hgmcr := h.MatchPlugin(HostRoleMCR)
 	if hgmcr == nil {
 		return nil
 	}
 
-	hmcr, ok := hgmcr.(*mcrHostPlugin)
+	hmcr, ok := hgmcr.(*hostPlugin)
 	if !ok {
 		return nil
 	}
@@ -70,25 +79,25 @@ func HostGetMCR(h *host.Host) *mcrHostPlugin {
 	return hmcr
 }
 
-// mcrHostPlugin
+// hostPlugin
 //
 // Implements no generic plugin interfaces.
-type mcrHostPlugin struct {
+type hostPlugin struct {
 	h                *host.Host
 	SwarmRole        string `yaml:"role"`
 	ShouldSudoDocker bool   `yaml:"sudo_docker"`
 	DaemonJson       string `yaml:"daemon_json"`
 }
 
-func (mhc mcrHostPlugin) Id() string {
+func (_ hostPlugin) Id() string {
 	return "mcr"
 }
 
-func (mhc mcrHostPlugin) Validate() error {
+func (_ hostPlugin) Validate() error {
 	return nil
 }
 
-func (mhc mcrHostPlugin) RoleMatch(role string) bool {
+func (_ hostPlugin) RoleMatch(role string) bool {
 	switch role {
 	case HostRoleMCR:
 		return true
@@ -101,14 +110,14 @@ func (mhc mcrHostPlugin) RoleMatch(role string) bool {
 }
 
 // DockerExecOptions meet the dockerhost.HostDockerExec interface
-func (mhc mcrHostPlugin) DockerExec() *dockerimplementation.DockerExec {
-	e := exec.HostGetExecutor(mhc.h)
+func (hp hostPlugin) DockerExec() *dockerimplementation.DockerExec {
+	e := exec.HostGetExecutor(hp.h)
 	if e == nil {
 		return nil
 	}
 
 	def := func(ctx context.Context, cmd string, i io.Reader, rops dockerimplementation.RunOptions) (string, string, error) {
-		hopts := exec.ExecOptions{Sudo: mhc.ShouldSudoDocker}
+		hopts := exec.ExecOptions{Sudo: hp.ShouldSudoDocker}
 
 		if rops.ShowOutput {
 			hopts.OutputLevel = "info"
@@ -123,15 +132,86 @@ func (mhc mcrHostPlugin) DockerExec() *dockerimplementation.DockerExec {
 	return dockerimplementation.NewDockerExec(def)
 }
 
-func (mhc mcrHostPlugin) MCRConfig() string {
-	return mhc.DaemonJson
+func (hp hostPlugin) DockerConfig() string {
+	return hp.DaemonJson
 }
 
-func (mhc mcrHostPlugin) IsManager() bool {
-	for _, r := range MCRManagerHostRoles {
-		if mhc.SwarmRole == r {
+func (hp hostPlugin) IsManager() bool {
+	for _, r := range ManagerRoles {
+		if hp.SwarmRole == r {
 			return true
 		}
 	}
 	return false
+}
+
+func (hp hostPlugin) DockerInfo(ctx context.Context) (dockertypessystem.Info, error) {
+	return hp.DockerExec().Info(ctx)
+}
+
+func (hp hostPlugin) DownloadMCRInstaller(ctx context.Context, c Config) error {
+	ir := c.InstallURLLinux
+
+	slog.InfoContext(ctx, fmt.Sprintf("%s: downloading MCR Installer: %s", hp.h.Id(), ir), slog.Any("host", hp.h))
+
+	irs, igerr := http.Get(ir)
+	if igerr != nil {
+		return igerr
+	}
+
+	defer irs.Body.Close()
+
+	if err := exec.HostGetExecutor(hp.h).Upload(ctx, irs.Body, MCRInstallerPath, 0777, exec.ExecOptions{}); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (hp hostPlugin) RunMCRInstaller(ctx context.Context, c Config) error {
+	slog.InfoContext(ctx, fmt.Sprintf("%s: running MCR Installer (%s)", hp.h.Id(), MCRInstallerPath), slog.Any("host", hp.h))
+
+	cmd := fmt.Sprintf("DOCKER_URL=%s CHANNEL=%s VERSION=%s bash %s", c.RepoURL, c.Channel, c.Version, MCRInstallerPath)
+	if _, e, err := exec.HostGetExecutor(hp.h).Exec(ctx, cmd, nil, exec.ExecOptions{Sudo: true}); err != nil {
+		return fmt.Errorf("%s: mcr installer fail: %s \n %s", hp.h.Id(), err.Error(), e)
+	}
+	return nil
+}
+
+func (hp hostPlugin) UninstallMCR(ctx context.Context) error {
+	slog.InfoContext(ctx, fmt.Sprintf("%s: uninstall MCR: %s", hp.h.Id(), strings.Join(MCRServices, ", ")), slog.Any("host", hp.h))
+
+	if err := exec.HostGetExecutor(hp.h).RemovePackages(ctx, MCRUninstallPackages); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (hp hostPlugin) EnableMCRService(ctx context.Context) error {
+	slog.InfoContext(ctx, fmt.Sprintf("%s: enabling MCR services: %s", hp.h.Id(), strings.Join(MCRServices, ", ")), slog.Any("host", hp.h))
+
+	if err := exec.HostGetExecutor(hp.h).ServiceEnable(ctx, MCRServices); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (hp hostPlugin) RestartMCRService(ctx context.Context) error {
+	if err := exec.HostGetExecutor(hp.h).ServiceRestart(ctx, []string{"docker"}); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (hp hostPlugin) DisableMCRService(ctx context.Context) error {
+	slog.InfoContext(ctx, fmt.Sprintf("%s: disabling MCR services: %s", hp.h.Id(), strings.Join(MCRServices, ", ")), slog.Any("host", hp.h))
+
+	if err := exec.HostGetExecutor(hp.h).ServiceDisable(ctx, MCRServices); err != nil {
+		return err
+	}
+
+	return nil
 }

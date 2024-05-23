@@ -6,7 +6,6 @@ import (
 	"log/slog"
 
 	"github.com/Mirantis/launchpad/pkg/host"
-	"github.com/Mirantis/launchpad/pkg/host/exec"
 )
 
 type restartMCRStep struct {
@@ -26,15 +25,10 @@ func (s *restartMCRStep) Run(ctx context.Context) error {
 		return hsgerr
 	}
 
-	if err := hs.Each(ctx, s.restartMCRService); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (s restartMCRStep) restartMCRService(ctx context.Context, h *host.Host) error {
-	if err := exec.HostGetExecutor(h).ServiceRestart(ctx, []string{"docker"}); err != nil {
+	if err := hs.Each(ctx, func(ctx context.Context, h *host.Host) error {
+		hm := HostGetMCR(h)
+		return hm.RestartMCRService(ctx)
+	}); err != nil {
 		return err
 	}
 

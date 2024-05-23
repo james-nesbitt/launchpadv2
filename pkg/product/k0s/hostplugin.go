@@ -28,8 +28,8 @@ type k0sHostPluginFactory struct {
 	ps []*k0sHostPlugin
 }
 
-// Plugin build a new host plugin
-func (mpf *k0sHostPluginFactory) Plugin(_ context.Context, h *host.Host) host.HostPlugin {
+// HostPlugin build a new host plugin
+func (mpf *k0sHostPluginFactory) HostPlugin(_ context.Context, h *host.Host) host.HostPlugin {
 	p := &k0sHostPlugin{
 		h: h,
 	}
@@ -41,8 +41,8 @@ func (mpf *k0sHostPluginFactory) Plugin(_ context.Context, h *host.Host) host.Ho
 // Decoder provide a Host Plugin decoder function
 //
 // The decoder function is ugly, but it is meant to to take a
-// yaml/json .Decode() function, and turn it into a plugin
-func (mpf *k0sHostPluginFactory) Decode(_ context.Context, h *host.Host, d func(interface{}) error) (host.HostPlugin, error) {
+// yaml/json .HostPluginDecode() function, and turn it into a plugin
+func (mpf *k0sHostPluginFactory) HostPluginDecode(_ context.Context, h *host.Host, d func(interface{}) error) (host.HostPlugin, error) {
 	p := &k0sHostPlugin{h: h}
 	mpf.ps = append(mpf.ps, p)
 

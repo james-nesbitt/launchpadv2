@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 
+	"github.com/Mirantis/launchpad/pkg/project"
 	"github.com/spf13/cobra"
 )
 
@@ -14,7 +15,7 @@ type HostFactoryCliBuilder interface {
 // CliBuild build command cli for launchpad
 //
 // The hosts component allows HostPluginFactories to also build CLI
-func (c *HostsComponent) CliBuild(cmd *cobra.Command) error {
+func (c *HostsComponent) CliBuild(cmd *cobra.Command, _ *project.Project) error {
 
 	g := &cobra.Group{
 		ID:    c.Name(),
@@ -29,6 +30,7 @@ func (c *HostsComponent) CliBuild(cmd *cobra.Command) error {
 			continue
 		}
 
+		slog.Debug(fmt.Sprintf("%s host plugin factory builds clis", key))
 		if err := hpfcb.CliBuild(cmd, c); err != nil {
 			slog.Warn(fmt.Sprintf("%s host plugin factory cli build error", key))
 		}

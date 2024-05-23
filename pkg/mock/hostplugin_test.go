@@ -29,7 +29,7 @@ mock:
 	pf := mock.MockHostPluginFactory{}
 	h := host.NewHost("test")
 
-	hp, hpderr := pf.Decode(ctx, h, ynd.Decode)
+	hp, hpderr := pf.HostPluginDecode(ctx, h, ynd.Decode)
 	if hpderr != nil {
 		t.Fatal("failed to decode mock host plugin")
 	}

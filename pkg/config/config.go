@@ -23,7 +23,7 @@ type ConfigMeta struct {
 
 // ConfigFromYamllBytes convert bytes of yaml to a project object.
 func ConfigFromYamllBytes(b []byte) (project.Project, error) {
-	var cl project.Project
+	var cl project.Project = project.New()
 	var cb ConfigBase
 
 	if err := yaml.Unmarshal(b, &cb); err != nil {

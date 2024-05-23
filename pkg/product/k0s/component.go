@@ -15,21 +15,21 @@ const (
 	WorkerHostRole     = "worker"
 )
 
-// NewK0S constructor for K0S from config.
-func NewK0S(id string, c Config) *K0S {
-	return &K0S{
+// NewComponent constructor for K0S from config.
+func NewComponent(id string, c Config) *Component {
+	return &Component{
 		id:     id,
 		config: c,
 		state:  State{},
 	}
 }
 
-// K0S product implementation.
-type K0S struct {
+// Component product implementation.
+type Component struct {
 	id string
 
-	// controller and worker host roles req (hosts onto which we will install)
-	hr dependency.Requirement
+	// controller and worker hosts req (hosts onto which we will install)
+	hs dependency.Requirement
 
 	// dependencies given out to any component that says that it needs access to our kubernetes/k0s-api
 	k8sd dependency.Dependency
@@ -40,7 +40,7 @@ type K0S struct {
 }
 
 // Name for the component.
-func (p K0S) Name() string {
+func (p Component) Name() string {
 	if p.id == ComponentType {
 		return p.id
 	}
@@ -48,11 +48,11 @@ func (p K0S) Name() string {
 }
 
 // Debug product debug.
-func (_ K0S) Debug() interface{} {
+func (_ Component) Debug() interface{} {
 	return nil
 }
 
 // Validate product debug.
-func (_ K0S) Validate(_ context.Context) error {
+func (_ Component) Validate(_ context.Context) error {
 	return nil
 }

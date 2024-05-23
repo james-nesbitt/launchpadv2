@@ -7,7 +7,6 @@ import (
 	"github.com/Mirantis/launchpad/pkg/product"
 )
 
-
 func init() {
 	product.ProductDecoders["mock"] = DecodeMockComponent
 }

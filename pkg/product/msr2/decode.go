@@ -8,15 +8,15 @@ import (
 )
 
 func init() {
-	product.RegisterDecoder("msr2", DecodeMSR2Component)
+	product.RegisterDecoder(ComponentType, DecodeComponent)
 }
 
-func DecodeMSR2Component(id string, d func(interface{}) error) (component.Component, error) {
+func DecodeComponent(id string, d func(interface{}) error) (component.Component, error) {
 	c := Config{}
 
 	if err := d(&c); err != nil {
-		return nil, fmt.Errorf("Failure to unmarshal product 'MSR2' : %w", err)
+		return nil, fmt.Errorf("Failure to decode product '%s' : %w", ComponentType, err)
 	}
 
-	return NewMSR2(id, c), nil
+	return NewComponent(id, c), nil
 }

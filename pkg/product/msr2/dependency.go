@@ -11,7 +11,7 @@ import (
 )
 
 // Requires declare that we need a HostsRoles dependency.
-func (c *MSR2) RequiresDependencies(_ context.Context) dependency.Requirements {
+func (c *Component) RequiresDependencies(_ context.Context) dependency.Requirements {
 	if c.dhr == nil {
 		c.dhr = dockerhost.NewDockerHostsRequirement(
 			fmt.Sprintf("%s:%s", c.Name(), dockerhost.ImplementationType),

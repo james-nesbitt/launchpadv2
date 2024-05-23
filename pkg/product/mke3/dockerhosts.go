@@ -20,7 +20,7 @@ func IsDockerSwarmManager(ctx context.Context, h *host.Host) bool {
 }
 
 // GetManagerHosts get the docker hosts for managers.
-func (c MKE3) GetManagerHosts(ctx context.Context) (host.Hosts, error) {
+func (c Component) GetManagerHosts(ctx context.Context) (host.Hosts, error) {
 	hs, err := c.GetAllHosts(ctx)
 	if err != nil {
 		return hs, fmt.Errorf("MCR manager hosts retrieval error; %w", err)
@@ -39,7 +39,7 @@ func (c MKE3) GetManagerHosts(ctx context.Context) (host.Hosts, error) {
 }
 
 // GetWorkerHosts get the docker hosts for workers.
-func (c MKE3) GetWorkerHosts(ctx context.Context) (host.Hosts, error) {
+func (c Component) GetWorkerHosts(ctx context.Context) (host.Hosts, error) {
 	hs, err := c.GetAllHosts(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("MCR worker hosts retrieval error; %w", err)
@@ -58,7 +58,7 @@ func (c MKE3) GetWorkerHosts(ctx context.Context) (host.Hosts, error) {
 }
 
 // GetAllHosts get the docker hosts for all hosts.
-func (c MKE3) GetAllHosts(ctx context.Context) (host.Hosts, error) {
+func (c Component) GetAllHosts(ctx context.Context) (host.Hosts, error) {
 	ghs, err := getRequirementHosts(ctx, c.dhr)
 	if err != nil {
 		return nil, fmt.Errorf("hosts retrieval error; %w", err)

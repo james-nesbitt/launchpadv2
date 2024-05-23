@@ -18,7 +18,7 @@ import (
 	dockerhost "github.com/Mirantis/launchpad/pkg/implementation/docker/host"
 )
 
-func (c MCR) CliBuild(cmd *cobra.Command) error {
+func (c Component) CliBuild(cmd *cobra.Command) error {
 
 	g := &cobra.Group{
 		ID:    c.Name(),

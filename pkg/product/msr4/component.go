@@ -10,17 +10,17 @@ const (
 	ComponentType = "msr4"
 )
 
-// NewMSR4 constructor for MSR4 from config.
-func NewMSR4(id string, c Config) *MSR4 {
-	return &MSR4{
+// NewComponent constructor for MSR4 from config.
+func NewComponent(id string, c Config) *Component {
+	return &Component{
 		id:     id,
 		config: c,
 		state:  State{},
 	}
 }
 
-// MSR4 product implementation.
-type MSR4 struct {
+// Component product implementation.
+type Component struct {
 	id     string
 	config Config
 	state  State
@@ -29,7 +29,7 @@ type MSR4 struct {
 }
 
 // Name for the component.
-func (p MSR4) Name() string {
+func (p Component) Name() string {
 	if p.id == ComponentType {
 		return p.id
 	}
@@ -37,11 +37,11 @@ func (p MSR4) Name() string {
 }
 
 // Debug product debug.
-func (_ MSR4) Debug() interface{} {
+func (_ Component) Debug() interface{} {
 	return nil
 }
 
 // Validate that the project meets the needs of the Product.
-func (_ MSR4) Validate(context.Context) error {
+func (_ Component) Validate(context.Context) error {
 	return nil
 }

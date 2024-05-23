@@ -8,7 +8,6 @@ import (
 	"github.com/Mirantis/launchpad/pkg/action"
 	"github.com/Mirantis/launchpad/pkg/dependency"
 	"github.com/Mirantis/launchpad/pkg/mock"
-
 )
 
 func Test_PhasesAddMerge(t *testing.T) {

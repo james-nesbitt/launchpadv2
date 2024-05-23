@@ -7,11 +7,11 @@ import (
 )
 
 // ValidateK8sDependencyConfig validate a Kubernetes client request configuration.
-func (p MKE3) ValidateK8sDependencyConfig(kc kubernetes.Version) error {
+func (p Component) ValidateK8sDependencyConfig(kc kubernetes.Version) error {
 	return nil
 }
 
-func (p *MKE3) kubernetesImplementation(_ context.Context) (*kubernetes.Kubernetes, error) {
+func (p *Component) kubernetesImplementation(_ context.Context) (*kubernetes.Kubernetes, error) {
 	c := kubernetes.Config{}
 	k := kubernetes.NewKubernetes(c)
 	return k, nil

@@ -8,7 +8,7 @@ import (
 	"github.com/Mirantis/launchpad/pkg/implementation/kubernetes"
 )
 
-func (c *MKE4) RequiresDependencies(ctx context.Context) dependency.Requirements {
+func (c *Component) RequiresDependencies(ctx context.Context) dependency.Requirements {
 	if c.k8sr == nil {
 		c.k8sr = kubernetes.NewKubernetesRequirement(
 			fmt.Sprintf("%s:%s", c.Name(), kubernetes.ImplementationType),

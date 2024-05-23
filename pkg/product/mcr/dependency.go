@@ -13,8 +13,8 @@ import (
 	"github.com/Mirantis/launchpad/pkg/implementation/docker/swarm"
 )
 
-// Requires declare that we need a HostsRoles dependency.
-func (c *MCR) RequiresDependencies(ctx context.Context) dependency.Requirements {
+// RequiresDependencies declare what dependencies we have
+func (c *Component) RequiresDependencies(ctx context.Context) dependency.Requirements {
 	if c.hr == nil {
 
 		c.hr = host.NewHostsFilterRequirement(
@@ -64,7 +64,7 @@ func (c *MCR) RequiresDependencies(ctx context.Context) dependency.Requirements 
 }
 
 // Provides dependencies.
-func (c *MCR) ProvidesDependencies(ctx context.Context, r dependency.Requirement) (dependency.Dependency, error) {
+func (c *Component) ProvidesDependencies(ctx context.Context, r dependency.Requirement) (dependency.Dependency, error) {
 	if dhr, ok := r.(dockerhost.DockerHostsRequirement); ok {
 		// DockerHosts dependency
 		//
@@ -122,6 +122,6 @@ func (c *MCR) ProvidesDependencies(ctx context.Context, r dependency.Requirement
 }
 
 // ValidateDockerVersion to say that this component can provided the requested version.
-func (c MCR) ValidateDockerVersion(v dockerimplementation.Version) error {
+func (c Component) ValidateDockerVersion(v dockerimplementation.Version) error {
 	return nil
 }

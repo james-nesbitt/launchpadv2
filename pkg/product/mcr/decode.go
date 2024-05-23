@@ -19,5 +19,5 @@ func DecodeMCRComponent(id string, d func(interface{}) error) (component.Compone
 		return nil, fmt.Errorf("Failure to unmarshal product 'MCR' : %w", err)
 	}
 
-	return NewMCR(id, c), nil
+	return NewComponent(id, c), nil
 }

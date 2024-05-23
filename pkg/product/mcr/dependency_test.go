@@ -8,7 +8,7 @@ import (
 )
 
 func Test_MCRDependencySanity(t *testing.T) {
-	mcrcl := mcr.NewMCR(
+	mcrcl := mcr.NewComponent(
 		"dummy",
 		mcr.Config{},
 	)

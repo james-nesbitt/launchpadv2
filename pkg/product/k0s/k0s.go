@@ -7,11 +7,11 @@ import (
 )
 
 // ValidateK0sDependencyConfig validate a K0s API client request configuration.
-func (p K0S) ValidateK0sDependencyConfig(dc implementation.K0sDependencyConfig) error {
+func (p Component) ValidateK0sDependencyConfig(dc implementation.K0sDependencyConfig) error {
 	return nil
 }
 
-func (p *K0S) k0sImplementation(_ context.Context) (*implementation.API, error) {
+func (p *Component) k0sImplementation(_ context.Context) (*implementation.API, error) {
 	c := implementation.Config{}
 	k := implementation.NewAPI(c)
 	return &k, nil

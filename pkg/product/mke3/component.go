@@ -10,17 +10,17 @@ const (
 	ComponentType = "mke3"
 )
 
-// NewMKE3 constructor for MKE3 from config.
-func NewMKE3(id string, c Config) *MKE3 {
-	return &MKE3{
+// NewComponent constructor for MKE3 from config.
+func NewComponent(id string, c Config) *Component {
+	return &Component{
 		id:     id,
 		config: c,
 		state:  State{},
 	}
 }
 
-// MKE3 product implementation.
-type MKE3 struct {
+// Component product implementation.
+type Component struct {
 	id     string
 	config Config
 	state  State
@@ -32,7 +32,7 @@ type MKE3 struct {
 }
 
 // Name for the component.
-func (p MKE3) Name() string {
+func (p Component) Name() string {
 	if p.id == ComponentType {
 		return p.id
 	}
@@ -40,11 +40,11 @@ func (p MKE3) Name() string {
 }
 
 // Debug product debug.
-func (_ MKE3) Debug() interface{} {
+func (_ Component) Debug() interface{} {
 	return nil
 }
 
 // Validate that the project meets the needs of the Product.
-func (_ MKE3) Validate(context.Context) error {
+func (_ Component) Validate(context.Context) error {
 	return nil
 }

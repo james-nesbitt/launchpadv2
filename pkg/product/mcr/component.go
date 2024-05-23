@@ -12,17 +12,17 @@ const (
 	ComponentType = "mcr"
 )
 
-// NewMCR constructor for MCR from config.
-func NewMCR(id string, c Config) *MCR {
-	return &MCR{
+// NewComponent constructor for MCR from config.
+func NewComponent(id string, c Config) *Component {
+	return &Component{
 		id:     id,
 		config: c,
 		state:  state{},
 	}
 }
 
-// MCR product implementation.
-type MCR struct {
+// Component product implementation.
+type Component struct {
 	id string
 
 	// host roles req
@@ -37,7 +37,7 @@ type MCR struct {
 }
 
 // Name for the component.
-func (p MCR) Name() string {
+func (p Component) Name() string {
 	if p.id == ComponentType {
 		return p.id
 	}
@@ -45,7 +45,7 @@ func (p MCR) Name() string {
 }
 
 // Debug product debug.
-func (c *MCR) Debug() interface{} {
+func (c *Component) Debug() interface{} {
 	return struct {
 		Config Config
 		State  interface{}
@@ -56,7 +56,7 @@ func (c *MCR) Debug() interface{} {
 }
 
 // Validate that the project meets the needs of the Product.
-func (c *MCR) Validate(ctx context.Context) error {
+func (c *Component) Validate(ctx context.Context) error {
 	errs := []error{}
 
 	if _, err := c.GetManagerHosts(ctx); err != nil {

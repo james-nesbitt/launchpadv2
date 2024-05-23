@@ -30,17 +30,17 @@ import (
 	// Register nextgen product handlers for testing.
 	_ "github.com/Mirantis/launchpad/pkg/product/k0s"
 	_ "github.com/Mirantis/launchpad/pkg/product/mke4"
+	_ "github.com/Mirantis/launchpad/pkg/product/msr3"
 	_ "github.com/Mirantis/launchpad/pkg/product/msr4"
 
 	// Register mock stuff, in case it gets used
 	_ "github.com/Mirantis/launchpad/pkg/mock"
-
 )
 
 var (
 	debug   bool
 	cfgFile string
-	cl      *project.Project
+	proj    *project.Project
 )
 
 func Execute() {
@@ -64,7 +64,7 @@ func Execute() {
 	slog.DebugContext(rootCmd.Context(), "building project for cli")
 	if cfgFile == "" {
 		slog.Warn("No project config specified. Using an empty project")
-		cl = &project.Project{
+		proj = &project.Project{
 			Components: component.Components{},
 		}
 	} else if err := boostrapBuildProject(rootCmd.Context()); err != nil {
@@ -100,14 +100,14 @@ func boostrapBuildProject(ctx context.Context) error {
 		return fmt.Errorf("could not read config '%s' : %s", cfgFile, frerr.Error())
 	}
 
-	tcl, umerr := config.ConfigFromYamllBytes(yb)
+	tproj, umerr := config.ConfigFromYamllBytes(yb)
 	if umerr != nil {
 		return fmt.Errorf("Error occurred unarshalling yaml: %s \nYAML:\b%s", umerr.Error(), yb)
 	}
 
-	cl = &tcl
+	proj = &tproj
 
-	if valerr := cl.Validate(ctx); valerr != nil {
+	if valerr := proj.Validate(ctx); valerr != nil {
 		return fmt.Errorf("project validation error: %s", valerr.Error())
 	}
 
@@ -119,30 +119,26 @@ func bootstrapLaunchpadCmd(cmd *cobra.Command) error {
 		ID:    "about",
 		Title: "About Launchpad",
 	})
-
 	cmd.AddCommand(versionCmd)
 
-	if cl == nil {
+	if proj == nil {
 		slog.WarnContext(cmd.Context(), "no project object was built")
-	} else if len(cl.Components) == 0 {
+		return nil
+	}
+
+	slog.DebugContext(cmd.Context(), "building cli commands from project")
+	project.CliBuild(cmd, proj)
+
+	if len(proj.Components) == 0 {
 		slog.WarnContext(cmd.Context(), "empty project object was built, so no project/component commands are available.")
-	} else {
-		cmd.AddGroup(&cobra.Group{
-			ID:    "project",
-			Title: "Project",
-		})
+		return nil
+	}
 
-		cmd.AddCommand(statusCmd)
-		cmd.AddCommand(applyCmd)
-		cmd.AddCommand(resetCmd)
-
-		slog.DebugContext(cmd.Context(), "building cli commands from project")
-
-		for _, c := range cl.Components {
-			if ccb, ok := c.(CliBuilder); ok {
-				if err := ccb.CliBuild(cmd); err != nil {
-					slog.ErrorContext(cmd.Context(), fmt.Sprintf("%s: error when building cli", c.Name()), slog.Any("component", c))
-				}
+	slog.DebugContext(cmd.Context(), "building cli commands from project components")
+	for _, c := range proj.Components {
+		if ccb, ok := c.(CliBuilder); ok {
+			if err := ccb.CliBuild(cmd); err != nil {
+				slog.ErrorContext(cmd.Context(), fmt.Sprintf("%s: error when building cli", c.Name()), slog.Any("component", c))
 			}
 		}
 	}

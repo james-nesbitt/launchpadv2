@@ -6,7 +6,7 @@ import (
 )
 
 type baseStep struct {
-	c *MCR
+	c *Component
 }
 
 func (s baseStep) Validate(ctx context.Context) error {

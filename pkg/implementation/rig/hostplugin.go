@@ -15,16 +15,16 @@ const (
 )
 
 func init() {
-	host.RegisterHostPluginFactory(HostRoleRig, &RigHostPluginFactory{})
+	host.RegisterHostPluginFactory(HostRoleRig, &HostPluginFactory{})
 }
 
-type RigHostPluginFactory struct {
-	ps []*rigHostPlugin
+type HostPluginFactory struct {
+	ps []*hostPlugin
 }
 
 // HostPlugin build a new host plugin
-func (rpf *RigHostPluginFactory) HostPlugin(_ context.Context, h *host.Host) host.HostPlugin {
-	p := &rigHostPlugin{
+func (rpf *HostPluginFactory) HostPlugin(_ context.Context, h *host.Host) host.HostPlugin {
+	p := &hostPlugin{
 		h:   h,
 		rig: &rig.ClientWithConfig{},
 	}
@@ -38,8 +38,8 @@ func (rpf *RigHostPluginFactory) HostPlugin(_ context.Context, h *host.Host) hos
 //
 // The decoder function is ugly, but it is meant to to take a
 // yaml/json .HostPluginDecode() function, and turn it into a plugin
-func (rpf *RigHostPluginFactory) HostPluginDecode(_ context.Context, h *host.Host, d func(interface{}) error) (host.HostPlugin, error) {
-	p := &rigHostPlugin{
+func (rpf *HostPluginFactory) HostPluginDecode(_ context.Context, h *host.Host, d func(interface{}) error) (host.HostPlugin, error) {
+	p := &hostPlugin{
 		rig: &rig.ClientWithConfig{},
 		h:   h,
 	}
@@ -60,20 +60,20 @@ func (rpf *RigHostPluginFactory) HostPluginDecode(_ context.Context, h *host.Hos
 // exec.HostRoleExecutor: uses all of the rig.Client functions
 // network.HostRoleNetwork: uses some internal functions to discover network
 // exec.HostRolePlatform: uses some internal functions to discover platform
-type rigHostPlugin struct {
+type hostPlugin struct {
 	h   *host.Host
 	rig *rig.ClientWithConfig
 }
 
-func (mhc rigHostPlugin) Id() string {
+func (mhc hostPlugin) Id() string {
 	return "rig"
 }
 
-func (mhc rigHostPlugin) Validate() error {
+func (mhc hostPlugin) Validate() error {
 	return nil
 }
 
-func (mhc rigHostPlugin) RoleMatch(role string) bool {
+func (mhc hostPlugin) RoleMatch(role string) bool {
 	switch role {
 	case host.HostRoleDiscover:
 		return true
@@ -89,6 +89,6 @@ func (mhc rigHostPlugin) RoleMatch(role string) bool {
 	return false
 }
 
-func (p rigHostPlugin) hid() string {
+func (p hostPlugin) hid() string {
 	return p.h.Id()
 }

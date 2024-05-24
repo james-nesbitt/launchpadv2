@@ -8,11 +8,11 @@ import (
 )
 
 // IsWindows.
-func (h rigHostPlugin) IsWindows(ctx context.Context) bool {
+func (h hostPlugin) IsWindows(ctx context.Context) bool {
 	return h.rig.IsWindows()
 }
 
-func (h rigHostPlugin) Arch(ctx context.Context) string {
+func (h hostPlugin) Arch(ctx context.Context) string {
 	arch, _, err := h.Exec(ctx, "uname -m", nil, exec.ExecOptions{})
 	if err != nil {
 		return ""
@@ -33,7 +33,7 @@ func (h rigHostPlugin) Arch(ctx context.Context) string {
 }
 
 // UserCacheDir returns the default root directory to use for user-specific cached data.
-func (p *rigHostPlugin) UserCacheDir() string {
+func (p *hostPlugin) UserCacheDir() string {
 	fs := p.rig.FS()
 
 	if cache := fs.Getenv("XDG_CACHE_HOME"); cache != "" {
@@ -43,7 +43,7 @@ func (p *rigHostPlugin) UserCacheDir() string {
 }
 
 // UserConfigDir returns the default root directory to use for user-specific configuration data.
-func (p *rigHostPlugin) UserConfigDir() string {
+func (p *hostPlugin) UserConfigDir() string {
 	fs := p.rig.FS()
 
 	if config := fs.Getenv("XDG_CONFIG_HOME"); config != "" {
@@ -53,7 +53,7 @@ func (p *rigHostPlugin) UserConfigDir() string {
 }
 
 // UserHomeDir returns the current user's home directory.
-func (p *rigHostPlugin) UserHomeDir() string {
+func (p *hostPlugin) UserHomeDir() string {
 	fs := p.rig.FS()
 
 	return fs.Getenv("HOME")

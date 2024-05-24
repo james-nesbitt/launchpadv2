@@ -13,10 +13,10 @@ import (
 func Test_HostPluginRoleTypeSanity(t *testing.T) {
 	ctx := context.Background()
 
-	pf := rig.RigHostPluginFactory{}
+	pf := rig.HostPluginFactory{}
 
 	h := host.NewHost("test")
-	p := pf.Plugin(ctx, h)
+	p := pf.HostPlugin(ctx, h)
 
 	h.AddPlugin(p)
 

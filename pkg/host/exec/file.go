@@ -31,7 +31,7 @@ func HostGetFiles(h *host.Host) HostFiles {
 
 	hf, ok := hgf.(HostFiles)
 	if !ok {
-		slog.Info(fmt.Sprintf("%s: plugin is not a files plugin: %s", h.Id(), hgf.Id()))
+		slog.Info(fmt.Sprintf("%s: plugin is not a files plugin: %s", h.Id(), h.Id()))
 		return nil
 	}
 

@@ -14,12 +14,12 @@ import (
 )
 
 // Connect prove that the host is reachable.
-func (p *rigHostPlugin) Connect(ctx context.Context) error {
+func (p *hostPlugin) Connect(ctx context.Context) error {
 	return p.rig.Connect(ctx)
 }
 
 // Exec a command.
-func (p *rigHostPlugin) Exec(ctx context.Context, cmd string, inr io.Reader, opts hostexec.ExecOptions) (string, string, error) {
+func (p *hostPlugin) Exec(ctx context.Context, cmd string, inr io.Reader, opts hostexec.ExecOptions) (string, string, error) {
 	slog.DebugContext(ctx, fmt.Sprintf("%s: Rig Exec: %s", p.hid(), cmd))
 
 	outs := strings.Builder{}
@@ -56,19 +56,19 @@ func (p *rigHostPlugin) Exec(ctx context.Context, cmd string, inr io.Reader, opt
 }
 
 // InstallPackages install some packages.
-func (p *rigHostPlugin) InstallPackages(ctx context.Context, packages []string) error {
+func (p *hostPlugin) InstallPackages(ctx context.Context, packages []string) error {
 	slog.DebugContext(ctx, fmt.Sprintf("%s: RIG install packages", p.hid()), slog.Any("packages", packages))
 	return p.rig.Sudo().PackageManagerService.PackageManager().Install(ctx, packages...)
 }
 
 // RemovePackages install some packages.
-func (p *rigHostPlugin) RemovePackages(ctx context.Context, packages []string) error {
+func (p *hostPlugin) RemovePackages(ctx context.Context, packages []string) error {
 	slog.DebugContext(ctx, fmt.Sprintf("%s: RIG install packages", p.hid()), slog.Any("packages", packages))
 	return p.rig.Sudo().PackageManagerService.PackageManager().Remove(ctx, packages...)
 }
 
 // ServiceEnable enable and start some services.
-func (p *rigHostPlugin) ServiceEnable(ctx context.Context, services []string) error {
+func (p *hostPlugin) ServiceEnable(ctx context.Context, services []string) error {
 	rigc := p.rig.Sudo()
 
 	errs := []error{}
@@ -100,7 +100,7 @@ func (p *rigHostPlugin) ServiceEnable(ctx context.Context, services []string) er
 }
 
 // ServiceRestart stop and restart some services.
-func (p *rigHostPlugin) ServiceRestart(ctx context.Context, services []string) error {
+func (p *hostPlugin) ServiceRestart(ctx context.Context, services []string) error {
 	rigc := p.rig.Sudo()
 
 	errs := []error{}
@@ -125,7 +125,7 @@ func (p *rigHostPlugin) ServiceRestart(ctx context.Context, services []string) e
 }
 
 // ServiceDisable stop and disable some services
-func (p *rigHostPlugin) ServiceDisable(ctx context.Context, services []string) error {
+func (p *hostPlugin) ServiceDisable(ctx context.Context, services []string) error {
 	rigc := p.rig.Sudo()
 
 	errs := []error{}
@@ -153,7 +153,7 @@ func (p *rigHostPlugin) ServiceDisable(ctx context.Context, services []string) e
 }
 
 // ServiceIsRunning is the service running
-func (p *rigHostPlugin) ServiceIsRunning(ctx context.Context, services []string) error {
+func (p *hostPlugin) ServiceIsRunning(ctx context.Context, services []string) error {
 	rigc := p.rig.Sudo()
 
 	errs := []error{}

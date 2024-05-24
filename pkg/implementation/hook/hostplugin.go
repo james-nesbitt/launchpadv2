@@ -44,7 +44,7 @@ type hookHostPluginFactory struct {
 }
 
 // Plugin build a new host plugin
-func (rpf *hookHostPluginFactory) Plugin(_ context.Context, h *host.Host) host.HostPlugin {
+func (rpf *hookHostPluginFactory) HostPlugin(_ context.Context, h *host.Host) host.HostPlugin {
 	p := &hookHostPlugin{
 		h:     h,
 		hooks: Hooks{},
@@ -59,7 +59,7 @@ func (rpf *hookHostPluginFactory) Plugin(_ context.Context, h *host.Host) host.H
 //
 // The decoder function is ugly, but it is meant to to take a
 // yaml/json .Decode() function, and turn it into a plugin
-func (rpf *hookHostPluginFactory) Decode(_ context.Context, h *host.Host, d func(interface{}) error) (host.HostPlugin, error) {
+func (rpf *hookHostPluginFactory) HostPluginDecode(_ context.Context, h *host.Host, d func(interface{}) error) (host.HostPlugin, error) {
 	p := &hookHostPlugin{
 		h:     h,
 		hooks: Hooks{},

@@ -24,7 +24,7 @@ role: controller
 
 	pf := k0s.HostPluginFactory{}
 
-	p, perr := pf.Decode(ctx, h, yn.Decode)
+	p, perr := pf.HostPluginDecode(ctx, h, yn.Decode)
 	if perr != nil {
 		t.Fatalf("failed to decode k0s host plugin: %s", perr.Error())
 	}

@@ -12,7 +12,7 @@ import (
 )
 
 // Stat return file info on a file, or an error
-func (p *rigHostPlugin) Stat(ctx context.Context, path string, opts exec.ExecOptions) (os.FileInfo, error) {
+func (p *hostPlugin) Stat(ctx context.Context, path string, opts exec.ExecOptions) (os.FileInfo, error) {
 	slog.DebugContext(ctx, fmt.Sprintf("%s: Rig Stat: %s", p.hid(), path))
 
 	rigc := p.rig.Client
@@ -26,7 +26,7 @@ func (p *rigHostPlugin) Stat(ctx context.Context, path string, opts exec.ExecOpt
 }
 
 // FileExists does a file exist
-func (p *rigHostPlugin) FileExist(ctx context.Context, path string, opts exec.ExecOptions) error {
+func (p *hostPlugin) FileExist(ctx context.Context, path string, opts exec.ExecOptions) error {
 	slog.DebugContext(ctx, fmt.Sprintf("%s: Rig FileExists: %s", p.hid(), path))
 
 	rigc := p.rig.Client
@@ -43,7 +43,7 @@ func (p *rigHostPlugin) FileExist(ctx context.Context, path string, opts exec.Ex
 }
 
 // Upload from an io.Reader to a file path on the Host.
-func (p *rigHostPlugin) Upload(ctx context.Context, src io.Reader, dst string, fm fs.FileMode, opts exec.ExecOptions) error {
+func (p *hostPlugin) Upload(ctx context.Context, src io.Reader, dst string, fm fs.FileMode, opts exec.ExecOptions) error {
 	slog.DebugContext(ctx, fmt.Sprintf("%s: Rig Upload: %s", p.hid(), dst))
 
 	rigc := p.rig.Client
@@ -66,7 +66,7 @@ func (p *rigHostPlugin) Upload(ctx context.Context, src io.Reader, dst string, f
 }
 
 // Rename a file or folder
-func (p *rigHostPlugin) Rename(ctx context.Context, old, new string, opts exec.ExecOptions) error {
+func (p *hostPlugin) Rename(ctx context.Context, old, new string, opts exec.ExecOptions) error {
 	slog.DebugContext(ctx, fmt.Sprintf("%s: Rig Rename: %s -> %s", p.hid(), old, new))
 
 	rigc := p.rig.Client

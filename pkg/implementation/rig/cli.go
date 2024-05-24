@@ -1,12 +1,13 @@
 package rig
 
 import (
+	"github.com/spf13/cobra"
+
 	"github.com/Mirantis/launchpad/pkg/host"
 	"github.com/Mirantis/launchpad/pkg/host/exec"
-	"github.com/spf13/cobra"
 )
 
-func (rpf rigHostPluginFactory) CliBuild(cmd *cobra.Command, c *host.HostsComponent) error {
+func (rpf HostPluginFactory) CliBuild(cmd *cobra.Command, c *host.HostsComponent) error {
 
 	exec.CliBuild(cmd, c)
 

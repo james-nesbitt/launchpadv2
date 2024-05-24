@@ -164,7 +164,7 @@ func (hp hostPlugin) DownloadMCRInstaller(ctx context.Context, c Config) error {
 
 	defer irs.Body.Close()
 
-	if err := exec.HostGetExecutor(hp.h).Upload(ctx, irs.Body, MCRInstallerPath, 0777, exec.ExecOptions{}); err != nil {
+	if err := exec.HostGetFiles(hp.h).Upload(ctx, irs.Body, MCRInstallerPath, 0777, exec.ExecOptions{}); err != nil {
 		return err
 	}
 

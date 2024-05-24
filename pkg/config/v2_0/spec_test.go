@@ -53,12 +53,10 @@ func TestConfig_CurrentGen(t *testing.T) {
 	cl := project.Project{}
 	cy := `
 hosts:
-  # jnlp2-ACon-0 (ssh)
-  ACon_0:
+  Man:
     mcr:
       role: manager
-  # jnlp2-AWrk_Ubu22-0 (ssh)
-  AWrk_Ubu22_0:
+  Wrk:
     mcr:
       role: worker
 products:
@@ -73,7 +71,7 @@ products:
     imageRepo: docker.io/mirantis
     install:
       adminUsername: "admin"
-      flags: 
+      flags:
       - "--default-node-orchestrator=kubernetes"
       - "--nodeport-range=32768-35535"
     upgrade:
@@ -99,28 +97,19 @@ products:
 		t.Errorf("Wrong number of components: %+v", cl.Components)
 	}
 
-	// 	if mke, ok := cl.Components["mke3"]; !ok {
-	// 		t.Error("MKE component didn't decode properly")
-	// 	} else if mke.Name() != "mke3" {
-	// 		t.Errorf("MKE product has wrong name: %s", mke.Name())
-	// 	}
-
 }
 
 func TestConfig_NextGen(t *testing.T) {
 	cl := project.Project{}
 	cy := `
-project:
-  prune: false
 hosts:
-  # jnlp2-ACon-0 (ssh)
-  ACon_0:
+  Con:
     k0s:
-      role:controller
-  # jnlp2-AWrk_Ubu22-0 (ssh)
-  AWrk_Ubu22_0:
+      role: controller
+  Wrk:
     k0s:
       role: worker
+
 products:
   k0s:
     version: v1.28.4+k0s.0
@@ -161,19 +150,13 @@ products:
 	if len(cl.Components) != 4 { // 3 products and the hosts component
 		t.Errorf("Wrong number of components: %+v", cl.Components)
 	}
-
-	// if k0s, ok := cl.Components["k0s"]; !ok {
-	// 	t.Error("K0s component didn't decode properly")
-	// } else if k0s.Name() != "k0s" {
-	// 	t.Errorf("K0s product has wrong name: %s", k0s.Name())
-	// }
 }
 
 func TestConfig_MKEx(t *testing.T) {
 	cl := project.Project{}
 	cy := `
 hosts:
-  dummy-controller:
+  Con:
     mkex:
       role: controller
 products:
@@ -194,10 +177,4 @@ products:
 	if len(cl.Components) != 4 { // 3 products and the hosts component
 		t.Errorf("Wrong number of components: %+v", cl.Components)
 	}
-
-	// if k0s, ok := cl.Components["k0s"]; !ok {
-	// 	t.Error("K0s component didn't decode properly")
-	// } else if k0s.Name() != "k0s" {
-	// 	t.Errorf("K0s product has wrong name: %s", k0s.Name())
-	// }
 }

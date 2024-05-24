@@ -13,6 +13,8 @@ func Test_HostPluginDecode(t *testing.T) {
 	ctx := context.Background()
 	ys := `
 role: controller
+reset: false
+datadir: /var/run/k0s/data
 `
 	h := host.NewHost("test")
 

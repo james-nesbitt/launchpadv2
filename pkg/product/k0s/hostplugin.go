@@ -76,10 +76,6 @@ func (mpf *HostPluginFactory) HostPluginDecode(_ context.Context, h *host.Host, 
 		return p, err
 	}
 
-	if err := defaults.Set(p); err != nil {
-		return p, err
-	}
-
 	mpf.ps = append(mpf.ps, p)
 
 	return p, nil

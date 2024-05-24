@@ -81,12 +81,6 @@ products:
 		t.Errorf("Wrong number of components: %+v", cl.Components)
 	}
 
-	// 	if mke, ok := cl.Components["mke3"]; !ok {
-	// 		t.Error("MKE component didn't decode properly")
-	// 	} else if mke.Name() != "mke3" {
-	// 		t.Errorf("MKE product has wrong name: %s", mke.Name())
-	// 	}
-
 }
 
 func TestConfig_NextGen(t *testing.T) {
@@ -115,20 +109,15 @@ products:
 		t.Errorf("Wrong number of components: %+v", cl.Components)
 	}
 
-	// if k0s, ok := cl.Components["k0s"]; !ok {
-	// 	t.Error("K0s component didn't decode properly")
-	// } else if k0s.Name() != "k0s" {
-	// 	t.Errorf("K0s product has wrong name: %s", k0s.Name())
-	// }
 }
 
 func TestConfig_MKEx(t *testing.T) {
 	cl := project.Project{}
 	cy := `
 hosts:
-  dummy-controller:
+  dummy:
     mkex:
-      role: controller
+      role: manager
 products:
   mkex:
     version: v1.28.4+k0s.0
@@ -148,9 +137,4 @@ products:
 		t.Errorf("Wrong number of components: %+v", cl.Components)
 	}
 
-	// if k0s, ok := cl.Components["k0s"]; !ok {
-	// 	t.Error("K0s component didn't decode properly")
-	// } else if k0s.Name() != "k0s" {
-	// 	t.Errorf("K0s product has wrong name: %s", k0s.Name())
-	// }
 }

@@ -22,8 +22,8 @@ type rigHostPluginFactory struct {
 	ps []*rigHostPlugin
 }
 
-// Plugin build a new host plugin
-func (rpf *rigHostPluginFactory) Plugin(_ context.Context, h *host.Host) host.HostPlugin {
+// HostPlugin build a new host plugin
+func (rpf *rigHostPluginFactory) HostPlugin(_ context.Context, h *host.Host) host.HostPlugin {
 	p := &rigHostPlugin{
 		h:   h,
 		rig: &rig.ClientWithConfig{},
@@ -37,8 +37,8 @@ func (rpf *rigHostPluginFactory) Plugin(_ context.Context, h *host.Host) host.Ho
 // Decoder provide a Host Plugin decoder function
 //
 // The decoder function is ugly, but it is meant to to take a
-// yaml/json .Decode() function, and turn it into a plugin
-func (rpf *rigHostPluginFactory) Decode(_ context.Context, h *host.Host, d func(interface{}) error) (host.HostPlugin, error) {
+// yaml/json .HostPluginDecode() function, and turn it into a plugin
+func (rpf *rigHostPluginFactory) HostPluginDecode(_ context.Context, h *host.Host, d func(interface{}) error) (host.HostPlugin, error) {
 	p := &rigHostPlugin{
 		rig: &rig.ClientWithConfig{},
 		h:   h,
@@ -51,7 +51,6 @@ func (rpf *rigHostPluginFactory) Decode(_ context.Context, h *host.Host, d func(
 	rpf.ps = append(rpf.ps, p)
 
 	return p, nil
-
 }
 
 // righHostPlugin a host plugin that uses rig a a backend

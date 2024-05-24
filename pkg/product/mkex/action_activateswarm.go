@@ -1,4 +1,4 @@
-package mcr
+package mkex
 
 import (
 	"context"
@@ -22,13 +22,12 @@ func (s swarmActivateStep) Id() string {
 }
 
 func (s *swarmActivateStep) Run(ctx context.Context) error {
-	/**
-	 * @NOTE a lot of this functionality should be moved to the host plugin
-	 */
-
 	slog.InfoContext(ctx, "running MCR swarm-activate step", slog.String("ID", s.Id()))
+	return activateSwarm(ctx, s.c)
+}
 
-	mhs, mhsgerr := s.c.GetManagerHosts(ctx)
+func activateSwarm(ctx context.Context, c *Component) error {
+	mhs, mhsgerr := c.GetManagerHosts(ctx)
 	if mhsgerr != nil {
 		return fmt.Errorf("could not retrieve managers to join the swarm: %s", mhsgerr.Error())
 	}
@@ -71,7 +70,7 @@ func (s *swarmActivateStep) Run(ctx context.Context) error {
 		return fmt.Errorf("error joining managers to the swarm: %s", err.Error())
 	}
 
-	whs, whsgerr := s.c.GetWorkerHosts(ctx)
+	whs, whsgerr := c.GetWorkerHosts(ctx)
 	if whsgerr != nil {
 		return fmt.Errorf("could not retrieve workers to join the swarm: %s", whsgerr.Error())
 	}

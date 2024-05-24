@@ -20,8 +20,8 @@ type MockHostPluginFactory struct {
 	ps []*mockHostPlugin
 }
 
-// Plugin build a new host plugin
-func (mpf *MockHostPluginFactory) Plugin(_ context.Context, h *host.Host) host.HostPlugin {
+// HostPlugin build a new host plugin
+func (mpf *MockHostPluginFactory) HostPlugin(_ context.Context, h *host.Host) host.HostPlugin {
 	p := &mockHostPlugin{
 		h:       h,
 		Network: network.Network{},
@@ -34,8 +34,8 @@ func (mpf *MockHostPluginFactory) Plugin(_ context.Context, h *host.Host) host.H
 // Decoder provide a Host Plugin decoder function
 //
 // The decoder function is ugly, but it is meant to to take a
-// yaml/json .Decode() function, and turn it into a plugin
-func (mpf *MockHostPluginFactory) Decode(_ context.Context, h *host.Host, d func(interface{}) error) (host.HostPlugin, error) {
+// yaml/json .HostPluginDecode() function, and turn it into a plugin
+func (mpf *MockHostPluginFactory) HostPluginDecode(_ context.Context, h *host.Host, d func(interface{}) error) (host.HostPlugin, error) {
 	hp := &mockHostPlugin{
 		h:       h,
 		Network: network.Network{},

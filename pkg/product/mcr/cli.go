@@ -16,9 +16,10 @@ import (
 	"github.com/Mirantis/launchpad/pkg/host"
 	"github.com/Mirantis/launchpad/pkg/host/exec"
 	dockerhost "github.com/Mirantis/launchpad/pkg/implementation/docker/host"
+	"github.com/Mirantis/launchpad/pkg/project"
 )
 
-func (c Component) CliBuild(cmd *cobra.Command) error {
+func (c Component) CliBuild(cmd *cobra.Command, _ project.Project) error {
 
 	g := &cobra.Group{
 		ID:    c.Name(),

@@ -40,7 +40,7 @@ func (h *Host) DecodeHostPlugin(ctx context.Context, t string, d func(interface{
 		return fmt.Errorf("%w: unknown host plugin type %s :: %+v", ErrUnknownHostPluginDecodeType, t, hostPluginFactories)
 	}
 
-	hp, hperr := hpf.Decode(ctx, h, d)
+	hp, hperr := hpf.HostPluginDecode(ctx, h, d)
 	if hperr != nil {
 		return fmt.Errorf("%s: error building host plugin: %s", t, hperr.Error())
 	}

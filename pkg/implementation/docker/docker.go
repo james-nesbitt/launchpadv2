@@ -16,6 +16,7 @@ type RunOptions struct {
 }
 
 type DockerImplementation interface {
+	// Run a docker command
 	//	@NOTE It would be nice to avoid this and use just the API commands to create run and delete a container.
 	Run(ctx context.Context, args []string, ro RunOptions) (string, string, error)
 	// Version retrieve the Docker Version from the remote server.
@@ -30,9 +31,7 @@ type DockerImplementation interface {
 	SwarmInit(ctx context.Context, r dockertypesswarm.InitRequest) error
 	// DockerInspect get info and join tokens
 	//
-	// @NOTE the docker cli does not have an equivalent so we have to build it from a couple
-	//
-	//	of cli calls.
+	// @NOTE the docker cli does not have an equivalent so we have to build it from a couple of cli calls.
 	SwarmInspect(ctx context.Context) (dockertypesswarm.Swarm, error)
 	// SwarmJoin join a swarm
 	SwarmJoin(ctx context.Context, r dockertypesswarm.JoinRequest) error

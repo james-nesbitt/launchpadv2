@@ -26,13 +26,13 @@ func RegisterHostPluginFactory(key string, hp HostPluginFactory) {
 // cli commands etc. To perform these additional roles, the PluginFactory
 // should also implement other interfaces.
 type HostPluginFactory interface {
-	// Plugin build a new host plugin
-	Plugin(context.Context, *Host) HostPlugin
-	// Decoder provide a Host Plugin decoder function
+	// HostPlugin build a new host plugin
+	HostPlugin(context.Context, *Host) HostPlugin
+	// HostPluginDecode provide a Host Plugin decoder function
 	//
 	// The decoder function is ugly, but it is meant to to take a
-	// yaml/json .Decode() function, and turn it into a plugin
-	Decode(context.Context, *Host, func(interface{}) error) (HostPlugin, error)
+	// yaml/json .HostPluginDecode() function, and turn it into a plugin
+	HostPluginDecode(context.Context, *Host, func(interface{}) error) (HostPlugin, error)
 }
 
 // HostPlugin the base interface for host plugins

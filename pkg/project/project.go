@@ -16,6 +16,13 @@ var (
 	ErrProjectDependenciesNotMet = errors.New("project dependencies not met")
 )
 
+// New Project constructor
+func New() Project {
+	return Project{
+		Components: component.Components{},
+	}
+}
+
 // Project function handler for the complete project.
 type Project struct {
 	Components component.Components

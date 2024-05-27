@@ -7,7 +7,7 @@ import (
 	"github.com/Mirantis/launchpad/pkg/host/exec"
 )
 
-func (rpf HostPluginFactory) CliBuild(cmd *cobra.Command, c *host.HostsComponent) error {
+func (_ HostPluginFactory) CliBuild(cmd *cobra.Command, c *host.HostsComponent) error {
 
 	exec.CliBuild(cmd, c)
 

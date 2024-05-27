@@ -1,0 +1,12 @@
+# values that make sense if you intend to turn this into a
+# Git repository, or add it to an existing repo.
+
+# Terraform stuff
+terraform.tfstate*
+*.tfvars
+# SSH-KEYS
+*.pem
+
+.terraform
+
+*.yaml

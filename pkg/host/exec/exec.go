@@ -44,6 +44,9 @@ type HostExecutor interface {
 	// Exec execute a command
 	Exec(ctx context.Context, cmd string, inr io.Reader, opts ExecOptions) (string, string, error)
 
+	// ExecInteractive get a shell
+	ExecInteractive(ctx context.Context, opts ExecOptions) error
+
 	// InstallPackages install the passed system packages
 	InstallPackages(ctx context.Context, packages []string) error
 	// RemovePackages uninstall some packages

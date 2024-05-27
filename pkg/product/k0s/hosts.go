@@ -19,20 +19,25 @@ func (c Component) GetLeaderHost(ctx context.Context) *host.Host {
 		return nil
 	}
 
-	// Pick the first controller that reports to be running and persist the choice
+	var first *host.Host
 	for _, h := range controllers {
-		hk := HostGetK0s(h)
-		if !hk.Reset && hk.Metadata.K0sBinaryVersion != nil && hk.Metadata.K0sRunningVersion != nil {
-			return h
+		if first == nil {
+			first = h
 		}
-	}
 
-	// Still nil?  Fall back to first "controller" host, do not persist selection.
-	for _, h := range controllers {
+		kh := HostGetK0s(h)
+
+		if _, err := kh.Version(ctx); err != nil {
+			continue
+		}
+		if _, err := kh.Status(ctx); err != nil {
+			continue
+		}
+
 		return h
 	}
 
-	return nil
+	return first
 }
 
 // GetControllerHosts get the docker hosts for managers.
@@ -44,8 +49,8 @@ func (c Component) GetControllerHosts(ctx context.Context) (host.Hosts, error) {
 
 	mhs := host.NewHosts()
 	for _, h := range hs {
-		k0sh := HostGetK0s(h)
-		if !k0sh.IsController() {
+		kh := HostGetK0s(h)
+		if !kh.IsController() {
 			continue
 		}
 
@@ -64,8 +69,8 @@ func (c Component) GetWorkerHosts(ctx context.Context) (host.Hosts, error) {
 
 	whs := host.NewHosts()
 	for _, h := range hs {
-		mh := HostGetK0s(h)
-		if mh.IsController() {
+		kh := HostGetK0s(h)
+		if kh.IsController() {
 			continue
 		}
 

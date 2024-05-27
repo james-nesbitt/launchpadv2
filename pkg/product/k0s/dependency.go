@@ -7,7 +7,6 @@ import (
 	"github.com/Mirantis/launchpad/pkg/dependency"
 	"github.com/Mirantis/launchpad/pkg/host"
 	kubeimpl "github.com/Mirantis/launchpad/pkg/implementation/kubernetes"
-	"github.com/Mirantis/launchpad/pkg/product/k0s/implementation"
 )
 
 // --- Dependency requirements ---
@@ -77,28 +76,6 @@ func (p *Component) ProvidesDependencies(ctx context.Context, r dependency.Requi
 				fmt.Sprintf("%s: kubernetes implementation: %s", ComponentType, r.Describe()),
 				func(ctx context.Context) (*kubeimpl.Kubernetes, error) {
 					return p.kubernetesImplementation(ctx)
-				},
-			)
-		}
-
-		return p.k8sd, nil
-	}
-
-	if k0sr, ok := r.(implementation.RequiresK0s); ok {
-		// Kubernetes dependency
-
-		c := k0sr.RequireK0s(ctx)
-
-		if err := p.ValidateK0sDependencyConfig(c); err != nil {
-			return nil, err
-		}
-
-		if p.k0sd == nil {
-			p.k0sd = implementation.NewK0sDependency(
-				fmt.Sprintf("%s:%s", ComponentType, implementation.ImplementatonType),
-				fmt.Sprintf("%s: kubernetes implementation: %s", ComponentType, r.Describe()),
-				func(ctx context.Context) (*implementation.API, error) {
-					return p.k0sImplementation(ctx)
 				},
 			)
 		}

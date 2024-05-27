@@ -6,10 +6,12 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"os"
 	"strings"
 
 	"github.com/k0sproject/rig/v2"
 
+	"github.com/Mirantis/launchpad/pkg/host/exec"
 	hostexec "github.com/Mirantis/launchpad/pkg/host/exec"
 )
 
@@ -34,25 +36,45 @@ func (p *hostPlugin) Exec(ctx context.Context, cmd string, inr io.Reader, opts h
 		&errs,
 	)
 
-	var rig *rig.Client = p.rig.Client
-	if opts.Sudo {
-		rig = p.rig.Sudo()
-	}
-
-	if cerr := rig.Connect(ctx); cerr != nil {
+	var c *rig.Client = p.rig.Client
+	if cerr := c.Connect(ctx); cerr != nil {
 		return outs.String(), errs.String(), cerr
 	}
+	if opts.Sudo {
+		c = p.rig.Sudo()
+		if cerr := c.Connect(ctx); cerr != nil {
+			return outs.String(), errs.String(), cerr
+		}
+	}
 
-	w, serr := rig.StartProcess(ctx, cmd, inr, outw, errw)
+	w, serr := c.StartProcess(ctx, cmd, inr, outw, errw)
 	if serr != nil {
 		return outs.String(), errs.String(), serr
 	}
 
-	if werr := w.Wait(); werr != nil {
+	wc := make(chan error)
+	go func() {
+		wc <- w.Wait()
+	}()
+
+	select {
+	case <-ctx.Done():
+		return outs.String(), errs.String(), fmt.Errorf("command cancelled due to context closure")
+	case werr := <-wc:
 		return outs.String(), errs.String(), werr
 	}
+}
 
-	return outs.String(), errs.String(), nil
+// ExecInteractive get an interactive shell
+func (p *hostPlugin) ExecInteractive(ctx context.Context, opts exec.ExecOptions) error {
+	slog.DebugContext(ctx, fmt.Sprintf("%s: Rig Exec Interactive", p.hid()))
+
+	var c *rig.Client = p.rig.Client
+	if cerr := c.Connect(ctx); cerr != nil {
+		return cerr
+	}
+
+	return c.ExecInteractive("", os.Stdin, os.Stdout, os.Stderr)
 }
 
 // InstallPackages install some packages.
@@ -83,12 +105,14 @@ func (p *hostPlugin) ServiceEnable(ctx context.Context, services []string) error
 			errs = append(errs, sgerr)
 			continue
 		}
+		slog.DebugContext(ctx, fmt.Sprintf("enabled service: %s", sn))
 
 		if !s.IsRunning(ctx) {
 			if err := s.Start(ctx); err != nil {
 				errs = append(errs, sgerr)
 				continue
 			}
+			slog.DebugContext(ctx, fmt.Sprintf("started service: %s", sn))
 		}
 	}
 

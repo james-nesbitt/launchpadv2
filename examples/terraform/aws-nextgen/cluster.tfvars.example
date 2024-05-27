@@ -1,0 +1,44 @@
+// used to name infrastructure (CHANGE THIS)
+name = "example"
+aws = {
+  region = "us-east-1"
+}
+
+extra_tags = {
+  "owner" = "you@mirantis.com",
+}
+
+k0s = {
+  k0s_version = "v1.30.1+k0s.0"
+}
+
+// configure the network stack
+network = {
+  cidr                 = "172.31.0.0/16"
+  public_subnet_count  = 1
+  private_subnet_count = 0 // if 0 then no private nodegroups allowed
+  enable_vpn_gateway   = false
+  enable_nat_gateway   = false
+}
+
+// one definition for each group of machines to include in the stack
+nodegroups = {
+  "ACon" = { // managers for A group
+    platform    = "ubuntu_22.04"
+    count       = 3
+    type        = "m6a.2xlarge"
+    volume_size = 100
+    role        = "controller"
+    public      = true
+    user_data   = ""
+  },
+  "AWrk" = { // workers for A group
+    platform    = "ubuntu_22.04"
+    count       = 6
+    type        = "c6a.xlarge"
+    volume_size = 100
+    public      = true
+    role        = "worker"
+    user_data   = ""
+  },
+}

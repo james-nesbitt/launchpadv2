@@ -36,7 +36,8 @@ func (c *Component) CommandBuild(ctx context.Context, cmd *action.Command) error
 		p := stepped.NewSteppedPhase(CommandPhaseDiscover, rs, ds, []string{dependency.EventKeyActivated})
 		p.Steps().Add(
 			&discoverStep{
-				id: c.Name(),
+				baseStep: bs,
+				id:       c.Name(),
 			},
 		)
 		cmd.Phases.Add(p)
@@ -45,20 +46,20 @@ func (c *Component) CommandBuild(ctx context.Context, cmd *action.Command) error
 		p := stepped.NewSteppedPhase(CommandPhaseApply, rs, ds, []string{dependency.EventKeyActivated})
 		p.Steps().Merge(stepped.Steps{
 			&discoverStep{
-				id: c.Name(),
-			},
-			&prepaseHostStep{
-				id: c.Name(),
+				baseStep: bs,
+				id:       c.Name(),
 			},
 			&installK0sStep{
 				baseStep: bs,
 				id:       c.Name(),
 			},
 			&configureK0sStep{
-				id: c.Name(),
+				baseStep: bs,
+				id:       c.Name(),
 			},
 			&activateK0sStep{
-				id: c.Name(),
+				baseStep: bs,
+				id:       c.Name(),
 			},
 		})
 		cmd.Phases.Add(p)
@@ -68,7 +69,8 @@ func (c *Component) CommandBuild(ctx context.Context, cmd *action.Command) error
 			pd := stepped.NewSteppedPhase(CommandPhaseDiscover, rs, ds, []string{dependency.EventKeyActivated})
 			pd.Steps().Add(
 				&discoverStep{
-					id: c.Name(),
+					baseStep: bs,
+					id:       c.Name(),
 				},
 			)
 			cmd.Phases.Add(pd)
@@ -77,7 +79,8 @@ func (c *Component) CommandBuild(ctx context.Context, cmd *action.Command) error
 		pr := stepped.NewSteppedPhase(CommandPhaseReset, rs, ds, []string{dependency.EventKeyDeActivated})
 		pr.Steps().Merge(stepped.Steps{
 			&uninstallK0sStep{
-				id: c.Name(),
+				baseStep: bs,
+				id:       c.Name(),
 			},
 		})
 		cmd.Phases.Add(pr)
@@ -86,10 +89,12 @@ func (c *Component) CommandBuild(ctx context.Context, cmd *action.Command) error
 		p := stepped.NewSteppedPhase(CommandPhaseKubernetesConf, rs, dependency.Dependencies{}, []string{dependency.EventKeyActivated})
 		p.Steps().Merge(stepped.Steps{
 			&discoverStep{
-				id: c.Name(),
+				baseStep: bs,
+				id:       c.Name(),
 			},
 			&kubernetesConfStep{
-				id: c.Name(),
+				baseStep: bs,
+				id:       c.Name(),
 			},
 		})
 		cmd.Phases.Add(p)

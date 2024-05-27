@@ -45,6 +45,8 @@ type HostFiles interface {
 	FileExist(ctx context.Context, path string, opts ExecOptions) error
 	// Upload content from a io.Reader to a path on the Host
 	Upload(ctx context.Context, src io.Reader, dst string, fm fs.FileMode, opts ExecOptions) error
+	// Download a file to the machine from a network address
+	Download(ctx context.Context, url string, dst string, fm fs.FileMode, opts ExecOptions) error
 	// Rename a file
 	Rename(ctx context.Context, old, new string, opts ExecOptions) error
 }

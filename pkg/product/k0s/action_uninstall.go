@@ -7,6 +7,7 @@ import (
 )
 
 type uninstallK0sStep struct {
+	baseStep
 	id string
 }
 

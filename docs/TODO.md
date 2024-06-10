@@ -53,6 +53,7 @@
 ## Product:K0s
 
 - [X] (k0s-initial) start K0s component 
+- [ ] (k0s-multiple-controller) currently, adding controllers fails with the nextgen terraform aws example
 
 ## Product:MKEx 
 

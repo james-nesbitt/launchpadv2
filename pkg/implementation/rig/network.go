@@ -16,7 +16,7 @@ var (
 )
 
 // Network retrieve the Network information for the machine
-func (p rigHostPlugin) Network(ctx context.Context) (network.Network, error) {
+func (p hostPlugin) Network(ctx context.Context) (network.Network, error) {
 	n := network.Network{}
 
 	if pi, err := p.resolvePrivateInterface(ctx); err != nil {
@@ -40,7 +40,7 @@ func (p rigHostPlugin) Network(ctx context.Context) (network.Network, error) {
 	return n, nil
 }
 
-func (p rigHostPlugin) resolvePrivateInterface(ctx context.Context) (string, error) {
+func (p hostPlugin) resolvePrivateInterface(ctx context.Context) (string, error) {
 	cmd := fmt.Sprintf(`%s; (ip route list scope global | grep -P "\b(172|10|192\.168)\.") || (ip route list | grep -m1 default)`, sbinPath)
 	o, e, err := p.Exec(ctx, cmd, nil, exec.ExecOptions{})
 	if err != nil {
@@ -55,11 +55,11 @@ func (p rigHostPlugin) resolvePrivateInterface(ctx context.Context) (string, err
 	return string(match[1]), nil
 }
 
-func (p rigHostPlugin) resolvePublicIP() (string, error) {
+func (p hostPlugin) resolvePublicIP() (string, error) {
 	return p.rig.ConnectionConfig.SSH.Address, nil
 }
 
-func (p rigHostPlugin) resolveInternaIP(ctx context.Context, privateInterface string, publicIP string) (string, error) {
+func (p hostPlugin) resolveInternaIP(ctx context.Context, privateInterface string, publicIP string) (string, error) {
 	o, e, err := p.Exec(ctx, fmt.Sprintf("%s ip -o addr show dev %s scope global", sbinPath, privateInterface), nil, exec.ExecOptions{})
 	if err != nil {
 		return "", fmt.Errorf("%s: failed to find private interface: %s :: %s", p.hid(), err.Error(), e)

@@ -53,16 +53,32 @@ func TestConfig_CurrentGen(t *testing.T) {
 	cl := project.Project{}
 	cy := `
 hosts:
-  dummy-manager:
+  Man:
     mcr:
       role: manager
-  dummy-worker:
-    mcr: {}
+  Wrk:
+    mcr:
+      role: worker
 products:
   mcr:
-    version: 23.0.10
+    version: 23.0.9
+    repoURL: https://repos.mirantis.com
+    installURLLinux: https://get.mirantis.com/
+    installURLWindows: https://get.mirantis.com/install.ps1
+    channel: stable
   mke3:
-    version: 3.7.2
+    version: 3.7.5
+    imageRepo: docker.io/mirantis
+    install:
+      adminUsername: "admin"
+      flags:
+      - "--default-node-orchestrator=kubernetes"
+      - "--nodeport-range=32768-35535"
+    upgrade:
+      flags:
+      - "--force-recent-backup"
+      - "--force-minimums"
+    prune: true
   msr2:
     version: 2.9.10
 `
@@ -81,24 +97,44 @@ products:
 		t.Errorf("Wrong number of components: %+v", cl.Components)
 	}
 
-	// 	if mke, ok := cl.Components["mke3"]; !ok {
-	// 		t.Error("MKE component didn't decode properly")
-	// 	} else if mke.Name() != "mke3" {
-	// 		t.Errorf("MKE product has wrong name: %s", mke.Name())
-	// 	}
-
 }
 
 func TestConfig_NextGen(t *testing.T) {
 	cl := project.Project{}
 	cy := `
 hosts:
-  dummy-controller:
+  Con:
     k0s:
       role: controller
+  Wrk:
+    k0s:
+      role: worker
+
 products:
   k0s:
     version: v1.28.4+k0s.0
+    config:
+      apiVersion: k0s.k0sproject.io/v1beta1"
+      kind: ClusterConfig
+      metadata:
+        name: k0s
+      spec:
+        controllerManager: {}
+        extensions:
+          helm:
+            concurrencyLevel: 5
+            charts: null
+            repositories: null
+          storage:
+            create_default_storage_class: true
+            type: openebs_local_storage
+        installConfig:
+          users:
+            etcdUser: etcd
+            kineUser: kube-apiserver
+            konnectivityUser: konnectivity-server
+            kubeAPIserverUser: kube-apiserver
+            kubeSchedulerUser: kube-scheduler
   mke4:
     version: 4.0.0
   msr4:
@@ -114,19 +150,13 @@ products:
 	if len(cl.Components) != 4 { // 3 products and the hosts component
 		t.Errorf("Wrong number of components: %+v", cl.Components)
 	}
-
-	// if k0s, ok := cl.Components["k0s"]; !ok {
-	// 	t.Error("K0s component didn't decode properly")
-	// } else if k0s.Name() != "k0s" {
-	// 	t.Errorf("K0s product has wrong name: %s", k0s.Name())
-	// }
 }
 
 func TestConfig_MKEx(t *testing.T) {
 	cl := project.Project{}
 	cy := `
 hosts:
-  dummy-controller:
+  Con:
     mkex:
       role: controller
 products:
@@ -147,10 +177,4 @@ products:
 	if len(cl.Components) != 4 { // 3 products and the hosts component
 		t.Errorf("Wrong number of components: %+v", cl.Components)
 	}
-
-	// if k0s, ok := cl.Components["k0s"]; !ok {
-	// 	t.Error("K0s component didn't decode properly")
-	// } else if k0s.Name() != "k0s" {
-	// 	t.Errorf("K0s product has wrong name: %s", k0s.Name())
-	// }
 }

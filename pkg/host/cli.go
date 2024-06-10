@@ -29,6 +29,10 @@ func (c *HostsComponent) CliBuild(cmd *cobra.Command, _ *project.Project) error 
 			slog.Debug(fmt.Sprintf("%s host plugin factory doesn't build clis", key))
 			continue
 		}
+		if hpfcb == nil { // this should never happen
+			slog.Error(fmt.Sprintf("%s host plugin factory cli builder is nil", key))
+			continue
+		}
 
 		slog.Debug(fmt.Sprintf("%s host plugin factory builds clis", key))
 		if err := hpfcb.CliBuild(cmd, c); err != nil {

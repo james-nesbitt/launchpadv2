@@ -156,9 +156,9 @@ func TestConfig_MKEx(t *testing.T) {
 	cl := project.Project{}
 	cy := `
 hosts:
-  Con:
+  dummy:
     mkex:
-      role: controller
+      role: manager
 products:
   mkex:
     version: v1.28.4+k0s.0

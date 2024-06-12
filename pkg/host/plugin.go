@@ -49,7 +49,7 @@ type HostPlugin interface {
 }
 
 // MatchPlugin finc the host plugin that fullfills a role
-func (h *Host) MatchPlugin(role string) interface{} {
+func (h *Host) MatchPlugin(role string) HostPlugin {
 	for _, hc := range h.plugins {
 		if hc.RoleMatch(role) {
 			return hc

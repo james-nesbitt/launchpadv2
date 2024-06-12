@@ -5,22 +5,23 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/fs"
 	"log/slog"
+	"os"
 	"strings"
 
 	"github.com/k0sproject/rig/v2"
 
+	"github.com/Mirantis/launchpad/pkg/host/exec"
 	hostexec "github.com/Mirantis/launchpad/pkg/host/exec"
 )
 
 // Connect prove that the host is reachable.
-func (p *rigHostPlugin) Connect(ctx context.Context) error {
+func (p *hostPlugin) Connect(ctx context.Context) error {
 	return p.rig.Connect(ctx)
 }
 
 // Exec a command.
-func (p *rigHostPlugin) Exec(ctx context.Context, cmd string, inr io.Reader, opts hostexec.ExecOptions) (string, string, error) {
+func (p *hostPlugin) Exec(ctx context.Context, cmd string, inr io.Reader, opts hostexec.ExecOptions) (string, string, error) {
 	slog.DebugContext(ctx, fmt.Sprintf("%s: Rig Exec: %s", p.hid(), cmd))
 
 	outs := strings.Builder{}
@@ -35,64 +36,61 @@ func (p *rigHostPlugin) Exec(ctx context.Context, cmd string, inr io.Reader, opt
 		&errs,
 	)
 
-	var rig *rig.Client = p.rig.Client
-	if opts.Sudo {
-		rig = p.rig.Sudo()
-	}
-
-	if cerr := rig.Connect(ctx); cerr != nil {
+	var c *rig.Client = p.rig.Client
+	if cerr := c.Connect(ctx); cerr != nil {
 		return outs.String(), errs.String(), cerr
 	}
+	if opts.Sudo {
+		c = p.rig.Sudo()
+		if cerr := c.Connect(ctx); cerr != nil {
+			return outs.String(), errs.String(), cerr
+		}
+	}
 
-	w, serr := rig.StartProcess(ctx, cmd, inr, outw, errw)
+	w, serr := c.StartProcess(ctx, cmd, inr, outw, errw)
 	if serr != nil {
 		return outs.String(), errs.String(), serr
 	}
 
-	if werr := w.Wait(); werr != nil {
+	wc := make(chan error)
+	go func() {
+		wc <- w.Wait()
+	}()
+
+	select {
+	case <-ctx.Done():
+		return outs.String(), errs.String(), fmt.Errorf("command cancelled due to context closure")
+	case werr := <-wc:
 		return outs.String(), errs.String(), werr
 	}
+}
 
-	return outs.String(), errs.String(), nil
+// ExecInteractive get an interactive shell
+func (p *hostPlugin) ExecInteractive(ctx context.Context, opts exec.ExecOptions) error {
+	slog.DebugContext(ctx, fmt.Sprintf("%s: Rig Exec Interactive", p.hid()))
+
+	var c *rig.Client = p.rig.Client
+	if cerr := c.Connect(ctx); cerr != nil {
+		return cerr
+	}
+
+	return c.ExecInteractive("", os.Stdin, os.Stdout, os.Stderr)
 }
 
 // InstallPackages install some packages.
-func (p *rigHostPlugin) InstallPackages(ctx context.Context, packages []string) error {
+func (p *hostPlugin) InstallPackages(ctx context.Context, packages []string) error {
 	slog.DebugContext(ctx, fmt.Sprintf("%s: RIG install packages", p.hid()), slog.Any("packages", packages))
 	return p.rig.Sudo().PackageManagerService.PackageManager().Install(ctx, packages...)
 }
 
 // RemovePackages install some packages.
-func (p *rigHostPlugin) RemovePackages(ctx context.Context, packages []string) error {
+func (p *hostPlugin) RemovePackages(ctx context.Context, packages []string) error {
 	slog.DebugContext(ctx, fmt.Sprintf("%s: RIG install packages", p.hid()), slog.Any("packages", packages))
 	return p.rig.Sudo().PackageManagerService.PackageManager().Remove(ctx, packages...)
 }
 
-// Upload from an io.Reader to a file path on the Host.
-func (p *rigHostPlugin) Upload(ctx context.Context, src io.Reader, dst string, fm fs.FileMode, opts hostexec.ExecOptions) error {
-	slog.DebugContext(ctx, fmt.Sprintf("%s: Rig Upload: %s", p.hid(), dst))
-
-	rigc := p.rig.Client
-	if opts.Sudo {
-		rigc = rigc.Sudo()
-	}
-
-	fs := rigc.FS()
-
-	bs, rerr := io.ReadAll(src)
-	if rerr != nil {
-		return rerr
-	}
-
-	if err := fs.WriteFile(dst, bs, fm); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 // ServiceEnable enable and start some services.
-func (p *rigHostPlugin) ServiceEnable(ctx context.Context, services []string) error {
+func (p *hostPlugin) ServiceEnable(ctx context.Context, services []string) error {
 	rigc := p.rig.Sudo()
 
 	errs := []error{}
@@ -107,12 +105,14 @@ func (p *rigHostPlugin) ServiceEnable(ctx context.Context, services []string) er
 			errs = append(errs, sgerr)
 			continue
 		}
+		slog.DebugContext(ctx, fmt.Sprintf("enabled service: %s", sn))
 
 		if !s.IsRunning(ctx) {
 			if err := s.Start(ctx); err != nil {
 				errs = append(errs, sgerr)
 				continue
 			}
+			slog.DebugContext(ctx, fmt.Sprintf("started service: %s", sn))
 		}
 	}
 
@@ -124,7 +124,7 @@ func (p *rigHostPlugin) ServiceEnable(ctx context.Context, services []string) er
 }
 
 // ServiceRestart stop and restart some services.
-func (p *rigHostPlugin) ServiceRestart(ctx context.Context, services []string) error {
+func (p *hostPlugin) ServiceRestart(ctx context.Context, services []string) error {
 	rigc := p.rig.Sudo()
 
 	errs := []error{}
@@ -149,7 +149,7 @@ func (p *rigHostPlugin) ServiceRestart(ctx context.Context, services []string) e
 }
 
 // ServiceDisable stop and disable some services
-func (p *rigHostPlugin) ServiceDisable(ctx context.Context, services []string) error {
+func (p *hostPlugin) ServiceDisable(ctx context.Context, services []string) error {
 	rigc := p.rig.Sudo()
 
 	errs := []error{}
@@ -166,6 +166,30 @@ func (p *rigHostPlugin) ServiceDisable(ctx context.Context, services []string) e
 
 		if err := s.Disable(ctx); err != nil {
 			errs = append(errs, fmt.Errorf("%s: service '%s' disable failed: %s", p.hid(), sn, err.Error()))
+		}
+	}
+
+	if len(errs) > 0 {
+		return errors.Join(errs...)
+	}
+
+	return nil
+}
+
+// ServiceIsRunning is the service running
+func (p *hostPlugin) ServiceIsRunning(ctx context.Context, services []string) error {
+	rigc := p.rig.Sudo()
+
+	errs := []error{}
+	for _, sn := range services {
+		s, sgerr := rigc.Service(sn)
+		if sgerr != nil {
+			errs = append(errs, fmt.Errorf("%s: service '%s' unknown: %s", p.hid(), sn, sgerr.Error()))
+			continue
+		}
+
+		if !s.IsRunning(ctx) {
+			errs = append(errs, fmt.Errorf("%s: service '%s' is not running", p.hid(), sn))
 		}
 	}
 

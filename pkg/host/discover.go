@@ -30,4 +30,5 @@ func HostGetDiscover(h *Host) HostDiscover {
 // HostDiscover validate that the Host is available
 type HostDiscover interface {
 	Discover(context.Context) error
+	MachineID(context.Context) (string, error)
 }

@@ -29,4 +29,12 @@ func HostGetPlatform(h *host.Host) HostPlatform {
 type HostPlatform interface {
 	// IsWindows check, could require a connection
 	IsWindows(context.Context) bool
+	// Arch what CPU Architecture is the host using
+	Arch(ctx context.Context) string
+	// UserCacheDir returns the default root directory to use for user-specific cached data.
+	UserCacheDir() string
+	// UserConfigDir returns the default root directory to use for user-specific configuration data.
+	UserConfigDir() string
+	// UserHomeDir returns the current user's home directory.
+	UserHomeDir() string
 }

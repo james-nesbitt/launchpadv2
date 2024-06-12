@@ -2,8 +2,22 @@ package k0s
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"log/slog"
+	"strings"
+	"sync"
+	"time"
+
+	"github.com/creasty/defaults"
+	"github.com/k0sproject/version"
+
+	"gopkg.in/yaml.v3"
 
 	"github.com/Mirantis/launchpad/pkg/host"
+	"github.com/Mirantis/launchpad/pkg/host/exec"
+	"github.com/Mirantis/launchpad/pkg/util/download"
+	"github.com/Mirantis/launchpad/pkg/util/flags"
 )
 
 /**
@@ -17,23 +31,31 @@ const (
 
 var (
 	// K0SManagerHostRoles the Host roles accepted for managers.
-	K0SManagerHostRoles = []string{"manager"}
+	K0SManagerHostRoles = []string{"controller"}
 )
 
 func init() {
-	host.RegisterHostPluginFactory(HostRoleK0S, &k0sHostPluginFactory{})
+	host.RegisterHostPluginFactory(HostRoleK0S, &HostPluginFactory{})
 }
 
-type k0sHostPluginFactory struct {
-	ps []*k0sHostPlugin
+type HostPluginFactory struct {
+	ps []*hostPlugin
 }
 
 // HostPlugin build a new host plugin
-func (mpf *k0sHostPluginFactory) HostPlugin(_ context.Context, h *host.Host) host.HostPlugin {
-	p := &k0sHostPlugin{
-		h: h,
+func (pf *HostPluginFactory) HostPlugin(_ context.Context, h *host.Host) host.HostPlugin {
+	c := HostConfig{
+		Environment: map[string]string{},
 	}
-	mpf.ps = append(mpf.ps, p)
+	p := &hostPlugin{
+		h: h,
+		c: c,
+		s: hostState{},
+	}
+
+	defaults.Set(p)
+
+	pf.ps = append(pf.ps, p)
 
 	return p
 }
@@ -42,23 +64,34 @@ func (mpf *k0sHostPluginFactory) HostPlugin(_ context.Context, h *host.Host) hos
 //
 // The decoder function is ugly, but it is meant to to take a
 // yaml/json .HostPluginDecode() function, and turn it into a plugin
-func (mpf *k0sHostPluginFactory) HostPluginDecode(_ context.Context, h *host.Host, d func(interface{}) error) (host.HostPlugin, error) {
-	p := &k0sHostPlugin{h: h}
-	mpf.ps = append(mpf.ps, p)
+func (pf *HostPluginFactory) HostPluginDecode(_ context.Context, h *host.Host, d func(interface{}) error) (host.HostPlugin, error) {
+	c := HostConfig{
+		Environment: map[string]string{},
+	}
+	p := &hostPlugin{
+		h: h,
+		s: hostState{},
+	}
 
-	err := d(p)
+	if err := d(&c); err != nil {
+		return p, err
+	}
 
-	return p, err
+	p.c = c
+
+	pf.ps = append(pf.ps, p)
+
+	return p, nil
 }
 
 // Get the K0S plugin from a Host
-func HostGetK0S(h *host.Host) *k0sHostPlugin {
+func HostGetK0s(h *host.Host) *hostPlugin {
 	hgk0s := h.MatchPlugin(HostRoleK0S)
 	if hgk0s == nil {
 		return nil
 	}
 
-	hk0s, ok := hgk0s.(*k0sHostPlugin)
+	hk0s, ok := hgk0s.(*hostPlugin)
 	if !ok {
 		return nil
 	}
@@ -66,24 +99,47 @@ func HostGetK0S(h *host.Host) *k0sHostPlugin {
 	return hk0s
 }
 
-// k0sHostPlugin
-//
-// Implements no generic plugin interfaces.
-type k0sHostPlugin struct {
-	h       *host.Host
-	K0sRole string `yaml:"role"`
-	Config  string `yaml:"config"`
+// HostConfig
+type HostConfig struct {
+	Role             string            `yaml:"role"`
+	Reset            bool              `yaml:"reset,omitempty"`
+	ShouldDownload   bool              `yaml:"direct_download,omitempty"`
+	DataDir          string            `yaml:"dataDir,omitempty"`
+	Environment      map[string]string `yaml:"environment,flow,omitempty"`
+	UploadBinary     bool              `yaml:"uploadBinary,omitempty"`
+	K0sBinaryPath    string            `yaml:"k0sBinaryPath,omitempty"`
+	K0sDataPath      string            `yaml:"k0sDataPath,omitempty"`
+	K0sConfigPath    string            `yaml:"k0sConfigPath,omitempty"`
+	K0sTokenPath     string            `yaml:"k0sTokenPath,omitempty"`
+	K0sDownloadURL   string            `yaml:"k0sDownloadURL,omitempty"`
+	InstallFlags     flags.Flags       `yaml:"installFlags,omitempty"`
+	OSIDOverride     string            `yaml:"os,omitempty"`
+	HostnameOverride string            `yaml:"hostname,omitempty"`
+	NoTaints         bool              `yaml:"noTaints,omitempty"`
 }
 
-func (mhc k0sHostPlugin) Id() string {
-	return "k0s"
+type hostState struct {
 }
 
-func (mhc k0sHostPlugin) Validate() error {
-	return nil
+var (
+	// global Download Queue
+	qd = download.NewQueueDownload(nil)
+)
+
+// hostPlugin
+type hostPlugin struct {
+	h *host.Host
+	c HostConfig
+	s hostState
 }
 
-func (mhc k0sHostPlugin) RoleMatch(role string) bool {
+// Id uniquely identify the plugin
+func (p hostPlugin) Id() string {
+	return fmt.Sprintf("%s:%s", p.h.Id(), "k0s")
+}
+
+// RoleMatch what host roles does this host plugin act
+func (p hostPlugin) RoleMatch(role string) bool {
 	switch role {
 	case HostRoleK0S:
 		return true
@@ -92,15 +148,279 @@ func (mhc k0sHostPlugin) RoleMatch(role string) bool {
 	return false
 }
 
-func (mhc k0sHostPlugin) K0SConfig() string {
-	return mhc.Config
+// Validate the plugin configuration.
+func (p *hostPlugin) Validate() error {
+	return nil
 }
 
-func (mhc k0sHostPlugin) IsController() bool {
-	for _, r := range K0SManagerHostRoles {
-		if mhc.K0sRole == r {
-			return true
+func (p hostPlugin) IsController() bool {
+	return p.c.Role == "controller"
+}
+
+// Version retrieve plugin host k0s version (know error if k0s binary is missing).
+func (p *hostPlugin) Version(ctx context.Context) (k0sversion, error) {
+	cmd := p.k0sCommand([]string{"version", "--json"})
+
+	eh := exec.HostGetExecutor(p.h)
+
+	var v k0sversion
+
+	o, e, err := eh.Exec(ctx, cmd, nil, exec.ExecOptions{Sudo: true})
+	if err != nil {
+		return v, k0sErrorAnalyze(e, fmt.Errorf("failed to retrieve version; %w", err))
+	}
+
+	if err := json.Unmarshal([]byte(o), &v); err != nil {
+		return v, fmt.Errorf("failed to unmarshal version: %s", err.Error())
+	}
+
+	return v, nil
+}
+
+// Status retrieve plugin host status (known error if binary is missing, or if k0s is not running).
+func (p *hostPlugin) Status(ctx context.Context) (k0sstatus, error) {
+	cmd := p.k0sCommand([]string{"status", "--out=json"})
+
+	eh := exec.HostGetExecutor(p.h)
+
+	var s k0sstatus
+
+	o, e, err := eh.Exec(ctx, cmd, nil, exec.ExecOptions{Sudo: true})
+	if err != nil {
+		return s, k0sErrorAnalyze(e, fmt.Errorf("failed to retrieve status; %w", err))
+	}
+
+	if err := json.Unmarshal([]byte(o), &s); err != nil {
+		return s, fmt.Errorf("failed to unmarshal status: %s", err.Error())
+	}
+
+	return s, nil
+}
+
+// DownloadK0sBinary get k0s onto the plugin host by directly downloading it from the host.
+func (p *hostPlugin) DownloadK0sBinary(ctx context.Context, v version.Version) error {
+	hf := exec.HostGetFiles(p.h)
+	hp := exec.HostGetPlatform(p.h)
+	u := DownloadK0sURL(v, hp.Arch(ctx))
+	d := p.k0sBinaryPath()
+
+	if err := hf.Download(ctx, u, d, 0550, exec.ExecOptions{Sudo: true}); err != nil {
+		return fmt.Errorf("%s: host couldn't download the K0s binary: %s -> %s :: %s", p.h.Id(), u, d, err.Error())
+	}
+	return nil
+}
+
+// UploadK0sBinary get the k0s binary onto the plugin host by downloading it to the launchpad machine and then streaming it to the plugin host.
+func (p *hostPlugin) UploadK0sBinary(ctx context.Context, v version.Version) error {
+	hf := exec.HostGetFiles(p.h)
+	hp := exec.HostGetPlatform(p.h)
+	u := DownloadK0sURL(v, hp.Arch(ctx))
+	d := p.k0sBinaryPath()
+
+	rc, _, derr := qd.Download(ctx, u) // queue dowloads so that we avoid repeating any downloads
+	if derr != nil {
+		return fmt.Errorf("could not download k0s binary, before uploading to host %s : %s -> %s : %s", p.h.Id(), u, d, derr.Error())
+	}
+
+	if err := hf.Upload(ctx, rc, d, 0750, exec.ExecOptions{Sudo: true}); err != nil {
+		return fmt.Errorf("%s: failed to upload k0s binary to host : %s", p.h.Id(), err.Error())
+	}
+	return nil
+}
+
+// WriteK0sConfig to a plugin host as yaml
+func (p *hostPlugin) WriteK0sConfig(ctx context.Context, cfg K0sConfig) error {
+	cfgbs, merr := yaml.Marshal(cfg)
+	if merr != nil {
+		return merr
+	}
+
+	cfgsr := strings.NewReader(string(cfgbs))
+
+	hf := exec.HostGetFiles(p.h)
+
+	if err := hf.Upload(ctx, cfgsr, p.k0sConfigPath(), 0440, exec.ExecOptions{Sudo: true}); err != nil {
+		return err
+	}
+	return nil
+}
+
+var token_mu sync.Mutex
+
+// GenerateToken generate a new k0s join token for a role
+//
+// @NOTE a mutex is used to ensure that only one token is generated at a time
+func (p *hostPlugin) GenerateToken(ctx context.Context, role string, expiry time.Duration) (string, error) {
+	cmd := []string{
+		"token",
+		"create",
+		fmt.Sprintf("--role=%s", role),
+		fmt.Sprintf("--expiry=%s", expiry),
+		fmt.Sprintf("--data-dir=%s", p.k0sDataPath()),
+	}
+
+	eh := exec.HostGetExecutor(p.h)
+
+	token_mu.Lock()
+	defer token_mu.Unlock()
+	o, e, err := eh.Exec(ctx, p.k0sCommand(cmd), nil, exec.ExecOptions{Sudo: true})
+	if err != nil {
+		return o, fmt.Errorf("%s: error generating join token: %s :: %s", p.h.Id(), err.Error(), e)
+	}
+	return strings.TrimSpace(o), nil
+}
+
+// ActivateNewCluster Initialize the plugin host as the first controller in a new cluster
+//
+// @TODO do more stuff to check if the cluster is already running?
+func (p *hostPlugin) ActivateNewCluster(ctx context.Context, c Config) error {
+	eh := exec.HostGetExecutor(p.h)
+
+	s, serr := p.Status(ctx)
+	if serr == nil {
+		if s.Role != RoleController {
+			return fmt.Errorf("%s: host cannot be treated as a new cluster leader, as it is a %s", p.h.Id(), s.Role)
+		}
+		return nil
+	}
+
+	for k, ss := range map[string][]string{
+		"worker":     {ServiceWorker},
+		"controller": {ServiceController},
+	} {
+		if eh.ServiceIsRunning(ctx, ss) == nil {
+			if err := eh.ServiceDisable(ctx, ss); err != nil {
+				return fmt.Errorf("%s: failed to stop K0s services: %s", p.h.Id(), k)
+			}
 		}
 	}
-	return false
+
+	args := []string{
+		"install",
+		RoleController,
+		"--debug",
+		"--force",
+		fmt.Sprintf("--data-dir=%s", p.k0sDataPath()),
+		fmt.Sprintf("--config=%s", p.k0sConfigPath()),
+	}
+
+	if c.DynamicConfig {
+		args = append(args, "--enable-dynamic-config")
+	}
+
+	slog.InfoContext(ctx, fmt.Sprintf("%s: installing leader: %s", p.h.Id(), args))
+
+	_, e, ierr := eh.Exec(ctx, p.k0sCommand(args), nil, exec.ExecOptions{Sudo: true})
+	if ierr != nil {
+		return fmt.Errorf("%s: failed to initialize new cluster: %s :: %s", p.h.Id(), ierr.Error(), e)
+	}
+	slog.InfoContext(ctx, fmt.Sprintf("%s: installed as new leader", p.h.Id()))
+
+	slog.InfoContext(ctx, fmt.Sprintf("%s: starting leader service: %s", p.h.Id(), ServiceController))
+	if err := eh.ServiceEnable(ctx, []string{ServiceController}); err != nil {
+		return fmt.Errorf("%s: failed to start leader k0s service: %s", p.h.Id(), err.Error())
+	}
+
+	return nil
+}
+
+// JoinCluster Join the plugin host to an existing k0s cluster
+func (p *hostPlugin) JoinCluster(ctx context.Context, l *host.Host, role string, c Config) error {
+	lkh := HostGetK0s(l)
+	eh := exec.HostGetExecutor(p.h)
+	fh := exec.HostGetFiles(p.h)
+
+	jt, terr := lkh.GenerateToken(ctx, role, JoinTokenExpireDuration)
+	if terr != nil {
+		return fmt.Errorf("%s: failed to get token from leader: %s", p.h.Id(), terr.Error())
+	}
+
+	if err := fh.Upload(ctx, strings.NewReader(jt), p.k0sTokenPath(), 0640, exec.ExecOptions{Sudo: true}); err != nil {
+		return fmt.Errorf("%s: failed to write join token to host: %s", p.h.Id(), err.Error())
+	}
+
+	args := []string{
+		"install",
+		role,
+		"--debug",
+		"--force",
+		fmt.Sprintf("--token-file=%s", p.k0sTokenPath()),
+		fmt.Sprintf("--data-dir=%s", p.k0sDataPath()),
+	}
+
+	if c.DynamicConfig {
+		args = append(args, "--enable-dynamic-config")
+	}
+
+	// disable any running services
+	for k, ss := range map[string][]string{
+		"worker":     {ServiceWorker},
+		"controller": {ServiceController},
+	} {
+		if eh.ServiceIsRunning(ctx, ss) == nil {
+			if err := eh.ServiceDisable(ctx, ss); err != nil {
+				return fmt.Errorf("%s: failed to stop K0s services: %s", p.h.Id(), k)
+			}
+		}
+	}
+
+	services := []string{}
+	switch role {
+	case RoleController:
+		services = append(services, ServiceController)
+		args = append(args, fmt.Sprintf("--config=%s", p.k0sConfigPath()))
+	case RoleWorker:
+		services = append(services, ServiceWorker)
+	}
+
+	_, e, err := eh.Exec(ctx, p.k0sCommand(args), nil, exec.ExecOptions{Sudo: true})
+	if err != nil {
+		return fmt.Errorf("%s: failed to join cluster: %s :: %s", p.h.Id(), err.Error(), e)
+	}
+
+	if eh.ServiceIsRunning(ctx, services) == nil {
+		if err := eh.ServiceEnable(ctx, services); err != nil {
+			return fmt.Errorf("%s: failed to enable&start K0s services", p.h.Id())
+		}
+	} else {
+		if err := eh.ServiceRestart(ctx, services); err != nil {
+			return fmt.Errorf("%s: failed to restart K0s services", p.h.Id())
+		}
+	}
+
+	return nil
+}
+
+// ---- Local helpers ----
+
+func (p *hostPlugin) k0sCommand(args []string) string {
+	return strings.Join(append([]string{p.k0sBinaryPath()}, args...), " ")
+}
+
+func (p *hostPlugin) k0sBinaryPath() string {
+	if p.c.K0sBinaryPath != "" {
+		return p.c.K0sBinaryPath
+	}
+	return DefaultK0sBinaryPath
+}
+
+func (p *hostPlugin) k0sConfigPath() string {
+	if p.c.K0sConfigPath != "" {
+		return p.c.K0sConfigPath
+	}
+	return DefaultK0sConfigPath
+}
+
+func (p *hostPlugin) k0sDataPath() string {
+	if p.c.K0sDataPath != "" {
+		return p.c.K0sDataPath
+	}
+	return DefaultK0sDataPath
+}
+
+func (p *hostPlugin) k0sTokenPath() string {
+	if p.c.K0sTokenPath != "" {
+		return p.c.K0sTokenPath
+	}
+	return DefaultK0sTokenPath
 }

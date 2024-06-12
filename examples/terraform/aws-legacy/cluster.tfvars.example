@@ -5,22 +5,21 @@ aws = {
 }
 
 extra_tags = {
-  "ticket"= "PRODENG-2595",
-  "owner" = "jnesbitt@mirantis.com",
+  "owner" = "you@mirantis.com",
 }
 
-launchpad = {
-  drain = false
-
-  mcr_version = "23.0.9"
-  mke_version = "3.7.5"
-  msr_version = ""
-
-  mke_connect = {
+mcr = {
+  version = "23.0.9"
+mke = {
+  version = "3.7.5"
+  connect = {
     username = "admin"
     password = ""
     insecure = false
   }
+}
+msr = {
+  version = ""
 }
 
 // configure the network stack
@@ -43,7 +42,7 @@ nodegroups = {
     public      = true
     user_data   = ""
   },
-  "AWrk_Ubu22" = { // workers for A group
+  "AWrk" = { // workers for A group
     platform    = "ubuntu_22.04"
     count       = 6
     type        = "c6a.xlarge"

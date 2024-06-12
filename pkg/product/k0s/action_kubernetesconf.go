@@ -7,6 +7,7 @@ import (
 )
 
 type kubernetesConfStep struct {
+	baseStep
 	id string
 }
 

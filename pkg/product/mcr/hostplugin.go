@@ -57,11 +57,14 @@ func (pf *hostPluginFactory) HostPlugin(_ context.Context, h *host.Host) host.Ho
 // yaml/json .HostPluginDecode() function, and turn it into a plugin
 func (pf *hostPluginFactory) HostPluginDecode(_ context.Context, h *host.Host, d func(interface{}) error) (host.HostPlugin, error) {
 	p := &hostPlugin{h: h}
+
+	if err := d(p); err != nil {
+		return p, err
+	}
+
 	pf.ps = append(pf.ps, p)
 
-	err := d(p)
-
-	return p, err
+	return p, nil
 }
 
 // Get the MCR plugin from a Host
@@ -161,7 +164,7 @@ func (hp hostPlugin) DownloadMCRInstaller(ctx context.Context, c Config) error {
 
 	defer irs.Body.Close()
 
-	if err := exec.HostGetExecutor(hp.h).Upload(ctx, irs.Body, MCRInstallerPath, 0777, exec.ExecOptions{}); err != nil {
+	if err := exec.HostGetFiles(hp.h).Upload(ctx, irs.Body, MCRInstallerPath, 0777, exec.ExecOptions{}); err != nil {
 		return err
 	}
 

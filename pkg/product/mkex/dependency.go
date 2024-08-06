@@ -11,7 +11,7 @@ import (
 	dockerhost "github.com/Mirantis/launchpad/pkg/implementation/docker/host"
 )
 
-// RequiresDependencies declare what dependencies we have
+// RequiresDependencies declare what dependencies we have.
 func (c *Component) RequiresDependencies(ctx context.Context) dependency.Requirements {
 	if c.hsr == nil {
 

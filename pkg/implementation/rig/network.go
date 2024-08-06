@@ -15,7 +15,7 @@ var (
 	sbinPath = "PATH=/usr/local/sbin:/usr/sbin:/sbin:$PATH"
 )
 
-// Network retrieve the Network information for the machine
+// Network retrieve the Network information for the machine.
 func (p hostPlugin) Network(ctx context.Context) (network.Network, error) {
 	n := network.Network{}
 

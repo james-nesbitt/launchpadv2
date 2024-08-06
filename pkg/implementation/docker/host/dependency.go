@@ -8,13 +8,13 @@ import (
 	"github.com/Mirantis/launchpad/pkg/host"
 )
 
-// DockerHostsDependency a Dependency that can produce hosts that have a Docker client
+// DockerHostsDependency a Dependency that can produce hosts that have a Docker client.
 type DockerHostsDependency interface {
 	// ProvidesDockerHost provide hosts that can produce a Docker client
 	ProvidesDockerHost(context.Context) host.Hosts
 }
 
-// NewDockerHostsDependency produce a new Dependency that can produce hosts that have Docker clients from a factory
+// NewDockerHostsDependency produce a new Dependency that can produce hosts that have Docker clients from a factory.
 func NewDockerHostsDependency(id string, description string, factory func(context.Context) (host.Hosts, error)) *dockerHostsDep {
 	return &dockerHostsDep{
 		id:      id,

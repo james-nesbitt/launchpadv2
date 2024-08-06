@@ -19,12 +19,12 @@ import (
 	// Register Host handlers.
 	_ "github.com/Mirantis/launchpad/pkg/implementation/rig"
 
-	// Register product handlers
+	// Register product handlers.
 	_ "github.com/Mirantis/launchpad/pkg/product/mke3"
 	_ "github.com/Mirantis/launchpad/pkg/product/mkex"
 	_ "github.com/Mirantis/launchpad/pkg/product/msr2"
 
-	// Register mock stuff, in case it gets used
+	// Register mock stuff, in case it gets used.
 	_ "github.com/Mirantis/launchpad/pkg/mock"
 )
 

@@ -13,7 +13,7 @@ import (
 	"github.com/Mirantis/launchpad/pkg/implementation/docker/swarm"
 )
 
-// RequiresDependencies declare what dependencies we have
+// RequiresDependencies declare what dependencies we have.
 func (c *Component) RequiresDependencies(ctx context.Context) dependency.Requirements {
 	if c.hr == nil {
 

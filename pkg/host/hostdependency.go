@@ -12,12 +12,12 @@ var (
 	ErrNoHostsFunction = errors.New("No hosts dependency option")
 )
 
-// HostsDepencency a Depencency that provides hosts
+// HostsDepencency a Dependency that provides hosts.
 type HostsDependency interface {
 	ProduceHosts(context.Context) (Hosts, error)
 }
 
-// NewHostsDependency constructor for a hostsDep using a factory for retrieving hosts
+// NewHostsDependency constructor for a hostsDep using a factory for retrieving hosts.
 func NewHostsDependency(id string, describe string, factory func(context.Context) (Hosts, error)) *hostsDep {
 	return &hostsDep{
 		id:       id,
@@ -50,7 +50,7 @@ func (hd hostsDep) Met(ctx context.Context) error {
 	return err
 }
 
-// Validate the the dependency thinks it has what it needs to fulfill it
+// Validate the the dependency thinks it has what it needs to fulfill it.
 func (hd hostsDep) Validate(context.Context) error {
 	if hd.factory == nil {
 		return ErrNoHostsFunction

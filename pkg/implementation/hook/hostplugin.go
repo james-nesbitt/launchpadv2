@@ -28,13 +28,13 @@ func HostGetExecutor(h *host.Host) Hooks {
 	return he.Hooks()
 }
 
-// HostHooks this plugin can deliver hooks
+// HostHooks this plugin can deliver hooks.
 type HostHooks interface {
 	// Provides hooks
 	Hooks() Hooks
 }
 
-// register our host plugin factory
+// register our host plugin factory.
 func init() {
 	host.RegisterHostPluginFactory(HostRoleHooks, &hookHostPluginFactory{})
 }
@@ -43,7 +43,7 @@ type hookHostPluginFactory struct {
 	ps []*hookHostPlugin
 }
 
-// Plugin build a new host plugin
+// Plugin build a new host plugin.
 func (rpf *hookHostPluginFactory) HostPlugin(_ context.Context, h *host.Host) host.HostPlugin {
 	p := &hookHostPlugin{
 		h:     h,
@@ -58,7 +58,7 @@ func (rpf *hookHostPluginFactory) HostPlugin(_ context.Context, h *host.Host) ho
 // Decoder provide a Host Plugin decoder function
 //
 // The decoder function is ugly, but it is meant to to take a
-// yaml/json .Decode() function, and turn it into a plugin
+// yaml/json .Decode() function, and turn it into a plugin.
 func (rpf *hookHostPluginFactory) HostPluginDecode(_ context.Context, h *host.Host, d func(interface{}) error) (host.HostPlugin, error) {
 	p := &hookHostPlugin{
 		h:     h,
@@ -78,7 +78,7 @@ func (rpf *hookHostPluginFactory) HostPluginDecode(_ context.Context, h *host.Ho
 // hookhHostPlugin a host plugin that uses inline hooks
 //
 // Implements:
-// HostRoleHooks: provides hooks
+// HostRoleHooks: provides hooks.
 type hookHostPlugin struct {
 	h     *host.Host
 	hooks Hooks

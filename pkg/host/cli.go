@@ -14,7 +14,7 @@ type HostFactoryCliBuilder interface {
 
 // CliBuild build command cli for launchpad
 //
-// The hosts component allows HostPluginFactories to also build CLI
+// The hosts component allows HostPluginFactories to also build CLI.
 func (c *HostsComponent) CliBuild(cmd *cobra.Command, _ *project.Project) error {
 
 	g := &cobra.Group{

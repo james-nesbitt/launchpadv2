@@ -10,7 +10,6 @@ import (
 
 	"github.com/k0sproject/version"
 
-	"github.com/Mirantis/launchpad/pkg/host"
 	"github.com/Mirantis/launchpad/pkg/host/network"
 	"github.com/k0sproject/dig"
 )
@@ -70,13 +69,14 @@ func k0sErrorAnalyze(e string, err error) error {
 	return err
 }
 
-// DownloadURL url to use for the k0s binary for the config version
+// DownloadURL url to use for the k0s binary for the config version.
 func DownloadK0sURL(v version.Version, arch string) string {
 	// https://github.com/k0sproject/k0s/releases/download/v1.30.0%2Bk0s.0/k0s-v1.30.0+k0s.0-amd64
 	// v1.30.0%2Bk0s.0/k0s-v1.30.0+k0s.0-amd64
 	return fmt.Sprintf("%[1]s/%[2]s/k0s-%[2]s-%[3]s", K0sReleaseLinkBase, v.String(), arch)
 }
 
+// CollectClusterSans collect all host public IPs/Addresses for SANs.
 func (c *Component) CollectClusterSans(ctx context.Context) []string {
 	var sans []string
 
@@ -99,56 +99,4 @@ func (c *Component) CollectClusterSans(ctx context.Context) []string {
 	}
 
 	return sans
-}
-
-func BuildHostConfig(ctx context.Context, basecfg K0sConfig, h *host.Host, sans []string) (K0sConfig, error) {
-	var hcfg K0sConfig = basecfg
-	slog.DebugContext(ctx, "base config", slog.Any("config", hcfg))
-
-	addUnlessExist := func(slice *[]string, s string) {
-		for _, v := range *slice {
-			if v == s {
-				return
-			}
-		}
-		*slice = append(*slice, s)
-	}
-
-	hn := network.HostGetNetwork(h)
-	n, nerr := hn.Network(ctx)
-	if nerr != nil {
-		return hcfg, nerr
-	}
-
-	var addr string
-	if n.PrivateAddress != "" {
-		addr = n.PrivateAddress
-	} else {
-		addr = n.PublicAddress
-	}
-
-	hcfg.Spec.API.Address = addr
-	hcfg.Spec.Storage.Etcd.PeerAddress = addr
-	addUnlessExist(&sans, addr)
-
-	for _, s := range sans {
-		addUnlessExist(&hcfg.Spec.API.Sans, s)
-	}
-
-	addUnlessExist(&hcfg.Spec.API.Sans, "127.0.0.1")
-
-	if hcfg.Spec.API.K0sApiPort == 0 {
-		hcfg.Spec.API.K0sApiPort = 9443
-	}
-	if hcfg.Spec.API.Port == 0 {
-		hcfg.Spec.API.Port = 6443
-	}
-	//	if hcfg.Spec.Konnectivity.AdminPort == 0 {
-	//		hcfg.Spec.Konnectivity.AdminPort = 8443
-	//	}
-	//	if hcfg.Spec.Konnectivity.AgentPort == 0 {
-	//		hcfg.Spec.Konnectivity.AgentPort = 8443
-	//	}
-
-	return hcfg, nil
 }

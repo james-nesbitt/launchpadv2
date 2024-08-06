@@ -27,7 +27,7 @@ func HostGetDiscover(h *Host) HostDiscover {
 	return hd
 }
 
-// HostDiscover validate that the Host is available
+// HostDiscover validate that the Host is available.
 type HostDiscover interface {
 	Discover(context.Context) error
 	MachineID(context.Context) (string, error)

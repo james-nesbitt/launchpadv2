@@ -17,13 +17,13 @@ type Config struct {
 	Metadata       K0sMetadata     `yaml:"-"`
 }
 
-// K0sMetadata contains gathered information about k0s cluster
+// K0sMetadata contains gathered information about k0s cluster.
 type K0sMetadata struct {
 	ClusterID        string
 	VersionDefaulted bool
 }
 
-// ShouldDownload should we download binaries directly to the host, os should we upload from the running client machine
+// ShouldDownload should we download binaries directly to the host, os should we upload from the running client machine.
 func (c Config) ShouldDownload() bool {
 	return true
 }

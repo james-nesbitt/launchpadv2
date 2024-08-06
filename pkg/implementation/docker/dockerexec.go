@@ -97,7 +97,7 @@ func (de DockerExec) Info(ctx context.Context) (dockertypessystem.Info, error) {
 	return di, nil
 }
 
-// ImagePull
+// ImagePull.
 func (de DockerExec) ImagePull(ctx context.Context, refStr string, options dockertypesimage.PullOptions) (io.ReadCloser, error) {
 	o, e, eerr := de.dockerCommand(ctx, []string{"image", "pull", refStr}, RunOptions{})
 	if eerr != nil {
@@ -107,7 +107,7 @@ func (de DockerExec) ImagePull(ctx context.Context, refStr string, options docke
 	return io.NopCloser(strings.NewReader(o)), nil
 }
 
-// NodeList retried the list of nodes in the swarm
+// NodeList retried the list of nodes in the swarm.
 func (de DockerExec) NodeList(ctx context.Context, options dockertypes.NodeListOptions) ([]dockertypesswarm.Node, error) {
 	cmd := []string{"node", "ls", "--format=json"}
 
@@ -133,7 +133,7 @@ func (de DockerExec) NodeList(ctx context.Context, options dockertypes.NodeListO
 	return nodeListCapturesListConvert(ncs), nil
 }
 
-// SwarmInit Initialize swarm
+// SwarmInit Initialize swarm.
 func (de DockerExec) SwarmInit(ctx context.Context, r dockertypesswarm.InitRequest) error {
 	cmd := []string{"swarm", "init"}
 
@@ -193,7 +193,7 @@ func (de DockerExec) SwarmInspect(ctx context.Context) (dockertypesswarm.Swarm, 
 	return s, nil
 }
 
-// SwarmJoin join a swarm
+// SwarmJoin join a swarm.
 func (de DockerExec) SwarmJoin(ctx context.Context, r dockertypesswarm.JoinRequest) error {
 	cmd := []string{"swarm", "join"}
 
@@ -222,7 +222,7 @@ func (de DockerExec) SwarmJoin(ctx context.Context, r dockertypesswarm.JoinReque
 	return nil
 }
 
-// SwarmLeave leave a swarm cluster
+// SwarmLeave leave a swarm cluster.
 func (de DockerExec) SwarmLeave(ctx context.Context, force bool) error {
 	cmd := []string{"swarm", "leave"}
 

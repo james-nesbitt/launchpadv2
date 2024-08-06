@@ -12,7 +12,7 @@ var (
 type state struct {
 }
 
-// Debug state for output
+// Debug state for output.
 func (s *state) Debug() interface{} {
 	return nil
 }

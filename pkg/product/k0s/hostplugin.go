@@ -16,6 +16,7 @@ import (
 
 	"github.com/Mirantis/launchpad/pkg/host"
 	"github.com/Mirantis/launchpad/pkg/host/exec"
+	"github.com/Mirantis/launchpad/pkg/host/network"
 	"github.com/Mirantis/launchpad/pkg/util/download"
 	"github.com/Mirantis/launchpad/pkg/util/flags"
 )
@@ -42,7 +43,7 @@ type HostPluginFactory struct {
 	ps []*hostPlugin
 }
 
-// HostPlugin build a new host plugin
+// HostPlugin build a new host plugin.
 func (pf *HostPluginFactory) HostPlugin(_ context.Context, h *host.Host) host.HostPlugin {
 	c := HostConfig{
 		Environment: map[string]string{},
@@ -63,7 +64,7 @@ func (pf *HostPluginFactory) HostPlugin(_ context.Context, h *host.Host) host.Ho
 // Decoder provide a Host Plugin decoder function
 //
 // The decoder function is ugly, but it is meant to to take a
-// yaml/json .HostPluginDecode() function, and turn it into a plugin
+// yaml/json .HostPluginDecode() function, and turn it into a plugin.
 func (pf *HostPluginFactory) HostPluginDecode(_ context.Context, h *host.Host, d func(interface{}) error) (host.HostPlugin, error) {
 	c := HostConfig{
 		Environment: map[string]string{},
@@ -84,7 +85,7 @@ func (pf *HostPluginFactory) HostPluginDecode(_ context.Context, h *host.Host, d
 	return p, nil
 }
 
-// Get the K0S plugin from a Host
+// Get the K0S plugin from a Host.
 func HostGetK0s(h *host.Host) *hostPlugin {
 	hgk0s := h.MatchPlugin(HostRoleK0S)
 	if hgk0s == nil {
@@ -99,7 +100,7 @@ func HostGetK0s(h *host.Host) *hostPlugin {
 	return hk0s
 }
 
-// HostConfig
+// HostConfig.
 type HostConfig struct {
 	Role             string            `yaml:"role"`
 	Reset            bool              `yaml:"reset,omitempty"`
@@ -122,23 +123,23 @@ type hostState struct {
 }
 
 var (
-	// global Download Queue
+	// global Download Queue.
 	qd = download.NewQueueDownload(nil)
 )
 
-// hostPlugin
+// hostPlugin.
 type hostPlugin struct {
 	h *host.Host
 	c HostConfig
 	s hostState
 }
 
-// Id uniquely identify the plugin
+// Id uniquely identify the plugin.
 func (p hostPlugin) Id() string {
 	return fmt.Sprintf("%s:%s", p.h.Id(), "k0s")
 }
 
-// RoleMatch what host roles does this host plugin act
+// RoleMatch what host roles does this host plugin act.
 func (p hostPlugin) RoleMatch(role string) bool {
 	switch role {
 	case HostRoleK0S:
@@ -217,7 +218,7 @@ func (p *hostPlugin) UploadK0sBinary(ctx context.Context, v version.Version) err
 	u := DownloadK0sURL(v, hp.Arch(ctx))
 	d := p.k0sBinaryPath()
 
-	rc, _, derr := qd.Download(ctx, u) // queue dowloads so that we avoid repeating any downloads
+	rc, _, derr := qd.Download(ctx, u) // queue downloads so that we avoid repeating any downloads
 	if derr != nil {
 		return fmt.Errorf("could not download k0s binary, before uploading to host %s : %s -> %s : %s", p.h.Id(), u, d, derr.Error())
 	}
@@ -228,8 +229,16 @@ func (p *hostPlugin) UploadK0sBinary(ctx context.Context, v version.Version) err
 	return nil
 }
 
-// WriteK0sConfig to a plugin host as yaml
-func (p *hostPlugin) WriteK0sConfig(ctx context.Context, cfg K0sConfig) error {
+// WriteK0sConfig to a plugin host as yaml.
+func (p *hostPlugin) WriteK0sConfig(ctx context.Context, basecfg K0sConfig, sans []string) error {
+	c, err := p.BuildHostConfig(ctx, basecfg, sans)
+	if err != nil {
+		return err
+	}
+	return p.writeK0sConfig(ctx, c)
+}
+
+func (p *hostPlugin) writeK0sConfig(ctx context.Context, cfg K0sConfig) error {
 	cfgbs, merr := yaml.Marshal(cfg)
 	if merr != nil {
 		return merr
@@ -249,7 +258,7 @@ var token_mu sync.Mutex
 
 // GenerateToken generate a new k0s join token for a role
 //
-// @NOTE a mutex is used to ensure that only one token is generated at a time
+// @NOTE a mutex is used to ensure that only one token is generated at a time.
 func (p *hostPlugin) GenerateToken(ctx context.Context, role string, expiry time.Duration) (string, error) {
 	cmd := []string{
 		"token",
@@ -324,7 +333,7 @@ func (p *hostPlugin) ActivateNewCluster(ctx context.Context, c Config) error {
 	return nil
 }
 
-// JoinCluster Join the plugin host to an existing k0s cluster
+// JoinCluster Join the plugin host to an existing k0s cluster.
 func (p *hostPlugin) JoinCluster(ctx context.Context, l *host.Host, role string, c Config) error {
 	lkh := HostGetK0s(l)
 	eh := exec.HostGetExecutor(p.h)
@@ -423,4 +432,57 @@ func (p *hostPlugin) k0sTokenPath() string {
 		return p.c.K0sTokenPath
 	}
 	return DefaultK0sTokenPath
+}
+
+// BuildHostConfig Modify a passed base K0s config with host specific values, and including passed additional sans.
+func (p *hostPlugin) BuildHostConfig(ctx context.Context, basecfg K0sConfig, sans []string) (K0sConfig, error) {
+	var hcfg K0sConfig = basecfg
+	slog.DebugContext(ctx, "base config", slog.Any("config", hcfg))
+
+	addUnlessExist := func(slice *[]string, s string) {
+		for _, v := range *slice {
+			if v == s {
+				return
+			}
+		}
+		*slice = append(*slice, s)
+	}
+
+	hn := network.HostGetNetwork(p.h)
+	n, nerr := hn.Network(ctx)
+	if nerr != nil {
+		return hcfg, nerr
+	}
+
+	var addr string
+	if n.PrivateAddress != "" {
+		addr = n.PrivateAddress
+	} else {
+		addr = n.PublicAddress
+	}
+
+	hcfg.Spec.API.Address = addr
+	hcfg.Spec.Storage.Etcd.PeerAddress = addr
+	addUnlessExist(&sans, addr)
+
+	for _, s := range sans {
+		addUnlessExist(&hcfg.Spec.API.Sans, s)
+	}
+
+	addUnlessExist(&hcfg.Spec.API.Sans, "127.0.0.1")
+
+	if hcfg.Spec.API.K0sApiPort == 0 {
+		hcfg.Spec.API.K0sApiPort = 9443
+	}
+	if hcfg.Spec.API.Port == 0 {
+		hcfg.Spec.API.Port = 6443
+	}
+	//	if hcfg.Spec.Konnectivity.AdminPort == 0 {
+	//		hcfg.Spec.Konnectivity.AdminPort = 8443
+	//	}
+	//	if hcfg.Spec.Konnectivity.AgentPort == 0 {
+	//		hcfg.Spec.Konnectivity.AgentPort = 8443
+	//	}
+
+	return hcfg, nil
 }

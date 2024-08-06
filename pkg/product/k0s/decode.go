@@ -11,7 +11,7 @@ func init() {
 	product.RegisterDecoder(ComponentType, DecodeComponent)
 }
 
-// DecodeComponent decode a new component from an unmarshall decoder
+// DecodeComponent decode a new component from an unmarshall decoder.
 func DecodeComponent(id string, d func(interface{}) error) (component.Component, error) {
 	var c Config
 

@@ -22,7 +22,7 @@ type HostPluginFactory struct {
 	ps []*hostPlugin
 }
 
-// HostPlugin build a new host plugin
+// HostPlugin build a new host plugin.
 func (rpf *HostPluginFactory) HostPlugin(_ context.Context, h *host.Host) host.HostPlugin {
 	p := &hostPlugin{
 		h:   h,
@@ -37,7 +37,7 @@ func (rpf *HostPluginFactory) HostPlugin(_ context.Context, h *host.Host) host.H
 // Decoder provide a Host Plugin decoder function
 //
 // The decoder function is ugly, but it is meant to to take a
-// yaml/json .HostPluginDecode() function, and turn it into a plugin
+// yaml/json .HostPluginDecode() function, and turn it into a plugin.
 func (rpf *HostPluginFactory) HostPluginDecode(_ context.Context, h *host.Host, d func(interface{}) error) (host.HostPlugin, error) {
 	p := &hostPlugin{
 		rig: &rig.ClientWithConfig{},
@@ -59,7 +59,7 @@ func (rpf *HostPluginFactory) HostPluginDecode(_ context.Context, h *host.Host, 
 // host.HostRoleDiscover: uses a rig.Client.Connect()
 // exec.HostRoleExecutor: uses all of the rig.Client functions
 // network.HostRoleNetwork: uses some internal functions to discover network
-// exec.HostRolePlatform: uses some internal functions to discover platform
+// exec.HostRolePlatform: uses some internal functions to discover platform.
 type hostPlugin struct {
 	h   *host.Host
 	rig *rig.ClientWithConfig

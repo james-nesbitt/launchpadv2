@@ -6,7 +6,7 @@ require (
 	github.com/adrg/xdg v0.4.0
 	github.com/bmatcuk/doublestar/v4 v4.6.1
 	github.com/creasty/defaults v1.7.0
-	github.com/docker/docker v26.1.3+incompatible
+	github.com/docker/docker v27.1.1+incompatible
 	github.com/jellydator/validation v1.1.0
 	github.com/k0sproject/dig v0.2.0
 	github.com/k0sproject/rig/v2 v2.0.0-alpha.2

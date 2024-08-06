@@ -35,11 +35,22 @@ func (s activateK0sStep) Run(ctx context.Context) error {
 		return fmt.Errorf("could not find a leader")
 	}
 
+	baseCfg := s.c.config.K0sConfig
+	csans := s.c.CollectClusterSans(ctx)
+
 	lkh := HostGetK0s(l)
 
 	_, lserr := lkh.Status(ctx)
 	if lserr != nil {
 		// leader has no k0s running, so start a new cluster
+
+		lkh := HostGetK0s(l)
+
+		slog.InfoContext(ctx, fmt.Sprintf("%s: writing config to leader host", l.Id()))
+		if werr := lkh.WriteK0sConfig(ctx, baseCfg, csans); werr != nil {
+			return werr
+		}
+
 		lkh.ActivateNewCluster(ctx, s.c.config)
 	}
 
@@ -49,6 +60,12 @@ func (s activateK0sStep) Run(ctx context.Context) error {
 	}
 	if err := chs.Each(ctx, func(ctx context.Context, h *host.Host) error {
 		kh := HostGetK0s(h)
+
+		slog.InfoContext(ctx, fmt.Sprintf("%s: writing config to controller host", l.Id()))
+		if werr := lkh.WriteK0sConfig(ctx, baseCfg, csans); werr != nil {
+			return werr
+		}
+
 		return kh.JoinCluster(ctx, l, RoleController, s.c.config)
 	}); err != nil {
 		return fmt.Errorf("error joining controller hosts: %s", err.Error())

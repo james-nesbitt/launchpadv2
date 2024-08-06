@@ -52,17 +52,17 @@ type ConfigUpgrade struct {
 	Flags flags.Flags `yaml:"flags,omitempty,flow"`
 }
 
-// Prepulling images is only required if not from the main repo
+// Prepulling images is only required if not from the main repo.
 func (c Config) imagePrepullRequired() bool {
 	return c.ImageRepo != MKEProductImageRepo
 }
 
-// SwarmOnly return if this instance will avoid installing any kubernetes components
+// SwarmOnly return if this instance will avoid installing any kubernetes components.
 func (c Config) isSwarmOnly() bool {
 	return c.Install.SwarmOnly
 }
 
-// ImagePullOptions create docker image pull options for any image pulls that are needed
+// ImagePullOptions create docker image pull options for any image pulls that are needed.
 func (c Config) imagePullOptions() dockertypesimage.PullOptions {
 	return dockertypesimage.PullOptions{}
 }

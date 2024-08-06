@@ -44,7 +44,7 @@ func Test_FilteredHostDependencySanity(t *testing.T) {
 
 	fhs, ferr := df(ctx) // run the factory
 	if ferr != nil {
-		t.Errorf("error occured filtering: %s", ferr.Error())
+		t.Errorf("error occurred filtering: %s", ferr.Error())
 	}
 
 	if len(fhs) != 6 {

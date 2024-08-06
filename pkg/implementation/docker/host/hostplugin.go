@@ -6,11 +6,11 @@ import (
 )
 
 var (
-	// HostRoleDocker indicates that a Host plugin can produce a Docker client
+	// HostRoleDocker indicates that a Host plugin can produce a Docker client.
 	HostRoleDockerExec = "docker-exec"
 )
 
-// HostGetDockerExec get a DockerExec from a host
+// HostGetDockerExec get a DockerExec from a host.
 func HostGetDockerExec(h *host.Host) *dockerimplementation.DockerExec {
 	hgde := h.MatchPlugin(HostRoleDockerExec)
 	if hgde == nil {

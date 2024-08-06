@@ -33,14 +33,9 @@ func (s configureK0sStep) Run(ctx context.Context) error {
 	csans := s.c.CollectClusterSans(ctx)
 
 	if err := hs.Each(ctx, func(ctx context.Context, h *host.Host) error {
-		hcfg, cfgerr := BuildHostConfig(ctx, baseCfg, h, csans)
-		if cfgerr != nil {
-			return cfgerr
-		}
-
 		kh := HostGetK0s(h)
 
-		if err := kh.WriteK0sConfig(ctx, hcfg); err != nil {
+		if err := kh.WriteK0sConfig(ctx, baseCfg, csans); err != nil {
 			return err
 		}
 

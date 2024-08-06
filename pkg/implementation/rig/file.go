@@ -12,7 +12,7 @@ import (
 	"github.com/k0sproject/rig/v2"
 )
 
-// Stat return file info on a file, or an error
+// Stat return file info on a file, or an error.
 func (p *hostPlugin) Stat(ctx context.Context, path string, opts exec.ExecOptions) (os.FileInfo, error) {
 	slog.DebugContext(ctx, fmt.Sprintf("%s: Rig Stat: %s", p.hid(), path))
 
@@ -32,7 +32,7 @@ func (p *hostPlugin) Stat(ctx context.Context, path string, opts exec.ExecOption
 	return fs.Stat(path)
 }
 
-// FileExists does a file exist
+// FileExists does a file exist.
 func (p *hostPlugin) FileExist(ctx context.Context, path string, opts exec.ExecOptions) error {
 	slog.DebugContext(ctx, fmt.Sprintf("%s: Rig FileExists: %s", p.hid(), path))
 
@@ -86,7 +86,7 @@ func (p *hostPlugin) Upload(ctx context.Context, src io.Reader, dst string, fm f
 
 // Download a network addess to a file on the host
 //
-// @TODO this implementation is currently locked to linux machines with curl installed
+// @TODO this implementation is currently locked to linux machines with curl installed.
 func (p *hostPlugin) Download(ctx context.Context, url string, dst string, fm fs.FileMode, opts exec.ExecOptions) error {
 	if _, e, err := p.Exec(ctx, fmt.Sprintf("rm -f %s", dst), nil, opts); err != nil {
 		return fmt.Errorf("%s: host couldn't delete the existing K0s binary: %s -> %s :: %s : %s", p.h.Id(), url, dst, err.Error(), e)
@@ -100,7 +100,7 @@ func (p *hostPlugin) Download(ctx context.Context, url string, dst string, fm fs
 	return nil
 }
 
-// Rename a file or folder
+// Rename a file or folder.
 func (p *hostPlugin) Rename(ctx context.Context, old, new string, opts exec.ExecOptions) error {
 	slog.DebugContext(ctx, fmt.Sprintf("%s: Rig Rename: %s -> %s", p.hid(), old, new))
 

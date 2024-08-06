@@ -13,7 +13,7 @@ import (
 
 // HostFiles
 //
-// Plugin can manage files and folders on a host
+// Plugin can manage files and folders on a host.
 const (
 	HostRoleFiles = "files"
 )

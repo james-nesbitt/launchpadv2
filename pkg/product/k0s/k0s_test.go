@@ -140,7 +140,9 @@ role: controller
 		"san.example.org",
 	}
 
-	cfg, cfgerr := k0s.BuildHostConfig(ctx, cfg, h, sans)
+	kh := k0s.HostGetK0s(h)
+
+	cfg, cfgerr := kh.BuildHostConfig(ctx, cfg, sans)
 	if cfgerr != nil {
 		t.Fatalf("fail to build host config: %s", cfgerr.Error())
 	}

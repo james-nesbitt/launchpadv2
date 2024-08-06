@@ -16,7 +16,7 @@ var (
 	ErrProjectDependenciesNotMet = errors.New("project dependencies not met")
 )
 
-// New Project constructor
+// New Project constructor.
 func New() Project {
 	return Project{
 		Components: component.Components{},

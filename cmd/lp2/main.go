@@ -30,10 +30,10 @@ import (
 	_ "github.com/Mirantis/launchpad/pkg/product/msr3"
 	_ "github.com/Mirantis/launchpad/pkg/product/msr4"
 
-	// Register mkex related product handlers
+	// Register mkex related product handlers.
 	_ "github.com/Mirantis/launchpad/pkg/product/mkex"
 
-	// Register mock stuff, in case it gets used
+	// Register mock stuff, in case it gets used.
 	_ "github.com/Mirantis/launchpad/pkg/mock"
 )
 

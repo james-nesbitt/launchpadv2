@@ -12,7 +12,7 @@ import (
 
 // GetLeaderHost find a leader or chose one host as leader
 //
-// @NOTE this function needs a lot of cleaning up
+// @NOTE this function needs a lot of cleaning up.
 func (c Component) GetLeaderHost(ctx context.Context) *host.Host {
 	controllers, cerr := c.GetControllerHosts(ctx)
 	if cerr != nil && len(controllers) == 0 {

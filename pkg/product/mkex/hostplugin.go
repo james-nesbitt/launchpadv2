@@ -37,7 +37,7 @@ type hostPluginFactory struct {
 	ps []*hostPlugin
 }
 
-// HostPlugin build a new host plugin
+// HostPlugin build a new host plugin.
 func (pf *hostPluginFactory) HostPlugin(_ context.Context, h *host.Host) host.HostPlugin {
 	p := &hostPlugin{
 		h: h,
@@ -50,7 +50,7 @@ func (pf *hostPluginFactory) HostPlugin(_ context.Context, h *host.Host) host.Ho
 // Decoder provide a Host Plugin decoder function
 //
 // The decoder function is ugly, but it is meant to to take a
-// yaml/json .HostPluginDecode() function, and turn it into a plugin
+// yaml/json .HostPluginDecode() function, and turn it into a plugin.
 func (pf *hostPluginFactory) HostPluginDecode(_ context.Context, h *host.Host, d func(interface{}) error) (host.HostPlugin, error) {
 	p := &hostPlugin{h: h}
 	pf.ps = append(pf.ps, p)
@@ -98,7 +98,7 @@ func (pf *hostPluginFactory) CliBuild(cmd *cobra.Command, c *host.HostsComponent
 	return nil
 }
 
-// Get the MKEX plugin from a Host
+// Get the MKEX plugin from a Host.
 func HostGetMKEX(h *host.Host) *hostPlugin {
 	hgmcr := h.MatchPlugin(HostRoleMKEX)
 	if hgmcr == nil {
@@ -142,7 +142,7 @@ func (hc hostPlugin) RoleMatch(role string) bool {
 	return false
 }
 
-// DockerExecOptions meet the dockerhost.HostDockerExec interface
+// DockerExecOptions meet the dockerhost.HostDockerExec interface.
 func (hc hostPlugin) DockerExec() *dockerimplementation.DockerExec {
 	e := exec.HostGetExecutor(hc.h)
 	if e == nil {

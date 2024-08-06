@@ -65,7 +65,7 @@ func (p *hostPlugin) Exec(ctx context.Context, cmd string, inr io.Reader, opts h
 	}
 }
 
-// ExecInteractive get an interactive shell
+// ExecInteractive get an interactive shell.
 func (p *hostPlugin) ExecInteractive(ctx context.Context, opts exec.ExecOptions) error {
 	slog.DebugContext(ctx, fmt.Sprintf("%s: Rig Exec Interactive", p.hid()))
 
@@ -148,7 +148,7 @@ func (p *hostPlugin) ServiceRestart(ctx context.Context, services []string) erro
 	return nil
 }
 
-// ServiceDisable stop and disable some services
+// ServiceDisable stop and disable some services.
 func (p *hostPlugin) ServiceDisable(ctx context.Context, services []string) error {
 	rigc := p.rig.Sudo()
 
@@ -176,7 +176,7 @@ func (p *hostPlugin) ServiceDisable(ctx context.Context, services []string) erro
 	return nil
 }
 
-// ServiceIsRunning is the service running
+// ServiceIsRunning is the service running.
 func (p *hostPlugin) ServiceIsRunning(ctx context.Context, services []string) error {
 	rigc := p.rig.Sudo()
 

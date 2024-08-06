@@ -158,7 +158,9 @@ func (c *Component) CliBuild(cmd *cobra.Command, _ *project.Project) error {
 			baseCfg := c.config.K0sConfig
 			csans := c.CollectClusterSans(ctx)
 
-			cfg, cerr := BuildHostConfig(ctx, baseCfg, h, csans)
+			kh := HostGetK0s(h)
+
+			cfg, cerr := kh.BuildHostConfig(ctx, baseCfg, csans)
 			if cerr != nil {
 				return cerr
 			}
@@ -192,18 +194,14 @@ func (c *Component) CliBuild(cmd *cobra.Command, _ *project.Project) error {
 			baseCfg := c.config.K0sConfig
 			csans := c.CollectClusterSans(ctx)
 
-			cfg, cerr := BuildHostConfig(ctx, baseCfg, l, csans)
-			if cerr != nil {
-				return cerr
-			}
-
 			lkh := HostGetK0s(l)
 
-			slog.InfoContext(ctx, fmt.Sprintf("%s: writing config to leader host", l.Id()), slog.Any("config", cfg))
-			if werr := lkh.WriteK0sConfig(ctx, cfg); werr != nil {
+			slog.InfoContext(ctx, fmt.Sprintf("%s: writing config to leader host", l.Id()))
+			if werr := lkh.WriteK0sConfig(ctx, baseCfg, csans); werr != nil {
 				return werr
 			}
 
+			slog.InfoContext(ctx, fmt.Sprintf("%s: activating leader host", l.Id()))
 			if err := lkh.ActivateNewCluster(ctx, c.config); err != nil {
 				return err
 			}
@@ -261,27 +259,18 @@ func (c *Component) CliBuild(cmd *cobra.Command, _ *project.Project) error {
 
 			switch r {
 			case RoleController:
-				// we already collected hosts
-
 				baseCfg := c.config.K0sConfig
 				csans := c.CollectClusterSans(ctx)
 
-				cfg, cerr := BuildHostConfig(ctx, baseCfg, l, csans)
-				if cerr != nil {
-					return cerr
-				}
-
-				slog.InfoContext(ctx, fmt.Sprintf("%s: writing config to controller host", l.Id()), slog.Any("config", cfg))
-				if werr := kh.WriteK0sConfig(ctx, cfg); werr != nil {
+				slog.InfoContext(ctx, fmt.Sprintf("%s: writing config to controller host", h.Id()))
+				if werr := kh.WriteK0sConfig(ctx, baseCfg, csans); werr != nil {
 					return werr
 				}
 
 			case RoleWorker:
-				hs, hserr = c.GetWorkerHosts(ctx)
-			default:
-				return fmt.Errorf("unrecognized role for join: %s", r)
 			}
 
+			slog.InfoContext(ctx, fmt.Sprintf("%s: joining host as %s to leader %s", h.Id(), r, l.Id()))
 			if err := kh.JoinCluster(ctx, l, r, c.config); err != nil {
 				return err
 			}

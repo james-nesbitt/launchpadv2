@@ -17,7 +17,7 @@ type LocalFile struct {
 	PermMode string
 }
 
-// UploadFile describes a file to be uploaded for the host
+// UploadFile describes a file to be uploaded for the host.
 type UploadFile struct {
 	Name            string       `yaml:"name,omitempty"`
 	Source          string       `yaml:"src"`
@@ -41,7 +41,7 @@ func (u UploadFile) Validate() error {
 	)
 }
 
-// converts string or integer value to octal string for chmod
+// converts string or integer value to octal string for chmod.
 func permToString(val interface{}) (string, error) {
 	var s string
 	switch t := val.(type) {
@@ -84,7 +84,7 @@ func permToString(val interface{}) (string, error) {
 	return s, nil
 }
 
-// UnmarshalYAML sets in some sane defaults when unmarshaling the data from yaml
+// UnmarshalYAML sets in some sane defaults when unmarshaling the data from yaml.
 func (u *UploadFile) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	type uploadFile UploadFile
 	yu := (*uploadFile)(u)
@@ -121,12 +121,12 @@ func (u *UploadFile) Owner() string {
 	return strings.TrimSuffix(fmt.Sprintf("%s:%s", u.User, u.Group), ":")
 }
 
-// returns true if the string contains any glob characters
+// returns true if the string contains any glob characters.
 func isGlob(s string) bool {
 	return strings.ContainsAny(s, "*%?[]{}")
 }
 
-// sets the destination and resolves any globs/local paths into u.Sources
+// sets the destination and resolves any globs/local paths into u.Sources.
 func (u *UploadFile) resolve() error {
 	if u.IsURL() {
 		if u.DestinationFile == "" {
@@ -165,7 +165,7 @@ func (u *UploadFile) resolve() error {
 	return nil
 }
 
-// finds files based on a glob pattern
+// finds files based on a glob pattern.
 func (u *UploadFile) glob(src string) error {
 	base, pattern := doublestar.SplitPattern(src)
 	u.Base = base
@@ -207,7 +207,7 @@ func (u *UploadFile) glob(src string) error {
 	return nil
 }
 
-// IsURL returns true if the source is a URL
+// IsURL returns true if the source is a URL.
 func (u *UploadFile) IsURL() bool {
 	return strings.Contains(u.Source, "://")
 }

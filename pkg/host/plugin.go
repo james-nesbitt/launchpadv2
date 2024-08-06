@@ -10,11 +10,11 @@ var (
 	ErrUnknownHostPluginType         = errors.New("Unknown host plugin handler")
 
 	// hostPluginFactories the global map of PluginFactories, managed by
-	// the register function below
+	// the register function below.
 	hostPluginFactories = map[string]HostPluginFactory{}
 )
 
-// RegisterHostPlugin register a host plugin factory
+// RegisterHostPlugin register a host plugin factory.
 func RegisterHostPluginFactory(key string, hp HostPluginFactory) {
 	hostPluginFactories[key] = hp
 }
@@ -38,17 +38,17 @@ type HostPluginFactory interface {
 // HostPlugin the base interface for host plugins
 //
 // Note that plugins are mutable, and the other interfaces
-// are more important than this interface
+// are more important than this interface.
 type HostPlugin interface {
 	// Id return the host unique identifier
 	Id() string
 	// RoleMatch find a host plugin that matches a role
 	RoleMatch(role string) bool
-	// Validate is the host plugin valid after configuraiton
+	// Validate is the host plugin valid after configuration
 	Validate() error
 }
 
-// MatchPlugin finc the host plugin that fullfills a role
+// MatchPlugin finc the host plugin that fullfills a role.
 func (h *Host) MatchPlugin(role string) HostPlugin {
 	for _, hc := range h.plugins {
 		if hc.RoleMatch(role) {
@@ -58,7 +58,7 @@ func (h *Host) MatchPlugin(role string) HostPlugin {
 	return nil
 }
 
-// PluginIds retrieve the IDs of all of the plugin for the host
+// PluginIds retrieve the IDs of all of the plugin for the host.
 func (h *Host) PluginIDs() []string {
 	pids := []string{}
 	for _, p := range h.plugins {
@@ -67,7 +67,7 @@ func (h *Host) PluginIDs() []string {
 	return pids
 }
 
-// HasPlugin does the host have a plugin of the passed id
+// HasPlugin does the host have a plugin of the passed id.
 func (h *Host) HasPlugin(pid string) bool {
 	for _, p := range h.plugins {
 		if pid == p.Id() {
@@ -77,7 +77,7 @@ func (h *Host) HasPlugin(pid string) bool {
 	return false
 }
 
-// AddPlugin add a new pluging to the host
+// AddPlugin add a new pluging to the host.
 func (h *Host) AddPlugin(p HostPlugin) {
 	h.plugins = append(h.plugins, p)
 }

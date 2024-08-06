@@ -41,7 +41,7 @@ type hostPluginFactory struct {
 	ps []*hostPlugin
 }
 
-// HostPlugin build a new host plugin
+// HostPlugin build a new host plugin.
 func (pf *hostPluginFactory) HostPlugin(_ context.Context, h *host.Host) host.HostPlugin {
 	p := &hostPlugin{
 		h: h,
@@ -54,7 +54,7 @@ func (pf *hostPluginFactory) HostPlugin(_ context.Context, h *host.Host) host.Ho
 // Decoder provide a Host Plugin decoder function
 //
 // The decoder function is ugly, but it is meant to to take a
-// yaml/json .HostPluginDecode() function, and turn it into a plugin
+// yaml/json .HostPluginDecode() function, and turn it into a plugin.
 func (pf *hostPluginFactory) HostPluginDecode(_ context.Context, h *host.Host, d func(interface{}) error) (host.HostPlugin, error) {
 	p := &hostPlugin{h: h}
 
@@ -67,7 +67,7 @@ func (pf *hostPluginFactory) HostPluginDecode(_ context.Context, h *host.Host, d
 	return p, nil
 }
 
-// Get the MCR plugin from a Host
+// Get the MCR plugin from a Host.
 func HostGetMCR(h *host.Host) *hostPlugin {
 	hgmcr := h.MatchPlugin(HostRoleMCR)
 	if hgmcr == nil {
@@ -112,7 +112,7 @@ func (_ hostPlugin) RoleMatch(role string) bool {
 	return false
 }
 
-// DockerExecOptions meet the dockerhost.HostDockerExec interface
+// DockerExecOptions meet the dockerhost.HostDockerExec interface.
 func (hp hostPlugin) DockerExec() *dockerimplementation.DockerExec {
 	e := exec.HostGetExecutor(hp.h)
 	if e == nil {

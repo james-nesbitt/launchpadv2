@@ -45,7 +45,7 @@ func InitSwarm(ctx context.Context, mhs host.Hosts) (*host.Host, error) {
 			continue
 		}
 
-		// swarm init suceeded on at least one manager, so we have a leader
+		// swarm init succeeded on at least one manager, so we have a leader
 		slog.DebugContext(ctx, fmt.Sprintf("%s: swarm initialized. This is the new swarm leader", h.Id()), slog.Any("host", h))
 
 		return h, nil

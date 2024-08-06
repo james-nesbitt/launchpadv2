@@ -138,6 +138,7 @@ func (c *Component) CliBuild(cmd *cobra.Command, _ *project.Project) error {
 		},
 	})
 
+	var w bool
 	cc := &cobra.Command{
 		GroupID: c.Name(),
 		Use:     fmt.Sprintf("%s:config", c.Name()),
@@ -165,18 +166,25 @@ func (c *Component) CliBuild(cmd *cobra.Command, _ *project.Project) error {
 				return cerr
 			}
 
+			if w {
+				if err := kh.WriteK0sConfig(ctx, cfg); err != nil {
+					return err
+				}
+			}
+
 			cfgbs, _ := yaml.Marshal(cfg)
 			fmt.Println(string(cfgbs))
 			return nil
 		},
 	}
 	cc.Flags().StringVar(&hn, "host", "", "host to execute on")
+	cc.Flags().BoolVar(&w, "write", false, "write the build config to the host")
 	cmd.AddCommand(cc)
 
 	ac := &cobra.Command{
 		GroupID: c.Name(),
-		Use:     fmt.Sprintf("%s:activate", c.Name()),
-		Short:   "activate k0s cluster",
+		Use:     fmt.Sprintf("%s:install", c.Name()),
+		Short:   "activate k0s cluster by installing to a leader",
 		Long:    ``,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
@@ -197,12 +205,12 @@ func (c *Component) CliBuild(cmd *cobra.Command, _ *project.Project) error {
 			lkh := HostGetK0s(l)
 
 			slog.InfoContext(ctx, fmt.Sprintf("%s: writing config to leader host", l.Id()))
-			if werr := lkh.WriteK0sConfig(ctx, baseCfg, csans); werr != nil {
+			if werr := lkh.BuildAndWriteK0sConfig(ctx, baseCfg, csans); werr != nil {
 				return werr
 			}
 
 			slog.InfoContext(ctx, fmt.Sprintf("%s: activating leader host", l.Id()))
-			if err := lkh.ActivateNewCluster(ctx, c.config); err != nil {
+			if err := lkh.InstallNewCluster(ctx, c.config); err != nil {
 				return err
 			}
 
@@ -263,7 +271,7 @@ func (c *Component) CliBuild(cmd *cobra.Command, _ *project.Project) error {
 				csans := c.CollectClusterSans(ctx)
 
 				slog.InfoContext(ctx, fmt.Sprintf("%s: writing config to controller host", h.Id()))
-				if werr := kh.WriteK0sConfig(ctx, baseCfg, csans); werr != nil {
+				if werr := kh.BuildAndWriteK0sConfig(ctx, baseCfg, csans); werr != nil {
 					return werr
 				}
 

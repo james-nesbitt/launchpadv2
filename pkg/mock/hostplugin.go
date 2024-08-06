@@ -23,8 +23,8 @@ type MockHostPluginFactory struct {
 // HostPlugin build a new host plugin.
 func (mpf *MockHostPluginFactory) HostPlugin(_ context.Context, h *host.Host) host.HostPlugin {
 	p := &mockHostPlugin{
-		h:       h,
-		Network: network.Network{},
+		h: h,
+		n: &network.Network{},
 	}
 	mpf.ps = append(mpf.ps, p)
 
@@ -37,8 +37,8 @@ func (mpf *MockHostPluginFactory) HostPlugin(_ context.Context, h *host.Host) ho
 // yaml/json .HostPluginDecode() function, and turn it into a plugin.
 func (mpf *MockHostPluginFactory) HostPluginDecode(_ context.Context, h *host.Host, d func(interface{}) error) (host.HostPlugin, error) {
 	hp := &mockHostPlugin{
-		h:       h,
-		Network: network.Network{},
+		h: h,
+		n: &network.Network{},
 	}
 	mpf.ps = append(mpf.ps, hp)
 
@@ -63,16 +63,16 @@ func HostGetMock(h *host.Host) *mockHostPlugin {
 	return &hm
 }
 
-func NewMockHostPlugin(h *host.Host) mockHostPlugin {
+func NewMockHostPlugin(h *host.Host, n *network.Network) mockHostPlugin {
 	return mockHostPlugin{
 		h: h,
+		n: n,
 	}
 }
 
 type mockHostPlugin struct {
 	h *host.Host
-
-	Network network.Network `yaml:"network"`
+	n *network.Network `yaml:"network"`
 }
 
 func (p mockHostPlugin) Id() string {

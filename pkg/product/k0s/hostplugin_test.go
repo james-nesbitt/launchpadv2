@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/Mirantis/launchpad/pkg/host"
+	"github.com/Mirantis/launchpad/pkg/mock"
 	"github.com/Mirantis/launchpad/pkg/product/k0s"
 	"gopkg.in/yaml.v3"
 )
@@ -17,6 +18,7 @@ reset: false
 datadir: /var/run/k0s/data
 `
 	h := host.NewHost("test")
+	h.AddPlugin(mock.NewMockHostPlugin(h, nil))
 
 	var yn yaml.Node
 

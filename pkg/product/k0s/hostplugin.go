@@ -229,16 +229,17 @@ func (p *hostPlugin) UploadK0sBinary(ctx context.Context, v version.Version) err
 	return nil
 }
 
-// WriteK0sConfig to a plugin host as yaml.
-func (p *hostPlugin) WriteK0sConfig(ctx context.Context, basecfg K0sConfig, sans []string) error {
+// BuildAndWriteK0sConfig Build host config and write it to the host as yaml.
+func (p *hostPlugin) BuildAndWriteK0sConfig(ctx context.Context, basecfg K0sConfig, sans []string) error {
 	c, err := p.BuildHostConfig(ctx, basecfg, sans)
 	if err != nil {
 		return err
 	}
-	return p.writeK0sConfig(ctx, c)
+	return p.WriteK0sConfig(ctx, c)
 }
 
-func (p *hostPlugin) writeK0sConfig(ctx context.Context, cfg K0sConfig) error {
+// WriteK0sConfig to a plugin host as yaml.
+func (p *hostPlugin) WriteK0sConfig(ctx context.Context, cfg K0sConfig) error {
 	cfgbs, merr := yaml.Marshal(cfg)
 	if merr != nil {
 		return merr
@@ -282,7 +283,7 @@ func (p *hostPlugin) GenerateToken(ctx context.Context, role string, expiry time
 // ActivateNewCluster Initialize the plugin host as the first controller in a new cluster
 //
 // @TODO do more stuff to check if the cluster is already running?
-func (p *hostPlugin) ActivateNewCluster(ctx context.Context, c Config) error {
+func (p *hostPlugin) InstallNewCluster(ctx context.Context, c Config) error {
 	eh := exec.HostGetExecutor(p.h)
 
 	s, serr := p.Status(ctx)

@@ -46,7 +46,7 @@ mock:
 
 func Test_HostGetMock(t *testing.T) {
 	h := host.NewHost("test")
-	var mp host.HostPlugin = mock.NewMockHostPlugin(h)
+	var mp host.HostPlugin = mock.NewMockHostPlugin(h, nil)
 
 	h.AddPlugin(mp)
 
@@ -58,7 +58,7 @@ func Test_HostGetMock(t *testing.T) {
 
 func Test_PluginSanty(t *testing.T) {
 	h := host.NewHost("test")
-	var mp host.HostPlugin = mock.NewMockHostPlugin(h)
+	var mp host.HostPlugin = mock.NewMockHostPlugin(h, nil)
 
 	h.AddPlugin(mp)
 

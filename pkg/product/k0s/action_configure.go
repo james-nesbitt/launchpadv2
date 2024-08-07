@@ -35,7 +35,7 @@ func (s configureK0sStep) Run(ctx context.Context) error {
 	if err := hs.Each(ctx, func(ctx context.Context, h *host.Host) error {
 		kh := HostGetK0s(h)
 
-		if err := kh.WriteK0sConfig(ctx, baseCfg, csans); err != nil {
+		if err := kh.BuildAndWriteK0sConfig(ctx, baseCfg, csans); err != nil {
 			return err
 		}
 

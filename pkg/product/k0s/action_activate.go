@@ -47,11 +47,11 @@ func (s activateK0sStep) Run(ctx context.Context) error {
 		lkh := HostGetK0s(l)
 
 		slog.InfoContext(ctx, fmt.Sprintf("%s: writing config to leader host", l.Id()))
-		if werr := lkh.WriteK0sConfig(ctx, baseCfg, csans); werr != nil {
+		if werr := lkh.BuildAndWriteK0sConfig(ctx, baseCfg, csans); werr != nil {
 			return werr
 		}
 
-		lkh.ActivateNewCluster(ctx, s.c.config)
+		lkh.InstallNewCluster(ctx, s.c.config)
 	}
 
 	chs, cherr := s.c.GetControllerHosts(ctx)
@@ -62,7 +62,7 @@ func (s activateK0sStep) Run(ctx context.Context) error {
 		kh := HostGetK0s(h)
 
 		slog.InfoContext(ctx, fmt.Sprintf("%s: writing config to controller host", l.Id()))
-		if werr := lkh.WriteK0sConfig(ctx, baseCfg, csans); werr != nil {
+		if werr := lkh.BuildAndWriteK0sConfig(ctx, baseCfg, csans); werr != nil {
 			return werr
 		}
 

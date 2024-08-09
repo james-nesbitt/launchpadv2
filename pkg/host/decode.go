@@ -5,11 +5,56 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"time"
+
+	"github.com/Mirantis/launchpad/pkg/component"
+	"gopkg.in/yaml.v3"
 )
 
 var (
 	ErrUnknownHostPluginDecodeType = errors.New("Unknown host plugin type for decoding")
 )
+
+func init() {
+	component.RegisterDecoder(ComponentType, DecodeComponent)
+}
+
+// DecodeComponent decode a new component from an unmarshall decoder.
+func DecodeComponent(id string, d func(interface{}) error) (component.Component, error) {
+	chs := NewHosts()
+	hc := NewHostsComponent(id, chs)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+	defer cancel()
+
+	// decode into a map of hosts, where each host is a map of host plugins
+	shsc := map[string]map[string]yaml.Node{}
+	if err := d(&shsc); err != nil {
+		return hc, fmt.Errorf("failed to decode spec hosts: %s", err.Error())
+	}
+
+	if len(shsc) == 0 {
+		return hc, fmt.Errorf("no hosts were found when decoding the project")
+	}
+
+	errs := []error{}
+	for id, shc := range shsc {
+		ds := map[string]func(interface{}) error{}
+		for k, d := range shc { // collect all of the plugin node .Decode functions
+			ds[k] = d.Decode
+		}
+
+		h, err := DecodeHost(ctx, id, ds)
+		if err != nil {
+			errs = append(errs, fmt.Errorf("%s: %s", id, err.Error()))
+			continue
+		}
+
+		chs.Add(h)
+	}
+
+	return hc, nil
+}
 
 // DecodeHost create a Host from the registered iplugin decode functions.
 func DecodeHost(ctx context.Context, id string, ds map[string]func(interface{}) error) (*Host, error) {

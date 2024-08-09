@@ -26,9 +26,6 @@ func Decode(cl *project.Project, d func(interface{}) error) error {
 		return err
 	}
 
-	if len(cs.Hosts.hs) == 0 {
-		slog.Warn("no hosts were detected")
-	}
 	if cs.Products.cs == nil {
 		slog.Warn("no components were detected")
 	}
@@ -37,7 +34,7 @@ func Decode(cl *project.Project, d func(interface{}) error) error {
 		cl.Components = component.Components{}
 	}
 
-	cl.Components[host.ComponentType] = host.NewHostsComponent(host.ComponentType, cs.Hosts.hosts())
+	cl.Components[host.ComponentType] = cs.Hosts.hc
 
 	for id, cp := range cs.Products.products() {
 		cl.Components[strings.ToUpper(id)] = cp

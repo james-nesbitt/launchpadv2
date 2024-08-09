@@ -388,14 +388,8 @@ func (p *hostPlugin) JoinCluster(ctx context.Context, l *host.Host, role string,
 		return fmt.Errorf("%s: failed to join cluster: %s :: %s", p.h.Id(), err.Error(), e)
 	}
 
-	if eh.ServiceIsRunning(ctx, services) == nil {
-		if err := eh.ServiceEnable(ctx, services); err != nil {
-			return fmt.Errorf("%s: failed to enable&start K0s services", p.h.Id())
-		}
-	} else {
-		if err := eh.ServiceRestart(ctx, services); err != nil {
-			return fmt.Errorf("%s: failed to restart K0s services", p.h.Id())
-		}
+	if err := eh.ServiceEnable(ctx, services); err != nil {
+		return fmt.Errorf("%s: failed to enable&start K0s services", p.h.Id())
 	}
 
 	return nil

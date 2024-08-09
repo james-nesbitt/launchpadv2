@@ -4,11 +4,10 @@ import (
 	"fmt"
 
 	"github.com/Mirantis/launchpad/pkg/component"
-	"github.com/Mirantis/launchpad/pkg/product"
 )
 
 func init() {
-	product.ProductDecoders["mock"] = DecodeMockComponent
+	component.RegisterDecoder("mock", DecodeMockComponent)
 }
 
 func DecodeMockComponent(id string, d func(interface{}) error) (component.Component, error) {

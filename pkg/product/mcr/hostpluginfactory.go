@@ -39,4 +39,3 @@ func (pf *hostPluginFactory) HostPluginDecode(_ context.Context, h *host.Host, d
 
 	return p, nil
 }
-

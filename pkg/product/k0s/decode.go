@@ -4,11 +4,10 @@ import (
 	"fmt"
 
 	"github.com/Mirantis/launchpad/pkg/component"
-	"github.com/Mirantis/launchpad/pkg/product"
 )
 
 func init() {
-	product.RegisterDecoder(ComponentType, DecodeComponent)
+	component.RegisterDecoder(ComponentType, DecodeComponent)
 }
 
 // DecodeComponent decode a new component from an unmarshall decoder.

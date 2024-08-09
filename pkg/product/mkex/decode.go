@@ -4,11 +4,10 @@ import (
 	"fmt"
 
 	"github.com/Mirantis/launchpad/pkg/component"
-	"github.com/Mirantis/launchpad/pkg/product"
 )
 
 func init() {
-	product.RegisterDecoder("mkex", DecodeComponent)
+	component.RegisterDecoder("mkex", DecodeComponent)
 }
 
 func DecodeComponent(id string, d func(interface{}) error) (component.Component, error) {

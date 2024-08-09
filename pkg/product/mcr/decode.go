@@ -4,11 +4,10 @@ import (
 	"fmt"
 
 	"github.com/Mirantis/launchpad/pkg/component"
-	"github.com/Mirantis/launchpad/pkg/product"
 )
 
 func init() {
-	product.RegisterDecoder("mcr", DecodeMCRComponent)
+	component.RegisterDecoder("mcr", DecodeMCRComponent)
 
 }
 

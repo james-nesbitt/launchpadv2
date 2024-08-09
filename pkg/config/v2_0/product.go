@@ -8,7 +8,6 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/Mirantis/launchpad/pkg/component"
-	"github.com/Mirantis/launchpad/pkg/product"
 )
 
 type SpecProducts struct {
@@ -47,7 +46,7 @@ func (scs *SpecProducts) UnmarshalYAML(py *yaml.Node) error {
 			id = pc.Id
 		}
 
-		p, err := product.DecodeKnownProduct(t, id, spn.Decode)
+		p, err := component.DecodeComponent(t, id, spn.Decode)
 		if err != nil {
 			errss = append(errss, fmt.Sprintf("%s: %s", id, err.Error()))
 			continue

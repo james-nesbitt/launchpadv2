@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/Mirantis/launchpad/pkg/product"
+	"github.com/Mirantis/launchpad/pkg/component"
 	"github.com/Mirantis/launchpad/pkg/product/mkex"
 	"gopkg.in/yaml.v3"
 )
@@ -20,7 +20,7 @@ role: manager
 		t.Fatal("failed to unmarshal")
 	}
 
-	c, cerr := product.DecodeKnownProduct(mkex.ComponentType, "test", yn.Decode)
+	c, cerr := component.DecodeComponent(mkex.ComponentType, "test", yn.Decode)
 	if cerr != nil {
 		t.Fatalf("error decoding: %s", cerr.Error())
 	}

@@ -15,9 +15,17 @@ import (
 	hostexec "github.com/Mirantis/launchpad/pkg/host/exec"
 )
 
+var (
+	ErrConnectFailed = errors.New("failed to connect to rig host")
+)
+
 // Connect prove that the host is reachable.
 func (p *hostPlugin) Connect(ctx context.Context) error {
-	return p.rig.Connect(ctx)
+	slog.DebugContext(ctx, fmt.Sprintf("rig: connecting to host '%s'", p.h.Id()), slog.Any("rig", p.rig), slog.Any("host", p.h))
+	if err := p.rig.Connect(ctx); err != nil {
+		return fmt.Errorf("%w; %s", ErrConnectFailed, err.Error())
+	}
+	return nil
 }
 
 // Exec a command.

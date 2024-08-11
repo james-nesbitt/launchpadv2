@@ -16,6 +16,7 @@ import (
 
 	"github.com/Mirantis/launchpad/pkg/host"
 	"github.com/Mirantis/launchpad/pkg/host/exec"
+	"github.com/Mirantis/launchpad/pkg/host/network"
 	"github.com/Mirantis/launchpad/pkg/util/download"
 	"github.com/Mirantis/launchpad/pkg/util/flags"
 )
@@ -323,13 +324,13 @@ func (p *hostPlugin) ActivateNewCluster(ctx context.Context, c Config) error {
 	return nil
 }
 
-// JoinCluster Join the plugin host to an existing k0s cluster
-func (p *hostPlugin) JoinCluster(ctx context.Context, l *host.Host, role string, c Config) error {
+// JoinClusterWorker Join the plugin host to an existing k0s cluster as a worker
+func (p *hostPlugin) JoinClusterWorker(ctx context.Context, l *host.Host, c Config) error {
 	lkh := HostGetK0s(l)
 	eh := exec.HostGetExecutor(p.h)
 	fh := exec.HostGetFiles(p.h)
 
-	jt, terr := lkh.GenerateToken(ctx, role, JoinTokenExpireDuration)
+	jt, terr := lkh.GenerateToken(ctx, RoleWorker, JoinTokenExpireDuration)
 	if terr != nil {
 		return fmt.Errorf("%s: failed to get token from leader: %s", p.h.Id(), terr.Error())
 	}
@@ -340,7 +341,7 @@ func (p *hostPlugin) JoinCluster(ctx context.Context, l *host.Host, role string,
 
 	args := []string{
 		"install",
-		role,
+		RoleWorker,
 		"--force",
 		fmt.Sprintf("--token-file=%s", p.k0sTokenPath()),
 		fmt.Sprintf("--data-dir=%s", p.k0sDataPath()),
@@ -362,18 +363,77 @@ func (p *hostPlugin) JoinCluster(ctx context.Context, l *host.Host, role string,
 		}
 	}
 
+	_, e, err := eh.Exec(ctx, p.k0sCommand(args), nil, exec.ExecOptions{Sudo: true})
+	if err != nil {
+		return fmt.Errorf("%s: failed to join cluster worker: %s :: %s", p.h.Id(), err.Error(), e)
+	}
+
 	services := []string{}
-	switch role {
-	case RoleController:
-		services = append(services, ServiceController)
-		//args = append(args, fmt.Sprintf("--config=%s", p.k0sConfigPath()))
-	case RoleWorker:
-		services = append(services, ServiceWorker)
+	services = append(services, ServiceWorker)
+
+	if eh.ServiceIsRunning(ctx, services) == nil {
+		if err := eh.ServiceEnable(ctx, services); err != nil {
+			return fmt.Errorf("%s: failed to enable&start K0s services", p.h.Id())
+		}
+	} else {
+		if err := eh.ServiceRestart(ctx, services); err != nil {
+			return fmt.Errorf("%s: failed to restart K0s services (can be ignored if this is a new node in the cluster): %s", p.h.Id(), err.Error())
+		}
+	}
+
+	return nil
+}
+
+// JoinClusterController Join the plugin host to an existing k0s cluster as a controller
+func (p *hostPlugin) JoinClusterController(ctx context.Context, l *host.Host, c Config, hc *K0sConfig) error {
+	lkh := HostGetK0s(l)
+	eh := exec.HostGetExecutor(p.h)
+	fh := exec.HostGetFiles(p.h)
+
+	jt, terr := lkh.GenerateToken(ctx, RoleController, JoinTokenExpireDuration)
+	if terr != nil {
+		return fmt.Errorf("%s: failed to get token from leader: %s", p.h.Id(), terr.Error())
+	}
+
+	if err := fh.Upload(ctx, strings.NewReader(jt), p.k0sTokenPath(), 0640, exec.ExecOptions{Sudo: true}); err != nil {
+		return fmt.Errorf("%s: failed to write join token to host: %s", p.h.Id(), err.Error())
+	}
+
+	args := []string{
+		"install",
+		RoleController,
+		"--force",
+		fmt.Sprintf("--token-file=%s", p.k0sTokenPath()),
+		fmt.Sprintf("--data-dir=%s", p.k0sDataPath()),
+	}
+
+	if c.DynamicConfig {
+		args = append(args, "--enable-dynamic-config")
+	}
+
+	// disable any running services
+	for k, ss := range map[string][]string{
+		"worker":     {ServiceWorker},
+		"controller": {ServiceController},
+	} {
+		if eh.ServiceIsRunning(ctx, ss) == nil {
+			if err := eh.ServiceDisable(ctx, ss); err != nil {
+				return fmt.Errorf("%s: failed to stop K0s services: %s", p.h.Id(), k)
+			}
+		}
 	}
 
 	_, e, err := eh.Exec(ctx, p.k0sCommand(args), nil, exec.ExecOptions{Sudo: true})
 	if err != nil {
 		return fmt.Errorf("%s: failed to join cluster: %s :: %s", p.h.Id(), err.Error(), e)
+	}
+
+	services := []string{}
+	services = append(services, ServiceController)
+
+	if hc != nil {
+		p.WriteK0sConfig(ctx, *hc)
+		args = append(args, fmt.Sprintf("--config=%s", p.k0sConfigPath()))
 	}
 
 	if eh.ServiceIsRunning(ctx, services) == nil {
@@ -382,11 +442,68 @@ func (p *hostPlugin) JoinCluster(ctx context.Context, l *host.Host, role string,
 		}
 	} else {
 		if err := eh.ServiceRestart(ctx, services); err != nil {
-			return fmt.Errorf("%s: failed to restart K0s services", p.h.Id())
+			return fmt.Errorf("%s: failed to restart K0s services (can be ignored if this is a new node in the cluster): %s", p.h.Id(), err.Error())
 		}
 	}
 
 	return nil
+}
+
+func (p hostPlugin) buildHostConfig(ctx context.Context, basecfg K0sConfig, sans []string) (K0sConfig, error) {
+	var hcfg K0sConfig = basecfg
+	slog.DebugContext(ctx, "base config", slog.Any("config", hcfg))
+
+	addUnlessExist := func(slice *[]string, s string) {
+		for _, v := range *slice {
+			if v == s {
+				return
+			}
+		}
+		*slice = append(*slice, s)
+	}
+
+	hn := network.HostGetNetwork(p.h)
+	n, nerr := hn.Network(ctx)
+	if nerr != nil {
+		return hcfg, nerr
+	}
+
+	var addr string
+	if n.PrivateAddress != "" {
+		addr = n.PrivateAddress
+	} else {
+		addr = n.PublicAddress
+	}
+
+	hcfg.Spec.API.Address = addr
+	hcfg.Spec.Storage.Etcd.PeerAddress = addr
+	addUnlessExist(&sans, addr)
+
+	// any external address (LB) should be included in the sans list
+	if hcfg.Spec.API.ExternalAddress != "" {
+		addUnlessExist(&hcfg.Spec.API.Sans, hcfg.Spec.API.ExternalAddress)
+	}
+
+	for _, s := range sans {
+		addUnlessExist(&hcfg.Spec.API.Sans, s)
+	}
+
+	addUnlessExist(&hcfg.Spec.API.Sans, "127.0.0.1")
+
+	if hcfg.Spec.API.K0sApiPort == 0 {
+		hcfg.Spec.API.K0sApiPort = 9443
+	}
+	if hcfg.Spec.API.Port == 0 {
+		hcfg.Spec.API.Port = 6443
+	}
+	//	if hcfg.Spec.Konnectivity.AdminPort == 0 {
+	//		hcfg.Spec.Konnectivity.AdminPort = 8443
+	//	}
+	//	if hcfg.Spec.Konnectivity.AgentPort == 0 {
+	//		hcfg.Spec.Konnectivity.AgentPort = 8443
+	//	}
+
+	return hcfg, nil
 }
 
 // ---- Local helpers ----

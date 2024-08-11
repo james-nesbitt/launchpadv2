@@ -18,7 +18,7 @@ func (c *Component) RequiresDependencies(ctx context.Context) dependency.Require
 	if c.hr == nil {
 
 		c.hr = host.NewHostsFilterRequirement(
-			fmt.Sprintf("%s:%s:mcr", host.ComponentType, c.Name()),
+			fmt.Sprintf("%s:%s", host.ComponentType, c.Name()),
 			fmt.Sprintf("MCR '%s' takes all nodes marked with MCR; needs at least one manager host as installation targets, using roles: %s", c.id, strings.Join(ManagerRoles, ",")),
 			func(ctx context.Context, hs host.Hosts) (host.Hosts, error) {
 				// filter for any nodes with an MCR plugin

@@ -26,7 +26,7 @@ func (c *HostsComponent) CliBuild(cmd *cobra.Command, _ *project.Project) error 
 	for key, hpf := range hostPluginFactories {
 		hpfcb, ok := hpf.(HostFactoryCliBuilder)
 		if !ok {
-			slog.Debug(fmt.Sprintf("%s host plugin factory doesn't build clis", key))
+			//slog.Debug(fmt.Sprintf("%s host plugin factory doesn't build clis", key))
 			continue
 		}
 		if hpfcb == nil { // this should never happen

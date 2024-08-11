@@ -22,6 +22,7 @@ var (
     name: k0s
   spec:
     api:
+      externalAddress: example-k0s-lb-c91e5f2cde668afd.elb.us-east-1.amazonaws.com
       k0sApiPort: 9443
       port: 6443
       sans:

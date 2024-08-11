@@ -47,6 +47,8 @@ type HostFiles interface {
 	Upload(ctx context.Context, src io.Reader, dst string, fm fs.FileMode, opts ExecOptions) error
 	// Download a file to the machine from a network address
 	Download(ctx context.Context, url string, dst string, fm fs.FileMode, opts ExecOptions) error
+	// Cat capture bytes from a file on the machine
+	Cat(ctx context.Context, dst string, opts ExecOptions) (io.Reader, error)
 	// Rename a file
 	Rename(ctx context.Context, old, new string, opts ExecOptions) error
 }

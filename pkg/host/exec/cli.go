@@ -43,6 +43,8 @@ func CliBuild(cmd *cobra.Command, c *host.HostsComponent) error {
 				Sudo: exec_sudo,
 			}
 
+			slog.DebugContext(ctx, fmt.Sprintf("%s: cli:execute: %s", h.Id(), strings.Join(args, " ")), slog.Any("host", h))
+
 			o, e, err := he.Exec(ctx, strings.Join(args, " "), os.Stdin, opts)
 			if err != nil {
 				return fmt.Errorf("%s: exec error: %s :: %s", h.Id(), err.Error(), e)

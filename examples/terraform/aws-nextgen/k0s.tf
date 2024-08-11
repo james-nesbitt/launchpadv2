@@ -11,7 +11,6 @@ variable "k0s" {
   description = "k0s install configuration"
   type = object({
     version = string
-    config = string
   })
 }
 
@@ -89,4 +88,5 @@ locals {
     ssh_port : ng.ssh_port
     ssh_key_path : abspath(local_sensitive_file.common_private_key.filename)
   } if contains(local.k0s_roles, ng.role) && ng.connection == "ssh" }]...)
+
 }

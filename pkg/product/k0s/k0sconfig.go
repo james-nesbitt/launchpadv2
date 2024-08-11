@@ -27,10 +27,11 @@ type K0sConfigSpec struct {
 }
 
 type K0sConfigSpecApi struct {
-	Address    string   `yaml:"address"`
-	K0sApiPort int      `yaml:"k0sApiPort" default:"9443"`
-	Port       int      `yaml:"port" default:"6443"`
-	Sans       []string `yaml:"sans"`
+	Address         string   `yaml:"address"`
+	ExternalAddress string   `yaml:"externalAddress"`
+	K0sApiPort      int      `yaml:"k0sApiPort" default:"9443"`
+	Port            int      `yaml:"port" default:"6443"`
+	Sans            []string `yaml:"sans"`
 }
 
 type K0sConfigSpecStorage struct {

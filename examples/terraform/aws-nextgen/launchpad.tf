@@ -32,10 +32,9 @@ spec:
           name: k0s
         spec:
           api:
+            externalAddress: ${local.K0S_URL}
             k0sApiPort: 9443
             port: 6443
-            sans:
-            - ${local.K0S_URL}
           controllerManager: {}
           extensions:
             helm:
@@ -55,7 +54,6 @@ spec:
           storage:
             etcd:
               externalCluster: null
-              peerAddress: 172.31.2.62
             type: etcd
           telemetry:
             enabled: true

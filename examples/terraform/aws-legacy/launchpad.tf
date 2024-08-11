@@ -38,46 +38,49 @@ locals {
 // ------- Ye old launchpad yaml (just for debugging)
 
 locals {
-  launchpad_yaml_20 = <<-EOT
-apiVersion: launchpad.mirantis.com/v2.0
+  launchpad_yaml_21 = <<-EOT
+apiVersion: launchpad.mirantis.com/v2.1
 kind: project
 metadata:
   name: ${var.name}
 spec:
   project:
     prune: false
-  hosts:
+
+  components:
+    hosts:
 %{~for h in local.launchpad_hosts_ssh}
-    # ${h.label} (ssh)
-    ${h.id}:
-      mcr:
-        role: ${h.role}
-      rig: 
-        ssh:
-          address: ${h.ssh_address}
-          user: ${h.ssh_user}
-          keyPath: ${h.ssh_key_path}
+      # ${h.label} (ssh)
+      ${h.id}:
+        mcr:
+          role: ${h.role}
+        rig:
+          ssh:
+            address: ${h.ssh_address}
+            user: ${h.ssh_user}
+            keyPath: ${h.ssh_key_path}
 %{~endfor}
 %{~for h in local.launchpad_hosts_winrm}
-    # ${h.label} (winrm)
-    ${h.id}:
-      mcr:
-        role: ${h.role}
-      rig:
-        winRM:
-          address: ${h.winrm_address}
-          user: ${h.winrm_user}
-          password: ${h.winrm_password}
-          useHTTPS: ${h.winrm_useHTTPS}
-          insecure: ${h.winrm_insecure}
+      # ${h.label} (winrm)
+      ${h.id}:
+        mcr:
+          role: ${h.role}
+        rig:
+          winRM:
+            address: ${h.winrm_address}
+            user: ${h.winrm_user}
+            password: ${h.winrm_password}
+            useHTTPS: ${h.winrm_useHTTPS}
+            insecure: ${h.winrm_insecure}
 %{~endfor}
-  products:
+
     mcr:
       version: ${var.mcr.version}
       repoURL: https://repos.mirantis.com
       installURLLinux: https://get.mirantis.com/
       installURLWindows: https://get.mirantis.com/install.ps1
       channel: stable
+
     mke3:
       version: ${var.mke.version}
       imageRepo: docker.io/mirantis
@@ -94,6 +97,7 @@ spec:
         - "--force-minimums"
       prune: true
 %{if local.has_msr}
+
     msr2:
       version: ${var.msr.version}
       imageRepo: docker.io/mirantis

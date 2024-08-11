@@ -15,6 +15,7 @@ import (
 
 	// Register v2 spec handler.
 	_ "github.com/Mirantis/launchpad/pkg/config/v2_0"
+	_ "github.com/Mirantis/launchpad/pkg/config/v2_1"
 
 	// Register Host handlers.
 	_ "github.com/Mirantis/launchpad/pkg/implementation/rig"

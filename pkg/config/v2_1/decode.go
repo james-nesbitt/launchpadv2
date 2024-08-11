@@ -28,8 +28,8 @@ func Decode(cl *project.Project, d func(interface{}) error) error {
 		cl.Components = component.Components{}
 	}
 
-	for id, cp := range cs.Products.products() {
-		cl.Components[strings.ToUpper(id)] = cp
+	for id, c := range cs.Components.components() {
+		cl.Components[strings.ToUpper(id)] = c
 	}
 
 	return nil

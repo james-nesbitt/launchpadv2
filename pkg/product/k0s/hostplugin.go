@@ -344,6 +344,29 @@ func (p *hostPlugin) JoinCluster(ctx context.Context, l *host.Host, role string,
 	return nil
 }
 
+// K0sKubeconfigAdmin retrieve the admin kubeconfig from a k0s controller
+//
+//	@NOTE only works on a controller
+func (p *hostPlugin) K0sKubeconfigAdmin(ctx context.Context) (string, error) {
+	if p.c.Role != RoleController {
+		return "", fmt.Errorf("%s: Can't retrieve kubeconfig from non controller node", p.h.Id())
+	}
+
+	args := []string{
+		"kubeconfig",
+		"admin",
+	}
+
+	eh := exec.HostGetExecutor(p.h)
+
+	o, e, err := eh.Exec(ctx, p.k0sCommand(args), nil, exec.ExecOptions{Sudo: true})
+	if err != nil {
+		return "", fmt.Errorf("%s: error retrieving kubeconfig: %s", p.h.Id(), e)
+	}
+
+	return o, nil
+}
+
 // ---- Local helpers ----
 
 func (p *hostPlugin) k0sCommand(args []string) string {

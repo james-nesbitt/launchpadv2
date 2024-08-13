@@ -8,6 +8,9 @@ import (
 	"strings"
 	"time"
 
+	kubeclientcmd "k8s.io/client-go/tools/clientcmd"
+	kubeclientcmdapi "k8s.io/client-go/tools/clientcmd/api"
+
 	"github.com/k0sproject/version"
 
 	"github.com/Mirantis/launchpad/pkg/host/network"
@@ -99,4 +102,24 @@ func (c *Component) CollectClusterSans(ctx context.Context) []string {
 	}
 
 	return sans
+}
+
+// K0SKubeConfigAdmin produce a kube client cmd Config object from the k0s cluster
+func (c *Component) K0SKubeConfigAdmin(ctx context.Context) (*kubeclientcmdapi.Config, error) {
+	lh := c.GetLeaderHost(ctx)
+	if lh == nil {
+		return nil, fmt.Errorf("No leader found")
+	}
+
+	lkh := HostGetK0s(lh)
+	if lkh == nil {
+		return nil, fmt.Errorf("leader host has no k0s functionality associated")
+	}
+
+	kcs, kcserr := lkh.K0sKubeconfigAdmin(ctx)
+	if kcserr != nil {
+		return nil, fmt.Errorf("Error retrieving kubeconfig for admin on leader; %w", lh.Id(), kcserr)
+	}
+
+	return kubeclientcmd.Load([]byte(kcs))
 }

@@ -1,9 +1,9 @@
 package kubernetes
 
+import (
+	kubeclientcmdapi "k8s.io/client-go/tools/clientcmd/api"
+)
+
 type Config struct {
-	Host          string
-	Key           string
-	Cert          string
-	CACert        string
-	TLSSkipVerify bool
+	KubeClientConfig kubeclientcmdapi.Config
 }

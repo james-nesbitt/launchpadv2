@@ -2,24 +2,37 @@ package k0s
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/Mirantis/launchpad/pkg/implementation/kubernetes"
 )
 
 // ValidateK8sDependencyConfig validate a Kubernetes client request configuration.
-func (p Component) ValidateK8sDependencyConfig(kc kubernetes.Version) error {
+func (c Component) ValidateK8sDependencyConfig(kc kubernetes.Version) error {
 	return nil
 }
 
-func (p *Component) kubernetesImplementation(ctx context.Context) (*kubernetes.Kubernetes, error) {
-	kcc, kccerr := p.K0SKubeConfigAdmin(ctx)
-	if kccerr != nil {
-		return nil, kccerr
+func (c *Component) kubernetesImplementation(ctx context.Context) (*kubernetes.Kubernetes, error) {
+	lh := c.GetLeaderHost(ctx)
+	if lh == nil {
+		return nil, fmt.Errorf("No leader found")
 	}
 
-	c := kubernetes.Config{
-		KubeClientConfig: *kcc,
+	lkh := HostGetK0s(lh)
+	if lkh == nil {
+		return nil, fmt.Errorf("leader host has no k0s functionality associated")
 	}
-	k := kubernetes.NewKubernetes(c)
+
+	kcs, kcserr := lkh.K0sKubeconfigAdmin(ctx)
+	if kcserr != nil {
+		return nil, fmt.Errorf("%s: Error retrieving kubeconfig for admin on leader; %w", lh.Id(), kcserr)
+	}
+
+	kc, kcerr := kubernetes.ConfigFromKubeConf([]byte(kcs))
+	if kcerr != nil {
+		return nil, fmt.Errorf("%s: Error interpreting kubeconfig; %w", lh.Id(), kcserr)
+	}
+
+	k := kubernetes.NewKubernetes(kc)
 	return k, nil
 }

@@ -18,8 +18,8 @@ func (c *Component) RequiresDependencies(_ context.Context) dependency.Requireme
 	if c.hs == nil {
 
 		c.hs = host.NewHostsFilterRequirement(
-			fmt.Sprintf("%s:%s:mcr", host.ComponentType, c.Name()),
-			fmt.Sprintf("MCR '%s' takes all nodes marked with MCR; needs at least one manager host as installation targets", c.Name()),
+			fmt.Sprintf("%s:%s", host.ComponentType, c.Name()),
+			fmt.Sprintf("K0S '%s' takes all nodes marked with K0S; needs at least one controller host as installation targets", c.Name()),
 			func(ctx context.Context, hs host.Hosts) (host.Hosts, error) {
 				// filter for any nodes with an K0S plugin
 				// - we also check to make sure that there is at least one controller

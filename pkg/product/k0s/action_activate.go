@@ -61,11 +61,12 @@ func (s activateK0sStep) Run(ctx context.Context) error {
 	if err := chs.Each(ctx, func(ctx context.Context, h *host.Host) error {
 		kh := HostGetK0s(h)
 
-		slog.InfoContext(ctx, fmt.Sprintf("%s: writing config to controller host", l.Id()))
+		slog.InfoContext(ctx, fmt.Sprintf("%s: writing config to controller host", h.Id()))
 		if werr := lkh.BuildAndWriteK0sConfig(ctx, baseCfg, csans); werr != nil {
 			return werr
 		}
 
+		slog.InfoContext(ctx, fmt.Sprintf("%s: joining as controller to '%s' cluster", h.Id(), l.Id()))
 		return kh.JoinCluster(ctx, l, RoleController, s.c.config)
 	}); err != nil {
 		return fmt.Errorf("error joining controller hosts: %s", err.Error())
@@ -79,6 +80,8 @@ func (s activateK0sStep) Run(ctx context.Context) error {
 		eh := exec.HostGetExecutor(h)
 		eh.Connect(ctx)
 		kh := HostGetK0s(h)
+
+		slog.InfoContext(ctx, fmt.Sprintf("%s: joining as worker to '%s' cluster", h.Id(), l.Id()))
 		return kh.JoinCluster(ctx, l, RoleWorker, s.c.config)
 	}); err != nil {
 		return fmt.Errorf("error joining worker hosts: %s", err.Error())

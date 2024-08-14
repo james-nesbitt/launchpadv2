@@ -292,5 +292,34 @@ func (c *Component) CliBuild(cmd *cobra.Command, _ *project.Project) error {
 	jc.Flags().StringVar(&r, "role", "worker", "role to join to cluster")
 	cmd.AddCommand(jc)
 
+	kcc := &cobra.Command{
+		GroupID: c.Name(),
+		Use:     fmt.Sprintf("%s:kubeconfig", c.Name()),
+		Short:   "Get the admin kubeconfig from the k0s cluster",
+		Long:    ``,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := cmd.Context()
+
+			lh := c.GetLeaderHost(ctx)
+			if lh == nil {
+				return fmt.Errorf("No leader found")
+			}
+
+			lkh := HostGetK0s(lh)
+			if lkh == nil {
+				return fmt.Errorf("leader host has no k0s functionality associated")
+			}
+
+			kcs, kcserr := lkh.K0sKubeconfigAdmin(ctx)
+			if kcserr != nil {
+				return fmt.Errorf("%s: Error retrieving kubeconfig for admin on leader; %w", lh.Id(), kcserr)
+			}
+
+			fmt.Println(kcs)
+			return nil
+		},
+	}
+	cmd.AddCommand(kcc)
+
 	return nil
 }

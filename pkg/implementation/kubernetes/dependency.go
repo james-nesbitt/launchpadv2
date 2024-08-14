@@ -9,7 +9,7 @@ import (
 
 // KubernetesDependency Kubernetes providing Dependency.
 type KubernetesDependency interface {
-	Kubernetes(ctx context.Context) *Kubernetes
+	Kubernetes(ctx context.Context) (*Kubernetes, error)
 }
 
 func NewKubernetesDependency(id string, desc string, factory func(context.Context) (*Kubernetes, error)) *kubeDep {
@@ -68,7 +68,6 @@ func (kd *kubeDep) DeliversEvents(context.Context) dependency.Events {
 }
 
 // Kubernetes API provide.
-func (kd *kubeDep) Kubernetes(ctx context.Context) *Kubernetes {
-	k, _ := kd.factory(ctx)
-	return k
+func (kd *kubeDep) Kubernetes(ctx context.Context) (*Kubernetes, error) {
+	return kd.factory(ctx)
 }

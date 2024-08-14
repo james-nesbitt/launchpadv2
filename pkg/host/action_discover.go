@@ -62,6 +62,7 @@ func (ds discoverStep) Run(ctx context.Context) error {
 			return fmt.Errorf("%s host discover impossible. No host plugin registered that performs discovery", h.Id())
 		}
 
+		slog.DebugContext(ctx, fmt.Sprintf("%s: Discovering host", h.Id()))
 		if err := hd.Discover(ctx); err != nil {
 			return fmt.Errorf("%s host discover failed: %s", h.Id(), err.Error())
 		}

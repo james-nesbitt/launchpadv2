@@ -1,4 +1,6 @@
 dist
 vendor
 
-launchpad.yaml
+launchpad*
+kubeconfig*
+

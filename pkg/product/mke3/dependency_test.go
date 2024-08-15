@@ -77,7 +77,10 @@ func Test_ProvidesK8s(t *testing.T) {
 		t.Fatalf("MKE3 returned an invalid k8s dependency: %+v", d)
 	}
 
-	k8s := dm.Kubernetes(ctx)
+	k8s, k8serr := dm.Kubernetes(ctx)
+	if k8serr != nil {
+		t.Fatalf("kubernetes implementation build produced an error: %s", k8serr.Error())
+	}
 	if k8s == nil {
 		t.Errorf("empty k8s returned by kubernetes dependency")
 	}

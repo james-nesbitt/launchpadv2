@@ -44,7 +44,10 @@ func Test_DependencySanity(t *testing.T) {
 		t.Fatalf("Kubernetes requirement returned unexpected dependency: %+v", kd2)
 	}
 
-	k2 := kd2.Kubernetes(ctx)
+	k2, k2err := kd2.Kubernetes(ctx)
+	if k2err != nil {
+		t.Fatalf("kubernetes implementation build produced an error: %s", k2err.Error())
+	}
 
 	if k2 != k {
 		t.Errorf("Kubernetes dependency returned unexpected kubernetes client: %+v", k2)

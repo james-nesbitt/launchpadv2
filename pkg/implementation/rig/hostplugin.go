@@ -3,7 +3,7 @@ package rig
 import (
 	"context"
 
-	"github.com/k0sproject/rig/v2"
+	rig "github.com/k0sproject/rig/v2"
 
 	"github.com/Mirantis/launchpad/pkg/host"
 	"github.com/Mirantis/launchpad/pkg/host/exec"

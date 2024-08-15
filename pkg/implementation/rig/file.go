@@ -9,7 +9,7 @@ import (
 	"os"
 
 	"github.com/Mirantis/launchpad/pkg/host/exec"
-	"github.com/k0sproject/rig/v2"
+	rig "github.com/k0sproject/rig/v2"
 )
 
 // Stat return file info on a file, or an error.

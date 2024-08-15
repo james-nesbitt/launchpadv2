@@ -29,7 +29,7 @@
 - [x] (host-network-discover) Hosts need to be able to discover their networking (internal) so that we can activate swarm using the advertise address
 - [x] (flexible-host) Allow Hosts to have component specific configuration/functionalily so that we can configure host specific things like docker-sudo, mcr-daemon-config. Maybe a plugin system, or allow multiple handlers per host? Currently I am looking at having a system for allowing hosts to be decorated on demand
 - [ ] (host-hooks) Allow host hooks. Perhaps rely on action.Events or action.Phases as markers.
-- [ ] (host-as-a-component) should we stop treating host components separately from product components.
+- [x] (host-as-a-component) should we stop treating host components separately from product components.
 - [ ] (log-command-identifier) Log entries for a command should have some identifier to show that they are connected so that you can correlate the various output lines to one execution.
 
 ## Component
@@ -43,7 +43,7 @@
 
 ## Products 
 
-- [ ] (product-discover-strategy) develop a strategy for the Discover operations that is more clear about state, and allows for expecting to fail (like checking that a product is uninstalled after running uninstall.
+- [x] (product-discover-strategy) develop a strategy for the Discover operations that is more clear about state, and allows for expecting to fail (like checking that a product is uninstalled after running uninstall.
 
 ## Product:MKE3
 
@@ -53,9 +53,13 @@
 ## Product:K0s
 
 - [X] (k0s-initial) start K0s component 
-- [ ] (k0s-multiple-controller) currently, adding controllers fails with the nextgen terraform aws example
+- [x] (k0s-multiple-controller) currently, adding controllers fails with the nextgen terraform aws example
+- [x] (k0s-kubernetes-implementation) k0s can produce a kubernetes implementation
+- [ ] (k0s-project) K0s project operations should install/uninstall k0s
 
 ## Product:MKEx 
 
 - [X] (mkex-initial) start mkex component 
 - [X] (mkex-swarm-initialize) get mkex to activate swarm
+
+## 

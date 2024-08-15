@@ -9,7 +9,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/k0sproject/rig/v2"
+	rig "github.com/k0sproject/rig/v2"
 
 	"github.com/Mirantis/launchpad/pkg/host/exec"
 	hostexec "github.com/Mirantis/launchpad/pkg/host/exec"

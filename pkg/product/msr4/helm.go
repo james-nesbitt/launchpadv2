@@ -19,7 +19,7 @@ func (c Component) helmRepo() helmrepo.Entry {
 }
 
 func (c Component) helmChartSpec() helmc.ChartSpec {
-	return helmc.ChartSpec{
+	cs := helmc.ChartSpec{
 		ChartName:   "msr4/harbor",
 		ReleaseName: c.Name(),
 		Version:     c.config.Version,
@@ -36,6 +36,8 @@ persistance:
   enabled: False
 `,
 	}
+
+	return cs
 }
 
 func (c Component) helmChartOpts() helmc.GenericHelmOptions {

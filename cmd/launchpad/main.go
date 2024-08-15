@@ -20,19 +20,18 @@ import (
 	// Register Host handlers.
 	_ "github.com/Mirantis/launchpad/pkg/implementation/rig"
 
-	// Register legacy product handlers for testing.
+	// register implementation components
+	_ "github.com/Mirantis/launchpad/pkg/implementation/kubernetes/component"
+
+	// Register legacy product handlers.
+	_ "github.com/Mirantis/launchpad/pkg/product/k0s"
 	_ "github.com/Mirantis/launchpad/pkg/product/mcr"
 	_ "github.com/Mirantis/launchpad/pkg/product/mke3"
-	_ "github.com/Mirantis/launchpad/pkg/product/msr2"
-
-	// Register nextgen product handlers for testing.
-	_ "github.com/Mirantis/launchpad/pkg/product/k0s"
 	_ "github.com/Mirantis/launchpad/pkg/product/mke4"
+	_ "github.com/Mirantis/launchpad/pkg/product/mkex"
+	_ "github.com/Mirantis/launchpad/pkg/product/msr2"
 	_ "github.com/Mirantis/launchpad/pkg/product/msr3"
 	_ "github.com/Mirantis/launchpad/pkg/product/msr4"
-
-	// Register mkex related product handlers.
-	_ "github.com/Mirantis/launchpad/pkg/product/mkex"
 
 	// Register mock stuff, in case it gets used.
 	_ "github.com/Mirantis/launchpad/pkg/mock"

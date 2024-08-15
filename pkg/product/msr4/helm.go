@@ -32,7 +32,7 @@ func (c Component) helmChartSpec() helmc.ChartSpec {
 		Timeout:         time.Second * 300,
 
 		ValuesYaml: `
-persistance:
+persistence:
   enabled: False
 `,
 	}

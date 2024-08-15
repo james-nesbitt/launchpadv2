@@ -65,7 +65,7 @@ func (s activateK0sStep) Run(ctx context.Context) error {
 		kh := HostGetK0s(h)
 
 		slog.InfoContext(ctx, fmt.Sprintf("%s: writing config to controller host", h.Id()))
-		if werr := lkh.BuildAndWriteK0sConfig(ctx, baseCfg, csans); werr != nil {
+		if werr := kh.BuildAndWriteK0sConfig(ctx, baseCfg, csans); werr != nil {
 			return werr
 		}
 

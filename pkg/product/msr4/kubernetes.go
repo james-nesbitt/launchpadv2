@@ -8,7 +8,7 @@ import (
 	"github.com/Mirantis/launchpad/pkg/implementation/kubernetes"
 )
 
-func (c Component) GetKubernetesImplementation(ctx context.Context) (*kubernetes.Kubernetes, error) {
+func (c *Component) GetKubernetesImplementation(ctx context.Context) (*kubernetes.Kubernetes, error) {
 	r := c.k8sr
 
 	if r == nil {

@@ -38,6 +38,7 @@ func HostGetFiles(h *host.Host) HostFiles {
 	return hf
 }
 
+// HostFiles manage files on a host
 type HostFiles interface {
 	// Stat return file info on a file, or an error
 	Stat(ctx context.Context, path string, opts ExecOptions) (os.FileInfo, error)
@@ -47,6 +48,10 @@ type HostFiles interface {
 	Upload(ctx context.Context, src io.Reader, dst string, fm fs.FileMode, opts ExecOptions) error
 	// Download a file to the machine from a network address
 	Download(ctx context.Context, url string, dst string, fm fs.FileMode, opts ExecOptions) error
+	// Delete a file path (and all contents)
+	Delete(ctx context.Context, path string, opts ExecOptions) error
+	// Cat capture bytes from a file on the machine
+	Cat(ctx context.Context, dst string, opts ExecOptions) (io.Reader, error)
 	// Rename a file
 	Rename(ctx context.Context, old, new string, opts ExecOptions) error
 }

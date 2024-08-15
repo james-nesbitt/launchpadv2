@@ -292,6 +292,78 @@ func (c *Component) CliBuild(cmd *cobra.Command, _ *project.Project) error {
 	jc.Flags().StringVar(&r, "role", "worker", "role to join to cluster")
 	cmd.AddCommand(jc)
 
+	s := &cobra.Command{
+		GroupID: c.Name(),
+		Use:     fmt.Sprintf("%s:stop", c.Name()),
+		Short:   "stop any running k0s components on the host",
+		Long:    ``,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := cmd.Context()
+
+			if hn == "" {
+				return fmt.Errorf("no host specified")
+			}
+
+			hs, hserr := c.GetAllHosts(ctx)
+			if hserr != nil {
+				return fmt.Errorf("could not get all hosts: %s", hn)
+			}
+
+			h := hs.Get(hn)
+			if h == nil {
+				return fmt.Errorf("%s: could not find host", hn)
+			}
+
+			kh := HostGetK0s(h)
+
+			slog.InfoContext(ctx, fmt.Sprintf("%s: stopping k0s on host", h.Id()))
+			if err := kh.K0sStop(ctx); err != nil {
+				return err
+			}
+
+			fmt.Printf("%s: stopped k0s components", h.Id())
+			return nil
+		},
+	}
+	s.Flags().StringVar(&hn, "host", "", "host on which to stop k0s components")
+	cmd.AddCommand(s)
+
+	rc := &cobra.Command{
+		GroupID: c.Name(),
+		Use:     fmt.Sprintf("%s:reset", c.Name()),
+		Short:   "reset the host",
+		Long:    ``,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := cmd.Context()
+
+			if hn == "" {
+				return fmt.Errorf("no host specified")
+			}
+
+			hs, hserr := c.GetAllHosts(ctx)
+			if hserr != nil {
+				return fmt.Errorf("could not get all hosts: %s", hn)
+			}
+
+			h := hs.Get(hn)
+			if h == nil {
+				return fmt.Errorf("%s: could not find host", hn)
+			}
+
+			kh := HostGetK0s(h)
+
+			slog.InfoContext(ctx, fmt.Sprintf("%s: resetting k0s", h.Id()))
+			if err := kh.K0sClean(ctx); err != nil {
+				return err
+			}
+
+			fmt.Printf("%s: reset", h.Id())
+			return nil
+		},
+	}
+	rc.Flags().StringVar(&hn, "host", "", "host to reset")
+	cmd.AddCommand(rc)
+
 	kcc := &cobra.Command{
 		GroupID: c.Name(),
 		Use:     fmt.Sprintf("%s:kubeconfig", c.Name()),

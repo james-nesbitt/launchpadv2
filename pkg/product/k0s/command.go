@@ -53,10 +53,6 @@ func (c *Component) CommandBuild(ctx context.Context, cmd *action.Command) error
 				baseStep: bs,
 				id:       c.Name(),
 			},
-			&configureK0sStep{
-				baseStep: bs,
-				id:       c.Name(),
-			},
 			&activateK0sStep{
 				baseStep: bs,
 				id:       c.Name(),

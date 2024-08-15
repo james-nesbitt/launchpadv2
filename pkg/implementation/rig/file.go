@@ -1,6 +1,7 @@
 package rig
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -118,4 +119,50 @@ func (p *hostPlugin) Rename(ctx context.Context, old, new string, opts exec.Exec
 	fs := c.FS()
 
 	return fs.Rename(old, new)
+}
+
+// Delete a file or folder.
+func (p *hostPlugin) Delete(ctx context.Context, path string, opts exec.ExecOptions) error {
+	slog.DebugContext(ctx, fmt.Sprintf("%s: Rig Delete: %s", p.hid(), path))
+
+	var c *rig.Client = p.rig.Client
+	if cerr := c.Connect(ctx); cerr != nil {
+		return cerr
+	}
+	if opts.Sudo {
+		c = p.rig.Sudo()
+		if cerr := c.Connect(ctx); cerr != nil {
+			return cerr
+		}
+	}
+
+	fs := c.FS()
+
+	return fs.RemoveAll(path)
+}
+
+// Cat stream file content bytes
+func (p *hostPlugin) Cat(ctx context.Context, dst string, opts exec.ExecOptions) (io.Reader, error) {
+	slog.DebugContext(ctx, fmt.Sprintf("%s: Rig Cat: %s", p.h.Id(), dst))
+
+	var c *rig.Client = p.rig.Client
+	if cerr := c.Connect(ctx); cerr != nil {
+		return nil, cerr
+	}
+	if opts.Sudo {
+		c = p.rig.Sudo()
+		if cerr := c.Connect(ctx); cerr != nil {
+			return nil, cerr
+		}
+	}
+
+	fs := c.FS()
+
+	rbs, rerr := fs.ReadFile(dst)
+	if rerr != nil {
+		return nil, rerr
+	}
+
+	rr := bytes.NewReader(rbs)
+	return rr, nil
 }

@@ -3,6 +3,7 @@ package k0s
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
 	"strings"
@@ -365,6 +366,81 @@ func (p *hostPlugin) K0sKubeconfigAdmin(ctx context.Context) (string, error) {
 	}
 
 	return o, nil
+}
+
+// K0sStop stop the k0s services using the k0s command
+func (p *hostPlugin) K0sStop(ctx context.Context) error {
+	args := []string{
+		"stop",
+	}
+
+	eh := exec.HostGetExecutor(p.h)
+
+	_, e, err := eh.Exec(ctx, p.k0sCommand(args), nil, exec.ExecOptions{Sudo: true})
+	if err != nil {
+		return fmt.Errorf("%s: error stopping k0s: %s", p.h.Id(), e)
+	}
+
+	return nil
+}
+
+// K0sStop run k0s reset on hos
+func (p *hostPlugin) K0sReset(ctx context.Context) error {
+	args := []string{
+		"reset",
+	}
+
+	eh := exec.HostGetExecutor(p.h)
+
+	_, e, err := eh.Exec(ctx, p.k0sCommand(args), nil, exec.ExecOptions{Sudo: true})
+	if err != nil {
+		return fmt.Errorf("%s: error stopping k0s: %s", p.h.Id(), e)
+	}
+
+	return nil
+}
+
+// K0sClean clean all things that may have been created related to this component
+func (p *hostPlugin) K0sClean(ctx context.Context) error {
+	fh := exec.HostGetFiles(p.h)
+	eh := exec.HostGetExecutor(p.h)
+
+	slog.DebugContext(ctx, fmt.Sprintf("%s: Stopping any running services", p.h.Id()))
+	if err := eh.Connect(ctx); err != nil {
+		return fmt.Errorf("%s: failed to connect to stop k0s services: %s", p.h.Id(), err.Error())
+	}
+
+	services := []string{}
+
+	switch p.c.Role {
+	case ControllerHostRole:
+		services = append(services, ServiceController)
+	case WorkerHostRole:
+		services = append(services, ServiceWorker)
+	}
+
+	if err := eh.ServiceDisable(ctx, services); err != nil {
+		return fmt.Errorf("%s: failed to stop k0s services: %s", p.h.Id(), err.Error())
+	}
+
+	opts := exec.ExecOptions{Sudo: true}
+
+	errs := []error{}
+	for _, fp := range []string{
+		p.k0sBinaryPath(),
+		p.k0sConfigPath(),
+		p.k0sDataPath(),
+		p.k0sTokenPath(),
+	} {
+		if err := fh.Delete(ctx, fp, opts); err != nil {
+			slog.WarnContext(ctx, fmt.Sprintf("%s: failed to delete %s: %s", p.h.Id(), fp, err.Error()))
+			errs = append(errs, err)
+		}
+	}
+	if len(errs) > 0 {
+		return errors.Join(errs...)
+	}
+	return nil
 }
 
 // ---- Local helpers ----

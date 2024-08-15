@@ -30,6 +30,7 @@ func (s activateK0sStep) Id() string {
 func (s activateK0sStep) Run(ctx context.Context) error {
 	slog.InfoContext(ctx, "running k0s activate step", slog.String("ID", s.id))
 
+	slog.DebugContext(ctx, "Looking for leader in controllers")
 	l := s.c.GetLeaderHost(ctx)
 	if l == nil {
 		return fmt.Errorf("could not find a leader")
@@ -40,9 +41,11 @@ func (s activateK0sStep) Run(ctx context.Context) error {
 
 	lkh := HostGetK0s(l)
 
-	_, lserr := lkh.Status(ctx)
-	if lserr != nil {
+	if ls, lserr := lkh.Status(ctx); lserr == nil {
+		slog.DebugContext(ctx, fmt.Sprintf("%s: discovered as leader", l.Id()), slog.Any("status", ls))
+	} else {
 		// leader has no k0s running, so start a new cluster
+		slog.DebugContext(ctx, fmt.Sprintf("%s: using as leader in new cluster", l.Id()), slog.Any("status", ls))
 
 		lkh := HostGetK0s(l)
 

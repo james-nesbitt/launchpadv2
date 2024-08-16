@@ -3,6 +3,7 @@ package kubernetes
 import (
 	"fmt"
 
+	"gopkg.in/yaml.v3"
 	kubeclientcmd "k8s.io/client-go/tools/clientcmd"
 )
 
@@ -38,4 +39,16 @@ func ConfigFromEnv(o *kubeclientcmd.ConfigOverrides) (Config, error) {
 	c.KubeCmdApiConfig = kubeclientcmd.NewDefaultClientConfig(*apic, o)
 
 	return c, nil
+}
+
+// KubeConfig produce yaml bytes for a kubeconfig for this implementation
+func (c Config) KubeConfig() []byte {
+	rc, _ := c.KubeCmdApiConfig.MergedRawConfig()
+
+	mb, mberr := yaml.Marshal(rc.DeepCopy())
+	if mberr != nil {
+		return []byte{}
+	}
+
+	return mb
 }

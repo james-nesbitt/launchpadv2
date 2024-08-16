@@ -15,18 +15,23 @@ const (
 	CommandPhaseReset    = "MSR4-Reset"
 )
 
-func (c Component) CommandBuild(ctx context.Context, cmd *action.Command) error {
+func (c *Component) CommandBuild(ctx context.Context, cmd *action.Command) error {
 	rs := dependency.Requirements{ // Requirements that we need
 		c.k8sr,
 	}
 	ds := dependency.Dependencies{} // Dependencies that we deliver
+
+	bs := baseStep{
+		c: c,
+	}
 
 	switch cmd.Key {
 	case project.CommandKeyDiscover:
 		p := stepped.NewSteppedPhase(CommandPhaseDiscover, rs, ds, []string{dependency.EventKeyActivated})
 		p.Steps().Add(
 			&discoverStep{
-				id: c.Name(),
+				baseStep: bs,
+				id:       c.Name(),
 			},
 		)
 		cmd.Phases.Add(p)
@@ -34,17 +39,13 @@ func (c Component) CommandBuild(ctx context.Context, cmd *action.Command) error 
 	case project.CommandKeyApply:
 		p := stepped.NewSteppedPhase(CommandPhaseApply, rs, ds, []string{dependency.EventKeyActivated})
 		p.Steps().Merge(stepped.Steps{
-			&discoverStep{
-				id: c.Name(),
-			},
 			&installMSRStep{
-				id: c.Name(),
-			},
-			&configureMSRStep{
-				id: c.Name(),
+				baseStep: bs,
+				id:       c.Name(),
 			},
 			&activateMSRStep{
-				id: c.Name(),
+				baseStep: bs,
+				id:       c.Name(),
 			},
 		})
 		cmd.Phases.Add(p)
@@ -54,7 +55,8 @@ func (c Component) CommandBuild(ctx context.Context, cmd *action.Command) error 
 			pd := stepped.NewSteppedPhase(CommandPhaseDiscover, rs, ds, []string{dependency.EventKeyActivated})
 			pd.Steps().Add(
 				&discoverStep{
-					id: c.Name(),
+					baseStep: bs,
+					id:       c.Name(),
 				},
 			)
 			cmd.Phases.Add(pd)
@@ -63,7 +65,8 @@ func (c Component) CommandBuild(ctx context.Context, cmd *action.Command) error 
 		pr := stepped.NewSteppedPhase(CommandPhaseReset, rs, ds, []string{dependency.EventKeyDeActivated})
 		pr.Steps().Merge(stepped.Steps{
 			&uninstallMSRStep{
-				id: c.Name(),
+				baseStep: bs,
+				id:       c.Name(),
 			},
 		})
 		cmd.Phases.Add(pr)

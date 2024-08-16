@@ -1,9 +1,8 @@
 //go:build integration
-
 package integration
 
 var (
-	IntegrationTestYamlLegacy_2_0 = `---
+	IntegrationTestYaml_Legacy_2_0 = `---
 apiVersion: launchpad.mirantis.com/v2.0
 kind: mke
 metadata:
@@ -43,7 +42,7 @@ spec:
     msr2:
       version: 2.9.30
 `
-	IntegrationTestYamlLegacy_2_1 = `---
+	IntegrationTestYaml_Legacy_2_1 = `---
 apiVersion: launchpad.mirantis.com/v2.1
 kind: mke
 metadata:
@@ -83,7 +82,7 @@ spec:
     msr2:
       version: 2.9.30
 `
-	IntegrationTestYamlNextGen_2_0 = `---
+	IntegrationTestYaml_NextGen_2_0 = `---
 apiVersion: launchpad.mirantis.com/v2.0
 kind: mke
 metadata:
@@ -110,7 +109,7 @@ spec:
     msr4:
       version: 4.0.0
 `
-	IntegrationTestYamlNextGen_2_1 = `---
+	IntegrationTestYaml_NextGen_2_1 = `---
 apiVersion: launchpad.mirantis.com/v2.1
 kind: mke
 metadata:

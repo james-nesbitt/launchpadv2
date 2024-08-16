@@ -17,6 +17,7 @@ require (
 	github.com/yourbasic/graph v0.0.0-20210606180040-8ecfec1c2869
 	gopkg.in/yaml.v3 v3.0.1
 	helm.sh/helm/v3 v3.15.4
+	k8s.io/apimachinery v0.30.3
 	k8s.io/client-go v0.30.3
 )
 
@@ -162,7 +163,6 @@ require (
 	gotest.tools/v3 v3.5.1 // indirect
 	k8s.io/api v0.30.3 // indirect
 	k8s.io/apiextensions-apiserver v0.30.3 // indirect
-	k8s.io/apimachinery v0.30.3 // indirect
 	k8s.io/apiserver v0.30.3 // indirect
 	k8s.io/cli-runtime v0.30.3 // indirect
 	k8s.io/component-base v0.30.3 // indirect

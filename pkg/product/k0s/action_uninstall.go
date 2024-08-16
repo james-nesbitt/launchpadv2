@@ -23,10 +23,13 @@ func (s uninstallK0sStep) Run(ctx context.Context) error {
 
 	errs := []error{}
 
-	if whs, whserr := s.c.GetWorkerHosts(ctx); whserr != nil {
+	if whs, whserr := s.c.GetAllHosts(ctx); whserr != nil {
 
 	} else {
-		if err := whs.Each(ctx, hostReset); err != nil {
+		if err := whs.Each(ctx, func(ctx context.Context, h *host.Host) error {
+			slog.InfoContext(ctx, fmt.Sprintf("%s: k0s reset", h.Id()))
+			return hostReset(ctx, h)
+		}); err != nil {
 			errs = append(errs, err)
 		}
 	}

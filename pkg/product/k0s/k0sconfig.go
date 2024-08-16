@@ -44,13 +44,19 @@ type K0sConfigSpecStorageEtcd struct {
 }
 
 type K0sConfigSpecExtensions struct {
-	Helm K0sConfigSpecExtensionsHelm `yaml:"helm"`
+	Helm    K0sConfigSpecExtensionsHelm   `yaml:"helm"`
+	Storage K0sConfigSpecExtensionStorage `yaml:"storage"`
 }
 
 type K0sConfigSpecExtensionsHelm struct {
 	ConcurrencyLevel int                                         `yaml:"concurrencyLevel"`
 	Repositories     map[string]string                           `yaml:"repositories,omitempty"`
 	Charts           map[string]K0sConfigSpecExtensionsHelmChart `yaml:"charts,omitempty"`
+}
+
+type K0sConfigSpecExtensionStorage struct {
+	Type                      string `yaml:"type"`
+	CreateDefaultStorageClass bool   `yaml:"create_default_storage_class"`
 }
 
 type K0sConfigSpecExtensionsHelmChart struct {

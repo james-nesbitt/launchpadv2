@@ -1,0 +1,14 @@
+apiVersion: launchpad.mirantis.com/v2.1
+kind: project
+metadata:
+  name: lp2-nge
+spec:
+  components:
+    kubernetes:
+      kubeFile: ./kubeconfig.yml
+    
+    mke4:
+      version: 4.0.0
+
+    msr4:
+      version: 4.0.0

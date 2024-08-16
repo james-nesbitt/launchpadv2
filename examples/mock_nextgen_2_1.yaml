@@ -1,25 +1,28 @@
-apiVersion: launchpad.mirantis.com/v2.0
-kind: mke
+apiVersion: launchpad.mirantis.com/v2.1
+kind: project
 metadata:
   name: lp2-ng
 spec:
-  hosts:
-    ACon0:
-      handler: mock
-      roles:
-      - controller
-    AWrk0:
-      handler: mock
-      roles:
-      - worker
-    AWrk1:
-      handler: mock
-      roles:
-      - worker
-  products:
+  components:
+    hosts:
+      ACon0:
+        handler: mock
+        roles:
+        - controller
+      AWrk0:
+        handler: mock
+        roles:
+        - worker
+      AWrk1:
+        handler: mock
+        roles:
+        - worker
+
     k0s:
       version: 1.28-k0s
+
     mke4:
       version: 4.0.0
+
     msr4:
       version: 4.0.0

@@ -17,6 +17,7 @@ spec:
         handler: mock
         roles:
         - worker
+
     mcr:
       version: 23.0.7
       repoURL: https://repos.mirantis.com
@@ -24,6 +25,7 @@ spec:
       installURLWindows: https://get.mirantis.com/install.ps1
       channel: stable
       prune: true
+
     mke3:
       version: 3.7.3
       imageRepo: docker.io/mirantis
@@ -34,5 +36,6 @@ spec:
       upgradeFlags:
       - "--force-recent-backup"
       - "--force-minimums"
+
     msr2:
       version: 2.9.30

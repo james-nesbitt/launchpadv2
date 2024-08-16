@@ -47,7 +47,7 @@ func main() {
 	var rootCmd = &cobra.Command{
 		Use:   "launchpad",
 		Short: "A Mirantis installer",
-		Long:  `Install various Mirantis products.`,
+		Long:  `manage various Mirantis products.`,
 	}
 
 	proj := cmd.Bootstrap(rootCmd)

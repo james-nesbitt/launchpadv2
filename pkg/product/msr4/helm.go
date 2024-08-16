@@ -1,11 +1,27 @@
 package msr4
 
 import (
+	"context"
 	"time"
 
 	helmc "github.com/mittwald/go-helm-client"
+	helmclient "github.com/mittwald/go-helm-client"
 	helmrepo "helm.sh/helm/v3/pkg/repo"
 )
+
+func (c *Component) helmClient(ctx context.Context) (helmclient.Client, error) {
+	ki, kierr := c.GetKubernetesImplementation(ctx)
+	if kierr != nil {
+		return nil, kierr
+	}
+
+	hc, hcerr := ki.HelmClient(ctx, c.helmOptions())
+	if hcerr != nil {
+		return nil, hcerr
+	}
+
+	return hc, nil
+}
 
 func (c Component) helmOptions() helmc.Options {
 	return c.config.HelmOptions()

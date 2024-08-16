@@ -41,10 +41,16 @@ func (c *Component) CliBuild(cmd *cobra.Command, _ *project.Project) error {
 	kcc := &cobra.Command{
 		GroupID: c.Name(),
 		Use:     fmt.Sprintf("%s:kubeconfig", c.Name()),
-		Short:   "Get the kubeconfig for the cluster",
+		Short:   "Get the kubeconfig for the cluster (BROKEN)",
 		Long:    ``,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return fmt.Errorf("TODO: kubernetes component does not yet have a way to generate kubeconf (we don't have config defined yet)")
+			cb := c.config.KubeConfig()
+			if len(cb) == 0 {
+				return fmt.Errorf("failed to build kubeconfig")
+			}
+			fmt.Println(string(cb))
+
+			return nil
 		},
 	}
 	cmd.AddCommand(kcc)

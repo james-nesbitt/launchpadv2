@@ -19,9 +19,8 @@ const (
 )
 
 func (c *Component) CommandBuild(ctx context.Context, cmd *action.Command) error {
-	rs := dependency.Requirements{ // Requirements that we need
-	}
-	ds := dependency.Dependencies{ // Dependencies that our phases typically deliver
+	rs := dependency.Requirements{} // Requirements that we need
+	ds := dependency.Dependencies{  // Dependencies that our phases typically deliver
 		c.k8sd,
 	}
 
@@ -39,6 +38,28 @@ func (c *Component) CommandBuild(ctx context.Context, cmd *action.Command) error
 			},
 		)
 		cmd.Phases.Add(p)
+
+	case project.CommandKeyApply:
+		p := stepped.NewSteppedPhase(CommandPhaseDiscover, rs, ds, []string{dependency.EventKeyActivated})
+		p.Steps().Add(
+			&discoverStep{
+				baseStep: bs,
+				id:       c.Name(),
+			},
+		)
+		cmd.Phases.Add(p)
+
+	case project.CommandKeyReset:
+		if c.k8sd != nil { // only discover if someone has asked for
+			p := stepped.NewSteppedPhase(CommandPhaseDiscover, rs, ds, []string{dependency.EventKeyActivated})
+			p.Steps().Add(
+				&discoverStep{
+					baseStep: bs,
+					id:       c.Name(),
+				},
+			)
+			cmd.Phases.Add(p)
+		}
 
 	case CommandKeyKubernetesConf:
 		p := stepped.NewSteppedPhase(CommandPhaseKubernetesConf, rs, ds, []string{dependency.EventKeyActivated})

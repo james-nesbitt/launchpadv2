@@ -7,6 +7,7 @@ import (
 )
 
 type installMSRStep struct {
+	baseStep
 	id string
 }
 
@@ -16,5 +17,10 @@ func (s installMSRStep) Id() string {
 
 func (s installMSRStep) Run(ctx context.Context) error {
 	slog.InfoContext(ctx, "running MSR4 install step", slog.String("ID", s.Id()))
+
+	if err := s.c.addMsr4HelmRepo(ctx); err != nil {
+		return err
+	}
+
 	return nil
 }

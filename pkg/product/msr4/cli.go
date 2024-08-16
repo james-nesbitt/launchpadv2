@@ -1,6 +1,7 @@
 package msr4
 
 import (
+	"encoding/json"
 	"fmt"
 	"log/slog"
 
@@ -15,79 +16,85 @@ func (c *Component) CliBuild(cmd *cobra.Command, _ *project.Project) error {
 	}
 	cmd.AddGroup(g)
 
-	dic := &cobra.Command{
+	rdc := &cobra.Command{
 		GroupID: g.ID,
-		Use:     fmt.Sprintf("%s:dev-install", c.Name()),
-		Short:   "msr4 install (used during development)",
+		Use:     fmt.Sprintf("%s:status", c.Name()),
+		Short:   "msr4 release status",
 		Long:    ``,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 
-			slog.InfoContext(ctx, "Retrieving Kube implementation\n")
-			ki, kierr := c.GetKubernetesImplementation(ctx)
-			if kierr != nil {
-				return kierr
-			}
-			slog.InfoContext(ctx, fmt.Sprintf("Retrieved Kube implementation (from whoever provided kube): %+v \n", ki))
-
-			hc, hcerr := ki.HelmClient(ctx, c.helmOptions())
-			if hcerr != nil {
-				return hcerr
-			}
-			slog.InfoContext(ctx, fmt.Sprintf("Built helm client: %+v \n", hc))
-
-			hr := c.helmRepo()
-
-			slog.InfoContext(ctx, fmt.Sprintf("Adding helm repo: %+v \n", hr))
-			if err := hc.AddOrUpdateChartRepo(hr); err != nil {
-				return fmt.Errorf("Error adding repo: %s", err.Error())
-			}
-
-			hcs := c.helmChartSpec()
-			hcopts := c.helmChartOpts()
-
-			slog.InfoContext(ctx, fmt.Sprintf("Installing/Upgrading chart: chart:%+v opts:%+v \n", hcs, hcopts))
-			r, rerr := hc.InstallOrUpgradeChart(ctx, &hcs, &hcopts)
+			r, rerr := c.getRelease(ctx)
 			if rerr != nil {
+				slog.ErrorContext(ctx, "failed to add MSR4 helm release")
 				return rerr
 			}
-			slog.InfoContext(ctx, fmt.Sprintf("Release installed: %+v \n", *r))
+
+			slog.InfoContext(ctx, "Added MSR4 release status retrieve")
+
+			rbs, _ := json.Marshal(r)
+			fmt.Print(string(rbs))
 
 			return nil
 		},
 	}
-	cmd.AddCommand(dic)
+	cmd.AddCommand(rdc)
 
-	duc := &cobra.Command{
+	rac := &cobra.Command{
 		GroupID: g.ID,
-		Use:     fmt.Sprintf("%s:dev-uninstall", c.Name()),
-		Short:   "msr4 uninstall (used during development)",
+		Use:     fmt.Sprintf("%s:add-repo", c.Name()),
+		Short:   "msr4 repo add",
 		Long:    ``,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 
-			slog.InfoContext(ctx, "Retrieving Kube implementation\n")
-			ki, kierr := c.GetKubernetesImplementation(ctx)
-			if kierr != nil {
-				return kierr
+			if err := c.addMsr4HelmRepo(ctx); err != nil {
+				slog.ErrorContext(ctx, "failed to add MSR4 helm repo")
+				return err
 			}
-			slog.InfoContext(ctx, fmt.Sprintf("Retrieved Kube implementation (from whoever provided kube): %+v \n", ki))
 
-			hc, hcerr := ki.HelmClient(ctx, c.helmOptions())
-			if hcerr != nil {
-				return hcerr
-			}
-			slog.InfoContext(ctx, fmt.Sprintf("Built helm client: %+v \n", hc))
+			slog.InfoContext(ctx, "Added MSR4 Helm repo")
 
-			hcs := c.helmChartSpec()
-			hcopts := c.helmChartOpts()
+			return nil
+		},
+	}
+	cmd.AddCommand(rac)
 
-			slog.InfoContext(ctx, fmt.Sprintf("Uninstalling chart: chart:%+v opts:%+v \n", hcs, hcopts))
-			rerr := hc.UninstallRelease(&hcs)
+	ric := &cobra.Command{
+		GroupID: g.ID,
+		Use:     fmt.Sprintf("%s:install-release", c.Name()),
+		Short:   "msr4 chart release install",
+		Long:    ``,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := cmd.Context()
+
+			r, rerr := c.installMsr4Release(ctx)
 			if rerr != nil {
+				slog.ErrorContext(ctx, "failed to install MSR4 helm chart release")
 				return rerr
 			}
-			slog.InfoContext(ctx, "Release uninstalled \n")
+
+			slog.InfoContext(ctx, "Installed MSR4 helm chart as release", slog.Any("release-info", r.Info))
+
+			return nil
+		},
+	}
+	cmd.AddCommand(ric)
+
+	duc := &cobra.Command{
+		GroupID: g.ID,
+		Use:     fmt.Sprintf("%s:uninstall", c.Name()),
+		Short:   "msr4 uninstall release",
+		Long:    ``,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := cmd.Context()
+
+			if err := c.uninstallMsr4Release(ctx); err != nil {
+				slog.ErrorContext(ctx, "Failed to uninstall MSR4 helm release")
+				return err
+			}
+
+			slog.InfoContext(ctx, "Uninstalled MSR4 helm release (namespace may remain.)")
 
 			return nil
 		},

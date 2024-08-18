@@ -19,6 +19,7 @@ func (c *Component) ProvidesDependencies(ctx context.Context, r dependency.Requi
 		kv := k8sr.RequiresKubernetes(ctx)
 
 		if err := c.ValidateK8sDependencyConfig(kv); err != nil {
+			// this kubernetes component doesn't meet the kubernetes needs of the requirement (version, apis etc)
 			return nil, err
 		}
 

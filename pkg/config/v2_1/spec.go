@@ -7,7 +7,7 @@ package v21
  * the separates hosts declaration, and considering all of the products
  * as components.
  * This makes all components optional, and allows complete freedom for
- * component injection, relying on depencencies to enforce coupling
+ * component injection, relying on dependencies to enforce coupling
  * validation.
  *
  * ------------------------------

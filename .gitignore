@@ -1,6 +1,6 @@
 dist
 vendor
 
-launchpad*
+launchpad.*
 kubeconfig*
 

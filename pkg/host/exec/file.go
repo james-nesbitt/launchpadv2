@@ -38,7 +38,7 @@ func HostGetFiles(h *host.Host) HostFiles {
 	return hf
 }
 
-// HostFiles manage files on a host
+// HostFiles manage files on a host.
 type HostFiles interface {
 	// Stat return file info on a file, or an error
 	Stat(ctx context.Context, path string, opts ExecOptions) (os.FileInfo, error)

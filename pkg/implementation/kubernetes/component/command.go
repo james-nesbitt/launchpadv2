@@ -10,11 +10,9 @@ import (
 )
 
 const (
-	CommandKeyKubernetesConf = "Kubernetes Configuration"
+	CommandKeyKubernetesConf = "KubeConf"
 
 	CommandPhaseDiscover       = "Kubernetes Discover"
-	CommandPhaseApply          = "Kubernetes Apply"
-	CommandPhaseReset          = "Kubernetes Reset"
 	CommandPhaseKubernetesConf = "Kubernetes Configuration"
 )
 

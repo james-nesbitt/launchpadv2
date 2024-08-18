@@ -17,5 +17,5 @@ func (s kubernetesConfStep) Id() string {
 
 func (s kubernetesConfStep) Run(ctx context.Context) error {
 	slog.InfoContext(ctx, "running kubeconfig step", slog.String("ID", s.id))
-	return nil
+	return fmt.Errorf("TODO: still have to build the kubeconfig export")
 }

@@ -368,7 +368,7 @@ func (p *hostPlugin) K0sKubeconfigAdmin(ctx context.Context) (string, error) {
 	return o, nil
 }
 
-// K0sStop stop the k0s services using the k0s command
+// K0sStop stop the k0s services using the k0s command.
 func (p *hostPlugin) K0sStop(ctx context.Context) error {
 	args := []string{
 		"stop",
@@ -384,7 +384,7 @@ func (p *hostPlugin) K0sStop(ctx context.Context) error {
 	return nil
 }
 
-// K0sStop run k0s reset on hos
+// K0sStop run k0s reset on hos.
 func (p *hostPlugin) K0sReset(ctx context.Context) error {
 	args := []string{
 		"reset",
@@ -400,7 +400,7 @@ func (p *hostPlugin) K0sReset(ctx context.Context) error {
 	return nil
 }
 
-// K0sClean clean all things that may have been created related to this component
+// K0sClean clean all things that may have been created related to this component.
 func (p *hostPlugin) K0sClean(ctx context.Context) error {
 	fh := exec.HostGetFiles(p.h)
 	eh := exec.HostGetExecutor(p.h)

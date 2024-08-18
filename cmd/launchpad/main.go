@@ -33,6 +33,9 @@ import (
 	_ "github.com/Mirantis/launchpad/pkg/product/msr3"
 	_ "github.com/Mirantis/launchpad/pkg/product/msr4"
 
+	// Register some more components.
+	_ "github.com/Mirantis/launchpad/pkg/implementation/kubernetes/component"
+
 	// Register mock stuff, in case it gets used.
 	_ "github.com/Mirantis/launchpad/pkg/mock"
 )

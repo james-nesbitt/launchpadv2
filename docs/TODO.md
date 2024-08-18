@@ -56,6 +56,7 @@
 - [x] (k0s-multiple-controller) currently, adding controllers fails with the nextgen terraform aws example
 - [x] (k0s-kubernetes-implementation) k0s can produce a kubernetes implementation
 - [ ] (k0s-project) K0s project operations should install/uninstall k0s
+- [ ] (k0s-config-dig) K0sConfig should just be a dig, but it wasn't working well (ignorance more than technical issues)
 
 ## Product:MKEx 
 

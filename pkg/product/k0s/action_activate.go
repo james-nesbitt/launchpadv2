@@ -61,7 +61,8 @@ func (s activateK0sStep) Run(ctx context.Context) error {
 	if cherr != nil {
 		return fmt.Errorf("could not retrieve controller hosts: %s", cherr.Error())
 	}
-	if err := chs.Each(ctx, func(ctx context.Context, h *host.Host) error {
+	slog.InfoContext(ctx, "Sequentially adding controller hosts")
+	if err := chs.Sequential(ctx, func(ctx context.Context, h *host.Host) error {
 		kh := HostGetK0s(h)
 
 		slog.InfoContext(ctx, fmt.Sprintf("%s: writing config to controller host", h.Id()))
@@ -71,7 +72,7 @@ func (s activateK0sStep) Run(ctx context.Context) error {
 
 		slog.InfoContext(ctx, fmt.Sprintf("%s: joining as controller to '%s' cluster", h.Id(), l.Id()))
 		return kh.JoinCluster(ctx, l, RoleController, s.c.config)
-	}); err != nil {
+	}, true); err != nil {
 		return fmt.Errorf("error joining controller hosts: %s", err.Error())
 	}
 
@@ -79,6 +80,7 @@ func (s activateK0sStep) Run(ctx context.Context) error {
 	if wherr != nil {
 		return fmt.Errorf("could not retrieve worker hosts: %s", wherr.Error())
 	}
+	slog.InfoContext(ctx, "In parrallel adding worker hosts")
 	if err := whs.Each(ctx, func(ctx context.Context, h *host.Host) error {
 		eh := exec.HostGetExecutor(h)
 		eh.Connect(ctx)

@@ -83,3 +83,23 @@ func (hs Hosts) Each(ctx context.Context, f func(context.Context, *Host) error) 
 	}
 	return nil
 }
+
+// Sequential Hosts in the set gets the function applied in serial.
+func (hs Hosts) Sequential(ctx context.Context, f func(context.Context, *Host) error, stopOnErr bool) error {
+	errs := []error{}
+
+	for _, h := range hs {
+		if err := f(ctx, h); err != nil {
+			errs = append(errs, err)
+
+			if stopOnErr {
+				break
+			}
+		}
+	}
+
+	if len(errs) > 0 {
+		return errors.Join(errs...)
+	}
+	return nil
+}

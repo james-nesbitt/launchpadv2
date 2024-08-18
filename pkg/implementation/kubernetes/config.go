@@ -7,12 +7,12 @@ import (
 	kubeclientcmd "k8s.io/client-go/tools/clientcmd"
 )
 
-// Config for the kubernetes implementation
+// Config for the kubernetes implementation.
 type Config struct {
 	KubeCmdApiConfig kubeclientcmd.OverridingClientConfig
 }
 
-// ConfigFromKubeConf create a kubernetes implementation configuration from kubeconf bytes
+// ConfigFromKubeConf create a kubernetes implementation configuration from kubeconf bytes.
 func ConfigFromKubeConf(cb []byte) (Config, error) {
 	var c Config
 

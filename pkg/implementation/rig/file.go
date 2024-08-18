@@ -141,7 +141,7 @@ func (p *hostPlugin) Delete(ctx context.Context, path string, opts exec.ExecOpti
 	return fs.RemoveAll(path)
 }
 
-// Cat stream file content bytes
+// Cat stream file content bytes.
 func (p *hostPlugin) Cat(ctx context.Context, dst string, opts exec.ExecOptions) (io.Reader, error) {
 	slog.DebugContext(ctx, fmt.Sprintf("%s: Rig Cat: %s", p.h.Id(), dst))
 

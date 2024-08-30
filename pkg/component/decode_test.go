@@ -10,7 +10,7 @@ import (
 
 func Test_Decode(t *testing.T) {
 	component.RegisterDecoder("dummy", func(id string, _ func(interface{}) error) (component.Component, error) {
-		p := mock.NewComponent(id, nil, nil)
+		p := mock.NewSimpleComponent(id, nil, nil)
 		return p, nil
 	})
 

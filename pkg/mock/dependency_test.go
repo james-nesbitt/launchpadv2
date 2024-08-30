@@ -2,45 +2,72 @@ package mock_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/Mirantis/launchpad/pkg/dependency"
 	"github.com/Mirantis/launchpad/pkg/mock"
+	"github.com/stretchr/testify/assert"
 )
 
-func Test_MockDependencySanity(t *testing.T) {
+func Test_DependencySanity(t *testing.T) {
+	assert.Implements(t, (*dependency.Dependency)(nil), mock.StaticDependency("test-dep", "my simple dep", nil, nil), "Mock dep does not implement expected dependency.Dependency interface")
+}
+
+func Test_DependencyStaticNoErrors(t *testing.T) {
 	ctx := context.Background()
-	var r dependency.Requirement = mock.Requirement(
-		"first",
-		"handled as the first",
-		nil,
-	)
 
-	if r.Describe() != "handled as the first" {
-		t.Errorf("Unexpected requirement description: %s", r.Describe())
-	}
+	id := "my-dep"
+	desc := "my dependency"
 
-	var d dependency.Dependency = mock.Dependency(
-		"handler-first",
-		"handle the first dependency",
-		nil,
-		nil,
-	)
+	d := mock.StaticDependency(id, desc, nil, nil)
 
-	if d.Describe() != "handle the first dependency" {
-		t.Errorf("Unexpected dependency description: %s", d.Describe())
-	}
+	assert.Equal(t, id, d.Id(), "mock dep returned wrong ID")
+	assert.Equal(t, desc, d.Describe(), "mock dep returned wrong description")
 
-	if err := r.Match(d); err != nil {
-		t.Errorf("Requirement match resulted in an error: %+v", r)
-	}
-	if rd := r.Matched(ctx); rd == nil {
-		t.Errorf("Requirement that ws just matched thinks that it isn't matched: %+v", r)
-	} else if d.Id() != rd.Id() {
-		t.Error("Matched requirement returned the wrong dependency")
-	}
+	assert.Nil(t, d.Validate(ctx), "mock dependency did not return expected nil validation")
+	assert.Nil(t, d.Met(ctx), "mock dependency did not return expected nil Met")
+}
 
-	if err := d.Met(ctx); err != nil {
-		t.Errorf("Dependency returned unexpected error: %s", err.Error())
-	}
+func Test_DependencyStaticWErrors(t *testing.T) {
+	ctx := context.Background()
+
+	id := "my-dep"
+	desc := "my dependency"
+	verr := errors.New("expected validation error")
+	merr := errors.New("expected met error")
+
+	d := mock.StaticDependency(id, desc, verr, merr)
+
+	assert.Equal(t, id, d.Id(), "mock dep returned wrong ID")
+	assert.Equal(t, desc, d.Describe(), "mock dep returned wrong description")
+
+	assert.ErrorIs(t, d.Validate(ctx), verr, "mock dependency did not return expected error")
+	assert.ErrorIs(t, d.Met(ctx), merr, "mock dependency did not return expected Met error")
+}
+
+func Test_DependencySimpleNil(t *testing.T) {
+	ctx := context.Background()
+
+	id := "my-dep"
+	desc := "my dependency"
+
+	d := mock.SimpleDependency(id, desc, func(_ context.Context) error { return nil }, func(_ context.Context) error { return nil })
+
+	assert.Nil(t, d.Validate(ctx), "mock dependency did not return expected nil validation")
+	assert.Nil(t, d.Met(ctx), "mock dependency did not return expected nil Met")
+}
+
+func Test_DependencySimple(t *testing.T) {
+	ctx := context.Background()
+
+	id := "my-dep"
+	desc := "my dependency"
+	verr := errors.New("expected validation error")
+	merr := errors.New("expected met error")
+
+	d := mock.SimpleDependency(id, desc, func(_ context.Context) error { return verr }, func(_ context.Context) error { return merr })
+
+	assert.ErrorIs(t, d.Validate(ctx), verr, "mock dependency did not return expected error")
+	assert.ErrorIs(t, d.Met(ctx), merr, "mock dependency did not return expected Met error")
 }

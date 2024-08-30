@@ -38,7 +38,7 @@ func (c Component) CliBuild(cmd *cobra.Command, _ *project.Project) error {
 				return fmt.Errorf("MCR has no hosts to discover: %s", gherr.Error())
 			}
 
-			fmt.Println(fmt.Sprintf("%+v", mhs))
+			fmt.Println(fmt.Sprint(mhs))
 
 			return nil
 		},

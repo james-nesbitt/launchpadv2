@@ -6,52 +6,68 @@ import (
 	"github.com/Mirantis/launchpad/pkg/dependency"
 )
 
-func RequiresDependencies(rs dependency.Requirements) hasDependencies {
-	return hasDependencies{
-		rs: rs,
+// Custom Requirement types
+
+// StaticRequirement provides a simple requirement with a dependency already injected, that does not allow new matches.
+func StaticRequirement(id, desc string, d dependency.Dependency) *reqDepMatcher {
+	return &reqDepMatcher{
+		id:   id,
+		desc: desc,
+		matcher: func(_ dependency.Dependency) error {
+			return dependency.ErrDependencyWrongType
+		},
+		d: d,
 	}
 }
 
-type hasDependencies struct {
-	rs dependency.Requirements
-}
-
-func (mhc hasDependencies) RequiresDependencies(ctx context.Context) dependency.Requirements {
-	return mhc.rs
-}
-
-func Requirement(id, description string, validate error) dependency.Requirement {
-	return &req{
-		id:          id,
-		description: description,
-		err:         validate,
+// SimpleRequirement provides a simple requirement that takes any dependency.
+func SimpleRequirement(id, desc string) *reqDepMatcher {
+	return &reqDepMatcher{
+		id:   id,
+		desc: desc,
 	}
 }
 
-type req struct {
-	id          string
-	description string
-	err         error
-	d           dependency.Dependency
+// MatchingRequirement provide a requirement that accepts dependencies based on a provided mathching function.
+func MatchingRequirement(id, desc string, matcher func(dependency.Dependency) error) *reqDepMatcher {
+	return &reqDepMatcher{
+		id:      id,
+		desc:    desc,
+		matcher: matcher,
+	}
 }
 
-func (mr req) Id() string {
-	return mr.id
+type reqDepMatcher struct {
+	id      string
+	desc    string
+	matcher func(dependency.Dependency) error
+
+	d dependency.Dependency
 }
 
-func (mr req) Describe() string {
-	return mr.description
+// Id unique identifier for the requirement.
+func (r reqDepMatcher) Id() string {
+	return r.id
 }
 
-func (mr req) Validate(_ context.Context) error {
-	return mr.err
+// Describe the Requirements for labelling/auditing.
+func (r reqDepMatcher) Describe() string {
+	return r.desc
 }
 
-func (mr *req) Match(d dependency.Dependency) error {
-	mr.d = d
+// Match with a Dependency.
+func (r *reqDepMatcher) Match(d dependency.Dependency) error {
+	if r.matcher != nil {
+		if err := r.matcher(d); err != nil {
+			return err
+		}
+	}
+
+	r.d = d
 	return nil
 }
 
-func (mr req) Matched(_ context.Context) dependency.Dependency {
-	return mr.d
+// Matched has been Matched. If not matched return nil.
+func (r reqDepMatcher) Matched(context.Context) dependency.Dependency {
+	return r.d
 }

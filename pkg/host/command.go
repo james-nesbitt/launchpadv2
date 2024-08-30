@@ -32,7 +32,7 @@ func (hc *HostsComponent) CommandBuild(ctx context.Context, cmd *action.Command)
 
 			p.Steps().Add(&discoverStep{
 				baseStep: bs,
-				id:       fmt.Sprintf("%s", d.Id()),
+				id:       fmt.Sprint(d.Id()),
 				d:        d,
 			})
 		}

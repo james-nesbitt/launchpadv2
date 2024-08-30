@@ -24,7 +24,9 @@ func HostGetNetwork(h *host.Host) HostNetwork {
 	return hn
 }
 
+// HostNetwork host plugin can provide network information.
 type HostNetwork interface {
+	// Network provide network information
 	Network(ctx context.Context) (Network, error)
 }
 

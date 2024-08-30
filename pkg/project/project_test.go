@@ -14,7 +14,7 @@ import (
 func Test_ProjectComponentValidation(t *testing.T) {
 	ctx := context.Background()
 	e := errors.New("validation error")
-	cp := mock.NewComponent(
+	cp := mock.NewSimpleComponent(
 		"mock",
 		nil,
 		e,
@@ -44,29 +44,26 @@ func Test_ProjectDependencyValidation(t *testing.T) {
 				"one",
 				nil,
 				nil,
-				dependency.Requirements{
-					mock.Requirement("first", "handled as the first", nil),
-				},
-				nil,
-				dependency.ErrNotHandled,
+				mock.ReqFactoryStatic(dependency.Requirements{
+					mock.SimpleRequirement("first", "handled as the first"),
+				}),
+				mock.DepFactoryStatic(nil, dependency.ErrNotHandled),
 			),
 			"two": mock.NewComponentWDependencies(
 				"two",
 				nil,
 				nil,
-				dependency.Requirements{
-					mock.Requirement("second", "handled as the second", nil),
-				},
-				nil,
-				dependency.ErrNotHandled,
+				mock.ReqFactoryStatic(dependency.Requirements{
+					mock.SimpleRequirement("second", "handled as the second"),
+				}),
+				mock.DepFactoryStatic(nil, dependency.ErrNotHandled),
 			),
 			"three": mock.NewComponentWDependencies(
 				"three",
 				nil,
 				nil,
-				dependency.Requirements{},
-				mock.Dependency("only", "should get used for all requirements", nil, nil),
-				nil,
+				mock.ReqFactoryStatic(dependency.Requirements{}),
+				mock.DepFactoryStatic(mock.StaticDependency("only", "should get used for all requirements", nil, nil), nil),
 			),
 		},
 	}

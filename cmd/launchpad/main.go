@@ -20,7 +20,7 @@ import (
 	// Register Host handlers.
 	_ "github.com/Mirantis/launchpad/pkg/implementation/rig"
 
-	// register implementation components
+	// register implementation components.
 	_ "github.com/Mirantis/launchpad/pkg/implementation/kubernetes/component"
 
 	// Register legacy product handlers.
@@ -38,12 +38,6 @@ import (
 
 	// Register mock stuff, in case it gets used.
 	_ "github.com/Mirantis/launchpad/pkg/mock"
-)
-
-var (
-	debug   bool
-	cfgFile string
-	proj    *project.Project
 )
 
 func main() {

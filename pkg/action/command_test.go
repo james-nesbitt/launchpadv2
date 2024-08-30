@@ -20,7 +20,7 @@ func Test_CommandBuild(t *testing.T) {
 				mock.NewPhase("two", nil, nil, nil, nil, nil),
 			),
 			dependency.Dependencies{
-				mock.Dependency("A", "Dep A", nil, nil),
+				mock.StaticDependency("A", "Dep A", nil, nil),
 			},
 			dependency.Events{},
 			nil,
@@ -31,8 +31,8 @@ func Test_CommandBuild(t *testing.T) {
 				mock.NewPhase("four", nil, nil, nil, nil, nil),
 			),
 			dependency.Dependencies{
-				mock.Dependency("B", "Dep B", nil, nil),
-				mock.Dependency("C", "Dep C", nil, nil),
+				mock.StaticDependency("B", "Dep B", nil, nil),
+				mock.StaticDependency("C", "Dep C", nil, nil),
 			},
 			dependency.Events{},
 			nil,

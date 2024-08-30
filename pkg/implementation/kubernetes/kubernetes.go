@@ -35,7 +35,7 @@ func IsValidKubernetesVersion(_ Version) error {
 	return nil
 }
 
-// KubeRestClientset for the kubernetes implementation
+// KubeRestClientset for the kubernetes implementation.
 func (k Kubernetes) KubeRestClientset(ctx context.Context) (*kube.Clientset, error) {
 	if k.config.KubeCmdApiConfig == nil {
 		return nil, fmt.Errorf("kubernetes implementation has no valid config options")
@@ -53,7 +53,7 @@ func (k Kubernetes) KubeRestClientset(ctx context.Context) (*kube.Clientset, err
 	return cl, nil
 }
 
-// HelmClient for the kubernetes implementaiton
+// HelmClient for the kubernetes implementation.
 func (k Kubernetes) HelmClient(ctx context.Context, opts helm.Options) (helm.Client, error) {
 	rc, rcerr := k.config.KubeCmdApiConfig.ClientConfig()
 	if rcerr != nil {
@@ -73,7 +73,7 @@ func (k Kubernetes) HelmClient(ctx context.Context, opts helm.Options) (helm.Cli
 	return hc, nil
 }
 
-// Determine the ServerVersion (good to test connection)
+// Determine the ServerVersion (good to test connection).
 func (k Kubernetes) ServerVersion(ctx context.Context) (*kubeversion.Info, error) {
 	krc, krcerr := k.KubeRestClientset(ctx)
 	if krcerr != nil {

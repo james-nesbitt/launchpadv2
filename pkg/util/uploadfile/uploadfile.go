@@ -50,7 +50,7 @@ func permToString(val interface{}) (string, error) {
 		if n, ok := t.(float64); ok {
 			num = int(n)
 		} else {
-			num = t.(int)
+			num, _ = t.(int) // this never fails
 		}
 
 		if num < 0 {

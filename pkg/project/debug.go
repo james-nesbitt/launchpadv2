@@ -9,10 +9,10 @@ import (
 func (cl *Project) Debug(ctx context.Context) interface{} {
 	cld := map[string]interface{}{}
 
-	ctx, c := context.WithTimeout(context.Background(), time.Second*30)
+	nctx, c := context.WithTimeout(context.Background(), time.Second*30)
 	defer c()
 
-	rs, ds, _ := cl.matchRequirements(ctx)
+	rs, ds, _ := cl.matchRequirements(nctx)
 
 	cl_v := "valid"
 	if err := cl.Validate(ctx); err != nil {

@@ -19,7 +19,7 @@ func init() {
 	component.RegisterDecoder(ComponentType, DecodeComponent)
 }
 
-// DecodeComponent decode a new component from an unmarshall decoder.
+// DecodeComponent decode a new hosts component from an unmarshall decoder.
 func DecodeComponent(id string, d func(interface{}) error) (component.Component, error) {
 	chs := NewHosts()
 	hc := NewHostsComponent(id, chs)
@@ -53,6 +53,9 @@ func DecodeComponent(id string, d func(interface{}) error) (component.Component,
 		chs.Add(h)
 	}
 
+	if len(errs) > 0 {
+		return hc, errors.Join(errs...)
+	}
 	return hc, nil
 }
 
@@ -65,6 +68,7 @@ func DecodeHost(ctx context.Context, id string, ds map[string]func(interface{}) 
 	}
 
 	errs := []error{}
+
 	for t, d := range ds {
 		if hperr := h.DecodeHostPlugin(ctx, t, d); hperr != nil {
 			errs = append(errs, fmt.Errorf("%s: %s", t, hperr.Error()))

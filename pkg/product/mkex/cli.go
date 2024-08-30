@@ -28,7 +28,7 @@ func (c *Component) CliBuild(cmd *cobra.Command, _ *project.Project) error {
 				return fmt.Errorf("MKEX has no hosts to discover: %s", gherr.Error())
 			}
 
-			fmt.Println(fmt.Sprintf("%+v", hs))
+			fmt.Println(fmt.Sprint(hs))
 
 			return nil
 		},

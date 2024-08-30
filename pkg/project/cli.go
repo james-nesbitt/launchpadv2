@@ -46,7 +46,7 @@ type CliBuilder interface {
 	CliBuild(*cobra.Command, *Project) error
 }
 
-func projectCliBuildStatus(cmd *cobra.Command, p *Project) error {
+func projectCliBuildStatus(cmd *cobra.Command, p *Project) {
 	// statusCmd represents the status command.
 	cmd.AddCommand(&cobra.Command{
 		GroupID: ProjectCliKey,
@@ -76,10 +76,9 @@ func projectCliBuildStatus(cmd *cobra.Command, p *Project) error {
 			return nil
 		},
 	})
-	return nil
 }
 
-func projectCliBuildApply(cmd *cobra.Command, p *Project) error {
+func projectCliBuildApply(cmd *cobra.Command, p *Project) {
 
 	// applyCmd represents the apply command.
 	cmd.AddCommand(&cobra.Command{
@@ -106,10 +105,9 @@ func projectCliBuildApply(cmd *cobra.Command, p *Project) error {
 			return nil
 		},
 	})
-	return nil
 }
 
-func projectCliBuildReset(cmd *cobra.Command, p *Project) error {
+func projectCliBuildReset(cmd *cobra.Command, p *Project) {
 	cmd.AddCommand(&cobra.Command{
 		GroupID: ProjectCliKey,
 		Use:     "project:reset",
@@ -138,5 +136,4 @@ func projectCliBuildReset(cmd *cobra.Command, p *Project) error {
 			return nil
 		},
 	})
-	return nil
 }

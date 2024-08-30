@@ -2,6 +2,7 @@ package mock
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 
 	"github.com/Mirantis/launchpad/pkg/host"
@@ -12,41 +13,9 @@ const (
 	HostRoleMock = "mock"
 )
 
-func init() {
-	host.RegisterHostPluginFactory(HostRoleMock, &MockHostPluginFactory{})
-}
-
-type MockHostPluginFactory struct {
-	ps []*mockHostPlugin
-}
-
-// HostPlugin build a new host plugin.
-func (mpf *MockHostPluginFactory) HostPlugin(_ context.Context, h *host.Host) host.HostPlugin {
-	p := &mockHostPlugin{
-		h: h,
-		n: &network.Network{},
-	}
-	mpf.ps = append(mpf.ps, p)
-
-	return p
-}
-
-// Decoder provide a Host Plugin decoder function
-//
-// The decoder function is ugly, but it is meant to to take a
-// yaml/json .HostPluginDecode() function, and turn it into a plugin.
-func (mpf *MockHostPluginFactory) HostPluginDecode(_ context.Context, h *host.Host, d func(interface{}) error) (host.HostPlugin, error) {
-	hp := &mockHostPlugin{
-		h: h,
-		n: &network.Network{},
-	}
-	mpf.ps = append(mpf.ps, hp)
-
-	if err := d(hp); err != nil {
-		return hp, err
-	}
-	return hp, nil
-}
+var (
+	ErrMockHostNetworkMissing = errors.New("mock host plugin had no network information")
+)
 
 func HostGetMock(h *host.Host) *mockHostPlugin {
 	hgm := h.MatchPlugin(HostRoleMock)
@@ -54,17 +23,17 @@ func HostGetMock(h *host.Host) *mockHostPlugin {
 		return nil
 	}
 
-	hm, ok := hgm.(mockHostPlugin)
+	hm, ok := hgm.(*mockHostPlugin)
 	if !ok {
 		slog.Warn("could not convert mock plugin")
 		return nil
 	}
 
-	return &hm
+	return hm
 }
 
-func NewMockHostPlugin(h *host.Host, n *network.Network) mockHostPlugin {
-	return mockHostPlugin{
+func NewMockHostPlugin(h *host.Host, n *network.Network) *mockHostPlugin {
+	return &mockHostPlugin{
 		h: h,
 		n: n,
 	}
@@ -76,7 +45,7 @@ type mockHostPlugin struct {
 }
 
 func (p mockHostPlugin) Id() string {
-	return "mock"
+	return HostRoleMock
 }
 
 func (p mockHostPlugin) Validate() error {
@@ -87,6 +56,17 @@ func (p mockHostPlugin) RoleMatch(role string) bool {
 	switch role {
 	case HostRoleMock:
 		return true
+	case network.HostRoleNetwork:
+		return p.n != nil
 	}
 	return false
+}
+
+// Network provide network information.
+func (p *mockHostPlugin) Network(ctx context.Context) (network.Network, error) {
+	if p.n == nil {
+		return network.Network{}, ErrMockHostNetworkMissing
+	}
+
+	return *p.n, nil
 }

@@ -102,8 +102,8 @@ func (p *hostPlugin) Download(ctx context.Context, url string, dst string, fm fs
 }
 
 // Rename a file or folder.
-func (p *hostPlugin) Rename(ctx context.Context, old, new string, opts exec.ExecOptions) error {
-	slog.DebugContext(ctx, fmt.Sprintf("%s: Rig Rename: %s -> %s", p.hid(), old, new))
+func (p *hostPlugin) Rename(ctx context.Context, before, after string, opts exec.ExecOptions) error {
+	slog.DebugContext(ctx, fmt.Sprintf("%s: Rig Rename: %s -> %s", p.hid(), before, after))
 
 	var c *rig.Client = p.rig.Client
 	if cerr := c.Connect(ctx); cerr != nil {
@@ -118,7 +118,7 @@ func (p *hostPlugin) Rename(ctx context.Context, old, new string, opts exec.Exec
 
 	fs := c.FS()
 
-	return fs.Rename(old, new)
+	return fs.Rename(before, after)
 }
 
 // Delete a file or folder.

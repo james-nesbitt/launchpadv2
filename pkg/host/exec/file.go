@@ -53,5 +53,5 @@ type HostFiles interface {
 	// Cat capture bytes from a file on the machine
 	Cat(ctx context.Context, dst string, opts ExecOptions) (io.Reader, error)
 	// Rename a file
-	Rename(ctx context.Context, old, new string, opts ExecOptions) error
+	Rename(ctx context.Context, before, after string, opts ExecOptions) error
 }

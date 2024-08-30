@@ -131,7 +131,7 @@ func (c *Component) CliBuild(cmd *cobra.Command, _ *project.Project) error {
 
 				return nil
 			}); err != nil {
-				return nil
+				return err
 			}
 
 			return nil

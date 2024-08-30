@@ -19,16 +19,12 @@ var (
 func (p hostPlugin) Network(ctx context.Context) (network.Network, error) {
 	n := network.Network{}
 
+	n.PublicAddress = p.rig.ConnectionConfig.SSH.Address
+
 	if pi, err := p.resolvePrivateInterface(ctx); err != nil {
 		return n, err
 	} else {
 		n.PrivateInterface = pi
-	}
-
-	if ip, err := p.resolvePublicIP(); err != nil {
-		return n, err
-	} else {
-		n.PublicAddress = ip
 	}
 
 	if ip, err := p.resolveInternaIP(ctx, n.PrivateInterface, n.PublicAddress); err != nil {
@@ -53,10 +49,6 @@ func (p hostPlugin) resolvePrivateInterface(ctx context.Context) (string, error)
 		return "", fmt.Errorf("can't find 'dev' in output")
 	}
 	return string(match[1]), nil
-}
-
-func (p hostPlugin) resolvePublicIP() (string, error) {
-	return p.rig.ConnectionConfig.SSH.Address, nil
 }
 
 func (p hostPlugin) resolveInternaIP(ctx context.Context, privateInterface string, publicIP string) (string, error) {

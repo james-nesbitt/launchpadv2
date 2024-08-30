@@ -16,12 +16,12 @@ func Test_MockValidate(t *testing.T) {
 	hds := []dependency.RequiresDependencies{
 		mock.RequiresDependencies(
 			dependency.Requirements{
-				mock.Requirement("test", "Validate requirement", nil),
+				mock.StaticRequirement("test", "Validate requirement", nil),
 			},
 		),
 	}
 	pds := map[string]dependency.ProvidesDependencies{
-		"my-dep": mock.ProvidesDependencies(mock.Dependency("my-dep", "", nil, nil), nil),
+		"my-dep": mock.ProvidesDependencies(mock.StaticDependency("my-dep", "", nil, nil), nil),
 	}
 
 	for _, hd := range hds {
@@ -43,13 +43,13 @@ func Test_MockValidate(t *testing.T) {
 
 func Test_MatchRequirements_Success(t *testing.T) {
 	ctx := context.Background()
-	r := mock.Requirement("mock", "", nil)          // only needed as an argument. fds do all of the work
+	r := mock.StaticRequirement("mock", "", nil)    // only needed as an argument. fds do all of the work
 	testerr := errors.New("we should not get here") // this should not get returned
 	fds := []dependency.ProvidesDependencies{
 		mock.ProvidesDependencies(nil, dependency.ErrNotHandled),
 		mock.ProvidesDependencies(nil, dependency.ErrNotHandled),
-		mock.ProvidesDependencies(mock.Dependency("this-one", "", nil, nil), nil),         // this handler should get used
-		mock.ProvidesDependencies(mock.Dependency("not-this-one", "", nil, nil), testerr), // this handler should not get used
+		mock.ProvidesDependencies(mock.StaticDependency("this-one", "", nil, nil), nil),         // this handler should get used
+		mock.ProvidesDependencies(mock.StaticDependency("not-this-one", "", nil, nil), testerr), // this handler should not get used
 	}
 
 	d, err := dependency.MatchRequirementDependency(ctx, r, fds)
@@ -70,7 +70,7 @@ func Test_MatchRequirements_Success(t *testing.T) {
 
 func Test_MatchRequirements_ShouldFail(t *testing.T) {
 	ctx := context.Background()
-	r := mock.Requirement("", "", nil)              // only needed as an argument. fds do all of the work
+	r := mock.StaticRequirement("", "", nil)        // only needed as an argument. fds do all of the work
 	testerr := errors.New("we should not get here") // this should not get returned
 	fds := []dependency.ProvidesDependencies{
 		mock.ProvidesDependencies(nil, dependency.ErrNotHandled),        // this handler should not get used
@@ -87,8 +87,8 @@ func Test_MatchRequirements_ShouldFail(t *testing.T) {
 
 func Test_MatchRequirements_Empty(t *testing.T) {
 	ctx := context.Background()
-	r := mock.Requirement("mock", "", nil)     // only needed as an argument. fds do all of the work
-	fds := []dependency.ProvidesDependencies{} // empty list of handlers/fullfillers
+	r := mock.StaticRequirement("mock", "", nil) // only needed as an argument. fds do all of the work
+	fds := []dependency.ProvidesDependencies{}   // empty list of handlers/fullfillers
 
 	_, err := dependency.MatchRequirementDependency(ctx, r, fds)
 	if !errors.Is(err, dependency.ErrNotHandled) {
@@ -97,13 +97,13 @@ func Test_MatchRequirements_Empty(t *testing.T) {
 }
 
 func Test_DependenciesSanity(t *testing.T) {
-	d1 := mock.Dependency("one", "", nil, nil)
-	d2 := mock.Dependency("two", "", nil, nil)
-	d3 := mock.Dependency("three", "", nil, nil)
-	d4 := mock.Dependency("four", "", nil, nil)
-	d5 := mock.Dependency("five", "", nil, nil)
-	d6 := mock.Dependency("six", "", nil, nil)
-	d7 := mock.Dependency("seven", "", nil, nil)
+	d1 := mock.StaticDependency("one", "", nil, nil)
+	d2 := mock.StaticDependency("two", "", nil, nil)
+	d3 := mock.StaticDependency("three", "", nil, nil)
+	d4 := mock.StaticDependency("four", "", nil, nil)
+	d5 := mock.StaticDependency("five", "", nil, nil)
+	d6 := mock.StaticDependency("six", "", nil, nil)
+	d7 := mock.StaticDependency("seven", "", nil, nil)
 
 	dsA := dependency.Dependencies{d1, d2, d3, d4, d6}
 	dsB := dependency.Dependencies{d3, d4, d5, d5}
@@ -129,12 +129,12 @@ func Test_DependenciesSanity(t *testing.T) {
 }
 
 func Test_DependencyIntersect(t *testing.T) {
-	d1 := mock.Dependency("one", "", nil, nil)
-	d2 := mock.Dependency("two", "", nil, nil)
-	d3 := mock.Dependency("three", "", nil, nil)
-	d4 := mock.Dependency("four", "", nil, nil)
-	d5 := mock.Dependency("five", "", nil, nil)
-	d6 := mock.Dependency("six", "", nil, nil)
+	d1 := mock.StaticDependency("one", "", nil, nil)
+	d2 := mock.StaticDependency("two", "", nil, nil)
+	d3 := mock.StaticDependency("three", "", nil, nil)
+	d4 := mock.StaticDependency("four", "", nil, nil)
+	d5 := mock.StaticDependency("five", "", nil, nil)
+	d6 := mock.StaticDependency("six", "", nil, nil)
 
 	dsA := dependency.Dependencies{d1, d2, d3, d4, d6}
 	dsB := dependency.Dependencies{d3, d4, d5, d5}

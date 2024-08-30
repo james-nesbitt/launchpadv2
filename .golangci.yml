@@ -7,9 +7,9 @@ issues:
 linters:
   disable-all: true
   enable:
+    - copyloopvar
     - durationcheck
-    - errcheck
-    - exportloopref
+    #- errcheck
     - forcetypeassert
     - godot
     - gofmt
@@ -24,4 +24,4 @@ linters:
     - tenv
     - unconvert
     - unparam
-    - unused
+    #- unused

@@ -70,7 +70,7 @@ func DecodeComponent(id string, d func(interface{}) error) (component.Component,
 }
 
 // decoding target to determine where we should get kube config from
-// @TODO figure out how to add overrides (especially for auth)
+// @TODO figure out how to add overrides (especially for auth).
 type mockConfig struct {
 	KubeConfigYaml string `yaml:"kubeYaml" json:"kubeYaml"`
 	KubeConfigFile string `yaml:"kubeFile" json:"kubeFile"`

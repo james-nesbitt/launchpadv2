@@ -9,7 +9,7 @@ endif
 # Lint by running golangci-lint in a docker container
 .PHONY: lint
 lint:
-	$(GOLANGCILINT) run
+	$(GOLANGCILINT) run ./...
 
 # Local install of the plugin
 # @SEE README.md on how to use the locally built plugin

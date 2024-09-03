@@ -11,9 +11,6 @@ import (
 
 	"github.com/Mirantis/launchpad/pkg/config"
 	"github.com/Mirantis/launchpad/pkg/project"
-
-	// Register v2 spec handler.
-	_ "github.com/Mirantis/launchpad/pkg/config/v2_0"
 )
 
 var (

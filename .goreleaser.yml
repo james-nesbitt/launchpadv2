@@ -6,7 +6,7 @@ before:
     - go mod tidy
 builds:
 - id: launchpad
-  main: ./cmd/launchpad
+  main: ./mirantis/cmd/launchpad
   env:
     - CGO_ENABLED=0
   mod_timestamp: '{{ .CommitTimestamp }}'
@@ -28,7 +28,7 @@ builds:
   binary: "release/launchpad_{{ .Os }}_{{ .Arch }}_{{ .Version }}"
   no_unique_dist_dir: true
 - id : mkex
-  main: ./cmd/mkex
+  main: ./mirantis/cmd/mkex
   env:
     - CGO_ENABLED=0
   mod_timestamp: '{{ .CommitTimestamp }}'

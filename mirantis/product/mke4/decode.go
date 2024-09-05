@@ -19,5 +19,9 @@ func DecodeMKE4Component(id string, d func(interface{}) error) (component.Compon
 		return nil, fmt.Errorf("Failure to decode product '%s' : %w", ComponentType, err)
 	}
 
+	if c.Name == "" {
+		c.Name = id
+	}
+
 	return NewComponent(id, c), nil
 }

@@ -23,7 +23,7 @@ func (s discoverStep) Run(ctx context.Context) error {
 		return kierr
 	}
 
-	ksv, ksverr := ki.ServerVersion(ctx)
+	ksv, ksverr := ki.ServerVersion()
 	if ksverr != nil {
 		return ksverr
 	}

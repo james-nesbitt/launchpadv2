@@ -53,7 +53,24 @@ spec:
             enabled: true
 
     mke4:
-      version: 4.0.0
+      name: mymke4
+      namespace: default
+      blueprint: |-
+        spec:
+          components:
+            addons:
+            - name: example-server
+              kind: chart
+              enabled: true
+              dryRun: false
+              namespace: default
+              chart:
+                name: nginx
+                repo: https://charts.bitnami.com/bitnami
+                version: 15.1.1
+                values: |
+                  service:
+                    type: ClusterIP
 
     msr4:
       version: 4.0.0

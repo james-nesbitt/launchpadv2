@@ -27,7 +27,7 @@ func (c *Component) CliBuild(cmd *cobra.Command, _ *project.Project) error {
 				return kierr
 			}
 
-			ksv, ksverr := ki.ServerVersion(ctx)
+			ksv, ksverr := ki.ServerVersion()
 			if ksverr != nil {
 				return ksverr
 			}

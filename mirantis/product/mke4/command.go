@@ -15,18 +15,23 @@ const (
 	CommandPhaseReset    = "MKE4-Reset"
 )
 
-func (c Component) CommandBuild(ctx context.Context, cmd *action.Command) error {
+func (c *Component) CommandBuild(ctx context.Context, cmd *action.Command) error {
 	rs := dependency.Requirements{ // Requirements that we need to operate
-		c.k8sr,
+		c.k8sr, // MKE4 can install on any kubernetes context
 	}
 	ds := dependency.Dependencies{} // Dependencies that we deliver
+
+	bs := baseStep{
+		c: c,
+	}
 
 	switch cmd.Key {
 	case project.CommandKeyDiscover:
 		p := stepped.NewSteppedPhase(CommandPhaseDiscover, rs, ds, []string{dependency.EventKeyActivated})
 		p.Steps().Add(
 			&discoverStep{
-				id: c.Name(),
+				baseStep: bs,
+				id:       c.Name(),
 			},
 		)
 		cmd.Phases.Add(p)
@@ -35,13 +40,16 @@ func (c Component) CommandBuild(ctx context.Context, cmd *action.Command) error 
 		p := stepped.NewSteppedPhase(CommandPhaseApply, rs, ds, []string{dependency.EventKeyActivated})
 		p.Steps().Merge(stepped.Steps{
 			&discoverStep{
-				id: c.Name(),
+				baseStep: bs,
+				id:       c.Name(),
 			},
-			&prepareNodesStep{
-				id: c.Name(),
+			&installOperatorStep{
+				baseStep: bs,
+				id:       c.Name(),
 			},
-			&installMKEStep{
-				id: c.Name(),
+			&activateStep{
+				baseStep: bs,
+				id:       c.Name(),
 			},
 		})
 		cmd.Phases.Add(p)
@@ -51,7 +59,8 @@ func (c Component) CommandBuild(ctx context.Context, cmd *action.Command) error 
 			pd := stepped.NewSteppedPhase(CommandPhaseDiscover, rs, ds, []string{dependency.EventKeyActivated})
 			pd.Steps().Add(
 				&discoverStep{
-					id: c.Name(),
+					baseStep: bs,
+					id:       c.Name(),
 				},
 			)
 			cmd.Phases.Add(pd)
@@ -59,8 +68,13 @@ func (c Component) CommandBuild(ctx context.Context, cmd *action.Command) error 
 
 		pr := stepped.NewSteppedPhase(CommandPhaseReset, rs, ds, []string{dependency.EventKeyDeActivated})
 		pr.Steps().Merge(stepped.Steps{
-			&uninstallMKEStep{
-				id: c.Name(),
+			&deactivateStep{
+				baseStep: bs,
+				id:       c.Name(),
+			},
+			&uninstallOperatorStep{
+				baseStep: bs,
+				id:       c.Name(),
 			},
 		})
 		cmd.Phases.Add(pr)

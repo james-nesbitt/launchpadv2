@@ -7,6 +7,7 @@ import (
 )
 
 type discoverStep struct {
+	baseStep
 	id string
 }
 

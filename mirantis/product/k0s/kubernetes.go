@@ -7,6 +7,10 @@ import (
 	"github.com/Mirantis/launchpad/implementation/kubernetes"
 )
 
+const (
+	KubernetesProvider = "k0s"
+)
+
 // ValidateK8sDependencyConfig validate a Kubernetes client request configuration.
 func (c Component) ValidateK8sDependencyConfig(kc kubernetes.Version) error {
 	return nil
@@ -32,6 +36,8 @@ func (c *Component) kubernetesImplementation(ctx context.Context) (*kubernetes.K
 	if kcerr != nil {
 		return nil, fmt.Errorf("%s: Error interpreting kubeconfig; %w", lh.Id(), kcserr)
 	}
+
+	kc.Provider = KubernetesProvider
 
 	k := kubernetes.NewKubernetes(kc)
 	return k, nil

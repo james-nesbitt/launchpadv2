@@ -9,6 +9,7 @@ import (
 
 // Config for the kubernetes implementation.
 type Config struct {
+	Provider         string // some kubernetes configurations have a provider name
 	KubeCmdApiConfig kubeclientcmd.OverridingClientConfig
 }
 
@@ -42,6 +43,7 @@ func ConfigFromEnv(o *kubeclientcmd.ConfigOverrides) (Config, error) {
 }
 
 // KubeConfig produce yaml bytes for a kubeconfig for this implementation.
+// @NOTE does not work very well
 func (c Config) KubeConfig() []byte {
 	rc, _ := c.KubeCmdApiConfig.MergedRawConfig()
 

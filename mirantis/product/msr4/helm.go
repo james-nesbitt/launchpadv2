@@ -15,7 +15,7 @@ func (c *Component) helmClient(ctx context.Context) (helmclient.Client, error) {
 		return nil, kierr
 	}
 
-	hc, hcerr := ki.HelmClient(ctx, c.helmOptions())
+	hc, hcerr := ki.HelmClient(c.helmOptions())
 	if hcerr != nil {
 		return nil, hcerr
 	}

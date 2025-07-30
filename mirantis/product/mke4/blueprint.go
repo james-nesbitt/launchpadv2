@@ -12,19 +12,18 @@ import (
 )
 
 // @SEE https://github.com/MirantisContainers/blueprint-cli/blob/main/pkg/constants/constants.go#L5
-//
-// @TODO consider importing it instead of duplicating it (if they OSS it)
+// @TODO consider importing it instead of duplicating it (if they OSS it).
 const (
-	// ManifestUrlLatest is the URL of the latest manifest YAML for the Boundless Operator
+	// ManifestUrlLatest is the URL of the latest manifest YAML for the Boundless Operator.
 	ManifestUrlLatest = "https://raw.githubusercontent.com/mirantiscontainers/boundless/main/deploy/static/boundless-operator.yaml"
 
-	// NamespaceBlueprint is the system namespace where the Boundless Operator and its components are installed
+	// NamespaceBlueprint is the system namespace where the Boundless Operator and its components are installed.
 	NamespaceBlueprint = "blueprint-system"
 
 	// DefaultBlueprintFileName represents the default blueprint filename.
 	DefaultBlueprintFileName = "blueprint.yaml"
 
-	// BlueprintOperatorDeployment if thi sdeployment name is running, then MKE4 is active
+	// BlueprintOperatorDeployment if thi sdeployment name is running, then MKE4 is active.
 	BlueprintOperatorDeployment = "blueprint-operator-controller-manager"
 )
 
@@ -35,7 +34,7 @@ var (
 	ErrBlueprintUninstall = errors.New("could not uninstall MKE4 instance")
 )
 
-// OperaterInstall install the MKE4 operator onto the cluster
+// OperaterInstall install the MKE4 operator onto the cluster.
 func OperatorInstall(ctx context.Context, k kubernetes.Kubernetes, c Config) error {
 	ors, orserr := c.OperatorResources()
 	if orserr != nil {
@@ -51,7 +50,7 @@ func OperatorInstall(ctx context.Context, k kubernetes.Kubernetes, c Config) err
 	return nil
 }
 
-// OperatorUninstall uninstall the MKE4 operator from the cluster
+// OperatorUninstall uninstall the MKE4 operator from the cluster.
 func OperatorUninstall(ctx context.Context, k kubernetes.Kubernetes, c Config) error {
 	ors, orserr := c.OperatorResources()
 	if orserr != nil {
@@ -67,7 +66,7 @@ func OperatorUninstall(ctx context.Context, k kubernetes.Kubernetes, c Config) e
 	return nil
 }
 
-// ActivateOrUpdate creates or updates a kubernetes CR for MKE4
+// ActivateOrUpdate creates or updates a kubernetes CR for MKE4.
 func ActivateOrUpdate(ctx context.Context, k kubernetes.Kubernetes, c Config) error {
 	bp, bperr := c.BlueprintResource()
 	if bperr != nil {
@@ -81,7 +80,7 @@ func ActivateOrUpdate(ctx context.Context, k kubernetes.Kubernetes, c Config) er
 	return nil
 }
 
-// Deactivate deletes the CR instance for MKE4
+// Deactivate deletes the CR instance for MKE4.
 func Deactivate(ctx context.Context, k kubernetes.Kubernetes, c Config) error {
 	bp, bperr := c.BlueprintResource()
 	if bperr != nil {
@@ -95,7 +94,7 @@ func Deactivate(ctx context.Context, k kubernetes.Kubernetes, c Config) error {
 	return nil
 }
 
-// IsActive is the MKE4 operator active
+// IsActive is the MKE4 operator active.
 func IsActive(ctx context.Context, k kubernetes.Kubernetes, c Config) (bool, error) {
 	kc, kcerr := k.Client()
 	if kcerr != nil {

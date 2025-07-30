@@ -12,7 +12,7 @@ import (
 
 // -- Kube client generation ---
 
-// DiscoveryClient kubernetes discovery client
+// DiscoveryClient kubernetes discovery client.
 func (k Kubernetes) DiscoveryClient() (*kube_discovery.DiscoveryClient, error) {
 	krc, krcerr := k.Client()
 	if krcerr != nil {
@@ -22,7 +22,7 @@ func (k Kubernetes) DiscoveryClient() (*kube_discovery.DiscoveryClient, error) {
 	return krc.DiscoveryClient, nil
 }
 
-// Client go-client kubernetes.Interface
+// Client go-client kubernetes.Interface.
 func (k Kubernetes) Client() (*kube_kubernetes.Clientset, error) {
 	if k.config.KubeCmdApiConfig == nil {
 		return nil, fmt.Errorf("kubernetes implementation has no valid config options")
@@ -40,7 +40,7 @@ func (k Kubernetes) Client() (*kube_kubernetes.Clientset, error) {
 	return cl, nil
 }
 
-// DynamicClient create and return a kubernetes dynamic client from the config
+// DynamicClient create and return a kubernetes dynamic client from the config.
 func (k Kubernetes) DynamicClient() (*kube_dynamic.DynamicClient, error) {
 	rcc, rccerr := k.config.KubeCmdApiConfig.ClientConfig()
 	if rccerr != nil {
@@ -75,7 +75,7 @@ func (k Kubernetes) HelmClient(opts helm.Options) (helm.Client, error) {
 	return hc, nil
 }
 
-// RestClient create the kubernetes rest client from the config
+// RestClient create the kubernetes rest client from the config.
 func (k Kubernetes) RestClient() (*kube_rest.RESTClient, error) {
 	rcc, rccerr := k.config.KubeCmdApiConfig.ClientConfig()
 	if rccerr != nil {

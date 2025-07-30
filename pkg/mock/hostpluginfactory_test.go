@@ -1,7 +1,6 @@
 package mock_test
 
 import (
-	"context"
 	"log/slog"
 	"testing"
 
@@ -14,7 +13,7 @@ import (
 )
 
 func Test_MockHostPluginFactory(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 	pf := mock.MockHostPluginFactory{}
 	h := host.NewHost("test-host")
 
@@ -24,7 +23,7 @@ func Test_MockHostPluginFactory(t *testing.T) {
 }
 
 func Test_MockHostPluginFactoryDecode(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 	pf := mock.MockHostPluginFactory{}
 	h := host.NewHost("test-host")
 
@@ -48,7 +47,7 @@ network:
 }
 
 func Test_MockHostPluginFactoryDecodeHost(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	y := `
 mock:

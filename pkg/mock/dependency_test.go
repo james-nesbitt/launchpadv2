@@ -15,7 +15,7 @@ func Test_DependencySanity(t *testing.T) {
 }
 
 func Test_DependencyStaticNoErrors(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	id := "my-dep"
 	desc := "my dependency"
@@ -30,7 +30,7 @@ func Test_DependencyStaticNoErrors(t *testing.T) {
 }
 
 func Test_DependencyStaticWErrors(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	id := "my-dep"
 	desc := "my dependency"
@@ -47,7 +47,7 @@ func Test_DependencyStaticWErrors(t *testing.T) {
 }
 
 func Test_DependencySimpleNil(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	id := "my-dep"
 	desc := "my dependency"
@@ -59,7 +59,7 @@ func Test_DependencySimpleNil(t *testing.T) {
 }
 
 func Test_DependencySimple(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	id := "my-dep"
 	desc := "my dependency"

@@ -1,7 +1,6 @@
 package mock_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/Mirantis/launchpad/pkg/dependency"
@@ -10,7 +9,7 @@ import (
 )
 
 func Test_RequiresNilDependencies(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	rd := mock.RequiresDependencies(nil)
 
@@ -19,7 +18,7 @@ func Test_RequiresNilDependencies(t *testing.T) {
 }
 
 func Test_RequiresDependencies(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	rs := dependency.NewRequirements()
 	rd := mock.RequiresDependencies(rs)

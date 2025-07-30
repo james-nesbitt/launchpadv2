@@ -1,7 +1,6 @@
 package dependency_test
 
 import (
-	"context"
 	"errors"
 	"testing"
 
@@ -12,7 +11,7 @@ import (
 // --- test Functions ---
 
 func Test_MockValidate(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 	hds := []dependency.RequiresDependencies{
 		mock.RequiresDependencies(
 			dependency.Requirements{
@@ -42,7 +41,7 @@ func Test_MockValidate(t *testing.T) {
 }
 
 func Test_MatchRequirements_Success(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 	r := mock.StaticRequirement("mock", "", nil)    // only needed as an argument. fds do all of the work
 	testerr := errors.New("we should not get here") // this should not get returned
 	fds := []dependency.ProvidesDependencies{
@@ -69,7 +68,7 @@ func Test_MatchRequirements_Success(t *testing.T) {
 }
 
 func Test_MatchRequirements_ShouldFail(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 	r := mock.StaticRequirement("", "", nil)        // only needed as an argument. fds do all of the work
 	testerr := errors.New("we should not get here") // this should not get returned
 	fds := []dependency.ProvidesDependencies{
@@ -86,7 +85,7 @@ func Test_MatchRequirements_ShouldFail(t *testing.T) {
 }
 
 func Test_MatchRequirements_Empty(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 	r := mock.StaticRequirement("mock", "", nil) // only needed as an argument. fds do all of the work
 	fds := []dependency.ProvidesDependencies{}   // empty list of handlers/fullfillers
 

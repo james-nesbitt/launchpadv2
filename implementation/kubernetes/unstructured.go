@@ -85,7 +85,7 @@ func deleteObject(ctx context.Context, client kube_kubernetes.Interface, dynamic
 }
 
 // getResource returns the GroupVersionResource for a given object
-// Especially, it discovers the resource name for the given object
+// Especially, it discovers the resource name for the given object.
 func getResource(client kube_kubernetes.Interface, object *kubeapi_unstructured.Unstructured) (kubeapi_schema.GroupVersionResource, error) {
 	gvk := object.GroupVersionKind()
 	apiResourceList, err := client.Discovery().ServerResourcesForGroupVersion(gvk.GroupVersion().String())

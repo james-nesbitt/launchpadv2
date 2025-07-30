@@ -5,7 +5,6 @@ package v20_test
  */
 
 import (
-	"context"
 	"testing"
 
 	// Register mock Host and Product handlers.
@@ -44,7 +43,7 @@ products:
 		t.Errorf("2.0 Spec decode failed unexpectedly: %s", err.Error())
 	}
 
-	if err := cl.Validate(context.Background()); err != nil {
+	if err := cl.Validate(t.Context()); err != nil {
 		t.Errorf("2.0 Spec decode project validate failed: %s", err.Error())
 	}
 }
@@ -89,7 +88,7 @@ products:
 		t.Errorf("CurrentGen 2.0 Spec decode failed unexpectedly: %s", err.Error())
 	}
 
-	if err := cl.Validate(context.Background()); err != nil {
+	if err := cl.Validate(t.Context()); err != nil {
 		t.Errorf("2.0 Spec decode project validate failed: %s", err.Error())
 	}
 

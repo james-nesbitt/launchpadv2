@@ -9,7 +9,7 @@ import (
 )
 
 func Test_DependencySanity(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 	cfg := kubernetes.Config{}
 	k := kubernetes.NewKubernetes(cfg)
 	v := kubernetes.Version{Version: "1.25"}

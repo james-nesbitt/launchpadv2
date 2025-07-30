@@ -1,7 +1,6 @@
 package dependency_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/Mirantis/launchpad/pkg/dependency"
@@ -30,7 +29,7 @@ func Test_NewRequirements(t *testing.T) {
 }
 
 func Test_CollectRequirements(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 	rs := dependency.Requirements{
 		mock.StaticRequirement("zero", "zero", nil),
 		mock.StaticRequirement("one", "one", nil),

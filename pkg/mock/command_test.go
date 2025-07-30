@@ -1,7 +1,6 @@
 package mock_test
 
 import (
-	"context"
 	"errors"
 	"testing"
 
@@ -11,7 +10,7 @@ import (
 )
 
 func Test_CommandHandlerSanity(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 	ch1 := mock.NewCommandHandler(
 		action.NewPhases(
 			mock.NewPhase("one", nil, nil, nil, nil, nil),

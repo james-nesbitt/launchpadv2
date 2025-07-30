@@ -1,7 +1,6 @@
 package k0s_test
 
 import (
-	"context"
 	"net/http"
 	"testing"
 
@@ -103,7 +102,7 @@ func NotTest_ConfigURL(t *testing.T) {
 }
 
 func NotTest_BuildHostConfig(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 	ny := `
 network:
   private_address: 192.168.100.10

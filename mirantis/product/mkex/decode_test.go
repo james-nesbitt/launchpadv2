@@ -1,7 +1,6 @@
 package mkex_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/Mirantis/launchpad/mirantis/product/mkex"
@@ -10,7 +9,7 @@ import (
 )
 
 func Test_DecodeSanity(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 	y := `
 role: manager
 `

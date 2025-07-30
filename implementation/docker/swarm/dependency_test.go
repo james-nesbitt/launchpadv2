@@ -10,7 +10,7 @@ import (
 )
 
 func Test_DependencySanity(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 	v := dockerimplementation.Version{
 		Version: "23.0.9",
 	}

@@ -33,7 +33,7 @@ func operatorYaml() ([]byte, error) {
 	return oryrb, oryrberr
 }
 
-// OperatorResources build the set of kubernetes resources needed to install the operator from the config
+// OperatorResources build the set of kubernetes resources needed to install the operator from the config.
 func (c Config) OperatorResources() ([]kubeapi_unstructured.Unstructured, error) {
 	var res []kubeapi_unstructured.Unstructured
 
@@ -62,7 +62,7 @@ func (c Config) OperatorResources() ([]kubeapi_unstructured.Unstructured, error)
 }
 
 // BlueprintResources provide an unstructured object describing the blueprint CR from config
-// @TODO this thing sucks, and should be done using structs from the Blueprint Operator
+// @TODO this thing sucks, and should be done using structs from the Blueprint Operator.
 func (c Config) BlueprintResource() (kubeapi_unstructured.Unstructured, error) {
 	var bp kubeapi_unstructured.Unstructured
 

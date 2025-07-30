@@ -12,7 +12,7 @@ import (
 )
 
 func Test_ComponentSanityPass(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 	cn := "compname"
 
 	c := mock.NewSimpleComponent(cn, nil, nil)
@@ -26,7 +26,7 @@ func Test_ComponentSanityPass(t *testing.T) {
 }
 
 func Test_ComponentSanityFail(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 	cv := errors.New("expected validate failure")
 
 	c := mock.NewSimpleComponent("name", nil, cv)
@@ -50,7 +50,7 @@ func Test_ComponentSanityDebug(t *testing.T) {
 }
 
 func Test_ComponentNilFactories(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	c := mock.NewComponentWDependencies("my-component", nil, nil, nil, nil)
 
@@ -63,7 +63,7 @@ func Test_ComponentNilFactories(t *testing.T) {
 }
 
 func Test_ComponentNilRequiresDependencies(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	fac := func(_ context.Context) dependency.Requirements {
 		return nil
@@ -75,7 +75,7 @@ func Test_ComponentNilRequiresDependencies(t *testing.T) {
 }
 
 func Test_ComponentRequiresDependencies(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	rs := dependency.NewRequirements()
 	fac := func(_ context.Context) dependency.Requirements {
@@ -88,7 +88,7 @@ func Test_ComponentRequiresDependencies(t *testing.T) {
 }
 
 func Test_ComponentNilProvidesDependencies(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	err := errors.New("expected factory error")
 	fac := func(_ context.Context, _ dependency.Requirement) (dependency.Dependency, error) {
@@ -104,7 +104,7 @@ func Test_ComponentNilProvidesDependencies(t *testing.T) {
 }
 
 func Test_ComponentProvidesDependencies(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	d := mock.SimpleDependency("my-dep", "my test dependency", nil, nil)
 	fac := func(_ context.Context, _ dependency.Requirement) (dependency.Dependency, error) {

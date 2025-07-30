@@ -9,7 +9,7 @@ import (
 )
 
 func Test_FilteredHostDependencySanity(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	hs := host.NewHosts(
 		host.NewHost("one"),

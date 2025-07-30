@@ -1,7 +1,6 @@
 package host_test
 
 import (
-	"context"
 	"testing"
 
 	"gopkg.in/yaml.v3"
@@ -11,7 +10,7 @@ import (
 )
 
 func Test_HostV2DecodeMock(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 	id := "test"
 	y := `
 mock:

@@ -1,7 +1,6 @@
 package project_test
 
 import (
-	"context"
 	"errors"
 	"testing"
 
@@ -12,7 +11,7 @@ import (
 )
 
 func Test_ProjectComponentValidation(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 	e := errors.New("validation error")
 	cp := mock.NewSimpleComponent(
 		"mock",
@@ -37,7 +36,7 @@ func Test_ProjectComponentValidation(t *testing.T) {
 }
 
 func Test_ProjectDependencyValidation(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 	cl := project.Project{
 		Components: component.Components{
 			"one": mock.NewComponentWDependencies(

@@ -1,7 +1,6 @@
 package mock_test
 
 import (
-	"context"
 	"errors"
 	"testing"
 
@@ -11,7 +10,7 @@ import (
 )
 
 func Test_ProvidesNilDependencies(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	err := errors.New("expected error")
 	pd := mock.ProvidesDependencies(nil, err)
@@ -26,7 +25,7 @@ func Test_ProvidesNilDependencies(t *testing.T) {
 }
 
 func Test_ProvidesDependencies(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	d := mock.SimpleDependency("test-dep", "test dependency", nil, nil)
 	pd := mock.ProvidesDependencies(d, nil)

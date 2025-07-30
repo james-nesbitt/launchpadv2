@@ -1,7 +1,6 @@
 package k0s_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/Mirantis/launchpad/mirantis/product/k0s"
@@ -11,7 +10,7 @@ import (
 )
 
 func Test_HostPluginDecode(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 	ys := `
 role: controller
 reset: false

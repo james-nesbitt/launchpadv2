@@ -11,7 +11,7 @@ import (
 )
 
 func Test_PhaseSanity(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 	id := "test"
 
 	var runErr error = errors.New("runError")

@@ -1,7 +1,6 @@
 package mke3_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/Mirantis/launchpad/implementation/kubernetes"
@@ -15,7 +14,7 @@ import (
 //
 //	This is the mechanism by which requirements and dependencies are matched in MKE3
 func Test_ProvidesMKE3(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	dc := mke3implementation.MKE3DependencyConfig{Version: "3.7.7"}
 	m := mke3.NewComponent("test", mke3.Config{Version: dc.Version})
@@ -50,7 +49,7 @@ func Test_ProvidesMKE3(t *testing.T) {
 
 // Prove that the MKE3 component can handle K8s requirements.
 func Test_ProvidesK8s(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	m := mke3.NewComponent("test", mke3.Config{Version: "3.7.7"})
 	var mc component.Component = m

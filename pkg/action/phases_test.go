@@ -69,7 +69,7 @@ func Test_PhasesContains(t *testing.T) {
 }
 
 func Test_PhasesOrder(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	// create a bunch of events which we will share across the phases
 	ea := dependency.Event{Id: "A"}

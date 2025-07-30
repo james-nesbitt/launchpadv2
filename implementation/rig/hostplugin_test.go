@@ -1,7 +1,6 @@
 package rig_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/Mirantis/launchpad/implementation/rig"
@@ -11,7 +10,7 @@ import (
 )
 
 func Test_HostPluginRoleTypeSanity(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	pf := rig.HostPluginFactory{}
 

@@ -1,7 +1,6 @@
 package mock_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/Mirantis/launchpad/pkg/dependency"
@@ -10,7 +9,7 @@ import (
 )
 
 func Test_MockDependencyReqStatic(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	rnfn := mock.ReqFactoryStatic(nil)
 	rsn := rnfn(ctx)
@@ -26,7 +25,7 @@ func Test_MockDependencyReqStatic(t *testing.T) {
 }
 
 func Test_MockDependencyDepStatic(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	dnfn := mock.DepFactoryStatic(nil, nil)
 	dsn, dsnerr := dnfn(ctx, nil)
@@ -43,7 +42,7 @@ func Test_MockDependencyDepStatic(t *testing.T) {
 }
 
 func Test_MockDependencyDepMatch(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	pos := mock.SimpleRequirement("this", "expected match")
 	neg := mock.SimpleRequirement("not-this", "expected to not match")

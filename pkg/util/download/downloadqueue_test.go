@@ -12,7 +12,7 @@ import (
 )
 
 func Test_DownloadQueue(t *testing.T) {
-	ctx, c := context.WithTimeout(context.Background(), time.Second*60)
+	ctx, c := context.WithTimeout(t.Context(), time.Second*60)
 	defer c()
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

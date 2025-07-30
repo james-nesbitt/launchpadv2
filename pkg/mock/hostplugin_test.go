@@ -1,7 +1,6 @@
 package mock_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/Mirantis/launchpad/pkg/host"
@@ -21,7 +20,7 @@ func Test_HostGetMockNoMockPlugin(t *testing.T) {
 }
 
 func Test_MockHostPluginSanity(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 	p := mock.NewMockHostPlugin(nil, nil)
 
 	// Network stuff
@@ -62,7 +61,7 @@ func Test_MockHostPluginNetworkNil(t *testing.T) {
 }
 
 func Test_MockHostPluginNetwork(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	id := "test-host"
 	h := host.NewHost(id)

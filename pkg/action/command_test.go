@@ -1,7 +1,6 @@
 package action_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/Mirantis/launchpad/pkg/action"
@@ -10,7 +9,7 @@ import (
 )
 
 func Test_CommandBuild(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 	cmd := action.NewEmptyCommand("test")
 
 	chs := []action.CommandHandler{

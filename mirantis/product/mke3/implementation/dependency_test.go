@@ -10,7 +10,7 @@ import (
 
 // Prove that the MKE3 Requirement and Dependency are valid and can be matched.
 func Test_DependencySanity(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	v := "3.7.7"
 	apic := mke3implementation.Config{Version: v}

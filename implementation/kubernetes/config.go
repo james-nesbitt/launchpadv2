@@ -42,8 +42,9 @@ func ConfigFromEnv(o *kubeclientcmd.ConfigOverrides) (Config, error) {
 	return c, nil
 }
 
+
 // KubeConfig produce yaml bytes for a kubeconfig for this implementation.
-// @NOTE does not work very well
+// @NOTE does not work very well.
 func (c Config) KubeConfig() []byte {
 	rc, _ := c.KubeCmdApiConfig.MergedRawConfig()
 

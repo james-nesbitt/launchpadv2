@@ -9,7 +9,7 @@ import (
 )
 
 func Test_HostsEachSanity(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	hs := host.NewHosts(
 		host.NewHost("one"),
@@ -35,7 +35,7 @@ func Test_HostsEachSanity(t *testing.T) {
 }
 
 func Test_HostsEachError(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	hs := host.NewHosts(
 		host.NewHost("one"),

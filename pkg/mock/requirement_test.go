@@ -1,7 +1,6 @@
 package mock_test
 
 import (
-	"context"
 	"errors"
 	"testing"
 
@@ -17,7 +16,7 @@ func Test_RequirementSanity(t *testing.T) {
 }
 
 func Test_RequirementStatic(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	rid := "test-req"
 	rdesc := "my test req"
@@ -36,7 +35,7 @@ func Test_RequirementStatic(t *testing.T) {
 }
 
 func Test_RequirementSimple(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	rid := "simple-req"
 	rdesc := "simple requirement"
@@ -56,7 +55,7 @@ func Test_RequirementSimple(t *testing.T) {
 }
 
 func Test_RequirementMatch(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 	d := mock.StaticDependency("test-dep", "my simple dep", nil, nil)
 
 	rpos := mock.MatchingRequirement("matcher", "matching-requirement", func(_ dependency.Dependency) error { return nil })

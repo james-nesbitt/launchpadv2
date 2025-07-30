@@ -1,7 +1,6 @@
 package k0s_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/Mirantis/launchpad/mirantis/product/k0s"
@@ -9,7 +8,7 @@ import (
 )
 
 func Test_Config_K0SConfig(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 	ky := `
 version: v1.28.4+k0s.0
 config:

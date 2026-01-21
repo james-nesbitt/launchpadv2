@@ -2,11 +2,13 @@ package download
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"mime"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 
 	"github.com/adrg/xdg"
@@ -35,6 +37,9 @@ func (qd *QueueDownload) Download(ctx context.Context, url string) (io.ReadClose
 
 	cd := irs.Header.Get("Content-Disposition")
 	_, params, _ := mime.ParseMediaType(cd)
+	if strings.Contains(params["filename"], "../") || strings.Contains(params["filename"], "..\\") {
+		return nil, "", fmt.Errorf("Invalid file path")
+	}
 	fs := filepath.Join("launchpad", "k0s", params["filename"])
 
 	// only download one at a time (prevents duplicate downloads, and lowers bandwidth)

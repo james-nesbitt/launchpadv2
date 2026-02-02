@@ -1,7 +1,11 @@
+/*
+Package msr2 MSR legacy component for launchpad.
+*/
 package msr2
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/Mirantis/launchpad/pkg/dependency"
 )
@@ -32,19 +36,20 @@ type Component struct {
 }
 
 // Name for the component.
-func (p Component) Name() string {
-	if p.id == ComponentType {
-		return p.id
+func (c Component) Name() string {
+	if c.id == ComponentType {
+		return c.id
 	}
-	return p.id
+	return fmt.Sprintf("%s:%s", ComponentType, c.id)
 }
 
 // Debug product debug.
-func (_ Component) Debug() interface{} {
-	return nil
+func (c Component) Debug() any {
+	return fmt.Sprintf("%s '%s' debug", ComponentType, c.Name())
 }
 
 // Validate that the project meets the needs of the Product.
-func (_ Component) Validate(context.Context) error {
+func (_ Component) Validate(context.Context) error { //nolint:staticcheck
+
 	return nil
 }

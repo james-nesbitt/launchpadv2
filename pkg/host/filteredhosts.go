@@ -18,7 +18,7 @@ func HostsDependencyFilterFactory(hs Hosts, filter HostsFilter) func(context.Con
 	return func(ctx context.Context) (Hosts, error) {
 		hs, err := filter(ctx, hs)
 		if err != nil {
-			return hs, fmt.Errorf("Hosts filter produced an error: %s", err.Error())
+			return hs, fmt.Errorf("hosts filter produced an error: %s", err.Error())
 		}
 
 		return hs, nil
@@ -47,7 +47,7 @@ type hostsFilterRequirement struct {
 }
 
 // Requirer identify the requirer with a string, which may be used for correlation in the future.
-func (hrr hostsFilterRequirement) Id() string {
+func (hrr hostsFilterRequirement) ID() string {
 	return hrr.id
 }
 

@@ -30,12 +30,10 @@ const (
 	HostRoleK0S = "k0s"
 )
 
-var (
-	// K0SManagerHostRoles the Host roles accepted for managers.
-	K0SManagerHostRoles = []string{"controller"}
-)
+// K0SManagerHostRoles the Host roles accepted for managers.
+var K0SManagerHostRoles = []string{"controller"}
 
-// Get the K0S plugin from a Host.
+// HostGetK0s Get the K0S plugin from a Host.
 func HostGetK0s(h *host.Host) *hostPlugin {
 	hgk0s := h.MatchPlugin(HostRoleK0S)
 	if hgk0s == nil {
@@ -50,7 +48,7 @@ func HostGetK0s(h *host.Host) *hostPlugin {
 	return hk0s
 }
 
-// HostConfig.
+// HostConfig definition for a host.
 type HostConfig struct {
 	Role             string            `yaml:"role"`
 	Reset            bool              `yaml:"reset,omitempty"`
@@ -69,13 +67,10 @@ type HostConfig struct {
 	NoTaints         bool              `yaml:"noTaints,omitempty"`
 }
 
-type hostState struct {
-}
+type hostState struct{}
 
-var (
-	// global Download Queue.
-	qd = download.NewQueueDownload(nil)
-)
+// global Download Queue.
+var qd = download.NewQueueDownload(nil)
 
 // hostPlugin.
 type hostPlugin struct {
@@ -85,8 +80,8 @@ type hostPlugin struct {
 }
 
 // Id uniquely identify the plugin.
-func (p hostPlugin) Id() string {
-	return fmt.Sprintf("%s:%s", p.h.Id(), "k0s")
+func (p hostPlugin) ID() string {
+	return fmt.Sprintf("%s:%s", p.h.ID(), "k0s")
 }
 
 // RoleMatch what host roles does this host plugin act.
@@ -155,8 +150,8 @@ func (p *hostPlugin) DownloadK0sBinary(ctx context.Context, v version.Version) e
 	u := DownloadK0sURL(v, hp.Arch(ctx))
 	d := p.k0sBinaryPath()
 
-	if err := hf.Download(ctx, u, d, 0550, exec.ExecOptions{Sudo: true}); err != nil {
-		return fmt.Errorf("%s: host couldn't download the K0s binary: %s -> %s :: %s", p.h.Id(), u, d, err.Error())
+	if err := hf.Download(ctx, u, d, 0o550, exec.ExecOptions{Sudo: true}); err != nil {
+		return fmt.Errorf("%s: host couldn't download the K0s binary: %s -> %s :: %s", p.h.ID(), u, d, err.Error())
 	}
 	return nil
 }
@@ -170,11 +165,11 @@ func (p *hostPlugin) UploadK0sBinary(ctx context.Context, v version.Version) err
 
 	rc, _, derr := qd.Download(ctx, u) // queue downloads so that we avoid repeating any downloads
 	if derr != nil {
-		return fmt.Errorf("could not download k0s binary, before uploading to host %s : %s -> %s : %s", p.h.Id(), u, d, derr.Error())
+		return fmt.Errorf("could not download k0s binary, before uploading to host %s : %s -> %s : %s", p.h.ID(), u, d, derr.Error())
 	}
 
-	if err := hf.Upload(ctx, rc, d, 0750, exec.ExecOptions{Sudo: true}); err != nil {
-		return fmt.Errorf("%s: failed to upload k0s binary to host : %s", p.h.Id(), err.Error())
+	if err := hf.Upload(ctx, rc, d, 0o750, exec.ExecOptions{Sudo: true}); err != nil {
+		return fmt.Errorf("%s: failed to upload k0s binary to host : %s", p.h.ID(), err.Error())
 	}
 	return nil
 }
@@ -199,7 +194,7 @@ func (p *hostPlugin) WriteK0sConfig(ctx context.Context, cfg K0sConfig) error {
 
 	hf := exec.HostGetFiles(p.h)
 
-	if err := hf.Upload(ctx, cfgsr, p.k0sConfigPath(), 0440, exec.ExecOptions{Sudo: true}); err != nil {
+	if err := hf.Upload(ctx, cfgsr, p.k0sConfigPath(), 0o440, exec.ExecOptions{Sudo: true}); err != nil {
 		return err
 	}
 	return nil
@@ -225,7 +220,7 @@ func (p *hostPlugin) GenerateToken(ctx context.Context, role string, expiry time
 	defer token_mu.Unlock()
 	o, e, err := eh.Exec(ctx, p.k0sCommand(cmd), nil, exec.ExecOptions{Sudo: true})
 	if err != nil {
-		return o, fmt.Errorf("%s: error generating join token: %s :: %s", p.h.Id(), err.Error(), e)
+		return o, fmt.Errorf("%s: error generating join token: %s :: %s", p.h.ID(), err.Error(), e)
 	}
 	return strings.TrimSpace(o), nil
 }
@@ -239,7 +234,7 @@ func (p *hostPlugin) InstallNewCluster(ctx context.Context, c Config) error {
 	s, serr := p.Status(ctx)
 	if serr == nil {
 		if s.Role != RoleController {
-			return fmt.Errorf("%s: host cannot be treated as a new cluster leader, as it is a %s", p.h.Id(), s.Role)
+			return fmt.Errorf("%s: host cannot be treated as a new cluster leader, as it is a %s", p.h.ID(), s.Role)
 		}
 		return nil
 	}
@@ -250,7 +245,7 @@ func (p *hostPlugin) InstallNewCluster(ctx context.Context, c Config) error {
 	} {
 		if eh.ServiceIsRunning(ctx, ss) == nil {
 			if err := eh.ServiceDisable(ctx, ss); err != nil {
-				return fmt.Errorf("%s: failed to stop K0s services: %s", p.h.Id(), k)
+				return fmt.Errorf("%s: failed to stop K0s services: %s", p.h.ID(), k)
 			}
 		}
 	}
@@ -268,17 +263,17 @@ func (p *hostPlugin) InstallNewCluster(ctx context.Context, c Config) error {
 		args = append(args, "--enable-dynamic-config")
 	}
 
-	slog.InfoContext(ctx, fmt.Sprintf("%s: installing leader: %s", p.h.Id(), args))
+	slog.InfoContext(ctx, fmt.Sprintf("%s: installing leader: %s", p.h.ID(), args))
 
 	_, e, ierr := eh.Exec(ctx, p.k0sCommand(args), nil, exec.ExecOptions{Sudo: true})
 	if ierr != nil {
-		return fmt.Errorf("%s: failed to initialize new cluster: %s :: %s", p.h.Id(), ierr.Error(), e)
+		return fmt.Errorf("%s: failed to initialize new cluster: %s :: %s", p.h.ID(), ierr.Error(), e)
 	}
-	slog.InfoContext(ctx, fmt.Sprintf("%s: installed as new leader", p.h.Id()))
+	slog.InfoContext(ctx, fmt.Sprintf("%s: installed as new leader", p.h.ID()))
 
-	slog.InfoContext(ctx, fmt.Sprintf("%s: starting leader service: %s", p.h.Id(), ServiceController))
+	slog.InfoContext(ctx, fmt.Sprintf("%s: starting leader service: %s", p.h.ID(), ServiceController))
 	if err := eh.ServiceEnable(ctx, []string{ServiceController}); err != nil {
-		return fmt.Errorf("%s: failed to start leader k0s service: %s", p.h.Id(), err.Error())
+		return fmt.Errorf("%s: failed to start leader k0s service: %s", p.h.ID(), err.Error())
 	}
 
 	return nil
@@ -292,11 +287,11 @@ func (p *hostPlugin) JoinCluster(ctx context.Context, l *host.Host, role string,
 
 	jt, terr := lkh.GenerateToken(ctx, role, JoinTokenExpireDuration)
 	if terr != nil {
-		return fmt.Errorf("%s: failed to get token from leader: %s", p.h.Id(), terr.Error())
+		return fmt.Errorf("%s: failed to get token from leader: %s", p.h.ID(), terr.Error())
 	}
 
-	if err := fh.Upload(ctx, strings.NewReader(jt), p.k0sTokenPath(), 0640, exec.ExecOptions{Sudo: true}); err != nil {
-		return fmt.Errorf("%s: failed to write join token to host: %s", p.h.Id(), err.Error())
+	if err := fh.Upload(ctx, strings.NewReader(jt), p.k0sTokenPath(), 0o640, exec.ExecOptions{Sudo: true}); err != nil {
+		return fmt.Errorf("%s: failed to write join token to host: %s", p.h.ID(), err.Error())
 	}
 
 	args := []string{
@@ -319,7 +314,7 @@ func (p *hostPlugin) JoinCluster(ctx context.Context, l *host.Host, role string,
 	} {
 		if eh.ServiceIsRunning(ctx, ss) == nil {
 			if err := eh.ServiceDisable(ctx, ss); err != nil {
-				return fmt.Errorf("%s: failed to stop K0s services: %s", p.h.Id(), k)
+				return fmt.Errorf("%s: failed to stop K0s services: %s", p.h.ID(), k)
 			}
 		}
 	}
@@ -335,11 +330,11 @@ func (p *hostPlugin) JoinCluster(ctx context.Context, l *host.Host, role string,
 
 	_, e, err := eh.Exec(ctx, p.k0sCommand(args), nil, exec.ExecOptions{Sudo: true})
 	if err != nil {
-		return fmt.Errorf("%s: failed to join cluster: %s :: %s", p.h.Id(), err.Error(), e)
+		return fmt.Errorf("%s: failed to join cluster: %s :: %s", p.h.ID(), err.Error(), e)
 	}
 
 	if err := eh.ServiceEnable(ctx, services); err != nil {
-		return fmt.Errorf("%s: failed to enable&start K0s services", p.h.Id())
+		return fmt.Errorf("%s: failed to enable&start K0s services", p.h.ID())
 	}
 
 	return nil
@@ -350,7 +345,7 @@ func (p *hostPlugin) JoinCluster(ctx context.Context, l *host.Host, role string,
 //	@NOTE only works on a controller
 func (p *hostPlugin) K0sKubeconfigAdmin(ctx context.Context) (string, error) {
 	if p.c.Role != RoleController {
-		return "", fmt.Errorf("%s: Can't retrieve kubeconfig from non controller node", p.h.Id())
+		return "", fmt.Errorf("%s: Can't retrieve kubeconfig from non controller node", p.h.ID())
 	}
 
 	args := []string{
@@ -362,7 +357,7 @@ func (p *hostPlugin) K0sKubeconfigAdmin(ctx context.Context) (string, error) {
 
 	o, e, err := eh.Exec(ctx, p.k0sCommand(args), nil, exec.ExecOptions{Sudo: true})
 	if err != nil {
-		return "", fmt.Errorf("%s: error retrieving kubeconfig: %s", p.h.Id(), e)
+		return "", fmt.Errorf("%s: error retrieving kubeconfig: %s", p.h.ID(), e)
 	}
 
 	return o, nil
@@ -378,7 +373,7 @@ func (p *hostPlugin) K0sStop(ctx context.Context) error {
 
 	_, e, err := eh.Exec(ctx, p.k0sCommand(args), nil, exec.ExecOptions{Sudo: true})
 	if err != nil {
-		return fmt.Errorf("%s: error stopping k0s: %s", p.h.Id(), e)
+		return fmt.Errorf("%s: error stopping k0s: %s", p.h.ID(), e)
 	}
 
 	return nil
@@ -394,7 +389,7 @@ func (p *hostPlugin) K0sReset(ctx context.Context) error {
 
 	_, e, err := eh.Exec(ctx, p.k0sCommand(args), nil, exec.ExecOptions{Sudo: true})
 	if err != nil {
-		return fmt.Errorf("%s: error stopping k0s: %s", p.h.Id(), e)
+		return fmt.Errorf("%s: error stopping k0s: %s", p.h.ID(), e)
 	}
 
 	return nil
@@ -405,9 +400,9 @@ func (p *hostPlugin) K0sClean(ctx context.Context) error {
 	fh := exec.HostGetFiles(p.h)
 	eh := exec.HostGetExecutor(p.h)
 
-	slog.DebugContext(ctx, fmt.Sprintf("%s: Stopping any running services", p.h.Id()))
+	slog.DebugContext(ctx, fmt.Sprintf("%s: Stopping any running services", p.h.ID()))
 	if err := eh.Connect(ctx); err != nil {
-		return fmt.Errorf("%s: failed to connect to stop k0s services: %s", p.h.Id(), err.Error())
+		return fmt.Errorf("%s: failed to connect to stop k0s services: %s", p.h.ID(), err.Error())
 	}
 
 	services := []string{}
@@ -420,7 +415,7 @@ func (p *hostPlugin) K0sClean(ctx context.Context) error {
 	}
 
 	if err := eh.ServiceDisable(ctx, services); err != nil {
-		return fmt.Errorf("%s: failed to stop k0s services: %s", p.h.Id(), err.Error())
+		return fmt.Errorf("%s: failed to stop k0s services: %s", p.h.ID(), err.Error())
 	}
 
 	opts := exec.ExecOptions{Sudo: true}
@@ -433,7 +428,7 @@ func (p *hostPlugin) K0sClean(ctx context.Context) error {
 		p.k0sTokenPath(),
 	} {
 		if err := fh.Delete(ctx, fp, opts); err != nil {
-			slog.WarnContext(ctx, fmt.Sprintf("%s: failed to delete %s: %s", p.h.Id(), fp, err.Error()))
+			slog.WarnContext(ctx, fmt.Sprintf("%s: failed to delete %s: %s", p.h.ID(), fp, err.Error()))
 			errs = append(errs, err)
 		}
 	}
@@ -479,7 +474,7 @@ func (p *hostPlugin) k0sTokenPath() string {
 
 // BuildHostConfig Modify a passed base K0s config with host specific values, and including passed additional sans.
 func (p *hostPlugin) BuildHostConfig(ctx context.Context, basecfg K0sConfig, sans []string) (K0sConfig, error) {
-	var hcfg K0sConfig = basecfg
+	hcfg := basecfg
 	slog.DebugContext(ctx, "base config", slog.Any("config", hcfg))
 
 	addUnlessExist := func(slice *[]string, s string) {

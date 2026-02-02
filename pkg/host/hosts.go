@@ -14,7 +14,7 @@ type Hosts map[string]*Host
 func NewHosts(hs ...*Host) Hosts {
 	nhs := Hosts{}
 	for _, h := range hs {
-		nhs[h.Id()] = h
+		nhs[h.ID()] = h
 	}
 	return nhs
 }
@@ -25,7 +25,7 @@ func (hs Hosts) Add(ahs ...*Host) {
 		if ah == nil {
 			continue
 		}
-		hs[ah.Id()] = ah
+		hs[ah.ID()] = ah
 	}
 }
 
@@ -41,7 +41,7 @@ func (hs Hosts) Merge(ahs Hosts) {
 
 // Get Host from the Hosts set if it exists, or return nil.
 func (hs Hosts) Get(id string) *Host {
-	h, _ := hs[id] //nolint: gosimple
+	h := hs[id] //nolint: gosimple
 	return h
 }
 

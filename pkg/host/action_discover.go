@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	DiscoverStepId = "HostComponent:DiscoverStep"
+	DiscoverStepID = "HostComponent:DiscoverStep"
 )
 
 type discoverStep struct {
@@ -19,19 +19,19 @@ type discoverStep struct {
 	d  dependency.Dependency
 }
 
-func (ds discoverStep) Id() string {
-	return fmt.Sprintf("%s:%s", DiscoverStepId, ds.id)
+func (ds discoverStep) ID() string {
+	return fmt.Sprintf("%s:%s", DiscoverStepID, ds.id)
 }
 
 func (ds discoverStep) Validate(ctx context.Context) error {
 	hd, ok := ds.d.(HostsDependency)
 	if !ok {
-		return fmt.Errorf("%w; %s has a Dependency of the wrong type", dependency.ErrDependencyNotMatched, ds.Id())
+		return fmt.Errorf("%w; %s has a Dependency of the wrong type", dependency.ErrDependencyNotMatched, ds.ID())
 	}
 
 	hs, err := hd.ProduceHosts(ctx)
 	if err != nil {
-		return fmt.Errorf("%w; %s failed to1 produce hosts: %s", dependency.ErrDependencyNotMatched, ds.Id(), err.Error())
+		return fmt.Errorf("%w; %s failed to1 produce hosts: %s", dependency.ErrDependencyNotMatched, ds.ID(), err.Error())
 	}
 	if len(hs) == 0 {
 		slog.WarnContext(ctx, "HostComponent:DiscoverStep dependency has no hosts.")
@@ -44,12 +44,12 @@ func (ds discoverStep) Validate(ctx context.Context) error {
 func (ds discoverStep) Run(ctx context.Context) error {
 	hd, ok := ds.d.(HostsDependency)
 	if !ok {
-		return fmt.Errorf("%w; %s has a Dependency of the wrong type", dependency.ErrDependencyNotMatched, ds.Id())
+		return fmt.Errorf("%w; %s has a Dependency of the wrong type", dependency.ErrDependencyNotMatched, ds.ID())
 	}
 
 	hs, err := hd.ProduceHosts(ctx)
 	if err != nil {
-		return fmt.Errorf("%w; %s failed to produce hosts: %s", dependency.ErrDependencyNotMatched, ds.Id(), err.Error())
+		return fmt.Errorf("%w; %s failed to produce hosts: %s", dependency.ErrDependencyNotMatched, ds.ID(), err.Error())
 	}
 	if len(hs) == 0 {
 		slog.WarnContext(ctx, "HostComponent:DiscoverStep dependency has no hosts.")
@@ -59,15 +59,15 @@ func (ds discoverStep) Run(ctx context.Context) error {
 	cerr := hs.Each(ctx, func(ctx context.Context, h *Host) error {
 		hd := HostGetDiscover(h)
 		if hd == nil {
-			return fmt.Errorf("%s host discover impossible. No host plugin registered that performs discovery", h.Id())
+			return fmt.Errorf("%s host discover impossible. No host plugin registered that performs discovery", h.ID())
 		}
 
-		slog.DebugContext(ctx, fmt.Sprintf("%s: Discovering host", h.Id()))
+		slog.DebugContext(ctx, fmt.Sprintf("%s: Discovering host", h.ID()))
 		if err := hd.Discover(ctx); err != nil {
-			return fmt.Errorf("%s host discover failed: %s", h.Id(), err.Error())
+			return fmt.Errorf("%s host discover failed: %s", h.ID(), err.Error())
 		}
 
-		slog.InfoContext(ctx, fmt.Sprintf("%s: host discover successful", h.Id()), slog.Any("host", h))
+		slog.InfoContext(ctx, fmt.Sprintf("%s: host discover successful", h.ID()), slog.Any("host", h))
 		return nil
 	})
 

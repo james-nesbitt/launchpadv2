@@ -24,7 +24,7 @@ func Test_RequirementStatic(t *testing.T) {
 
 	r := mock.StaticRequirement(rid, rdesc, d)
 
-	assert.Equal(t, rid, r.Id(), "wrong id returned")
+	assert.Equal(t, rid, r.ID(), "wrong id returned")
 	assert.Equal(t, rdesc, r.Describe(), "wrong description returned")
 
 	rd := r.Matched(ctx)

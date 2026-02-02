@@ -53,7 +53,7 @@ func Test_DependencySanity(t *testing.T) {
 		t.Errorf("Kubernetes dependency returned unexpected kubernetes client: %+v", k2)
 	}
 
-	if d.Id() != "test" {
-		t.Errorf("Kubernetes dependency returned wrong id: %s", d.Id())
+	if d.ID() != "test" {
+		t.Errorf("Kubernetes dependency returned wrong id: %s", d.ID())
 	}
 }

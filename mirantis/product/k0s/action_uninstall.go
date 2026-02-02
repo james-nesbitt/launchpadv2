@@ -14,7 +14,7 @@ type uninstallK0sStep struct {
 	id string
 }
 
-func (s uninstallK0sStep) Id() string {
+func (s uninstallK0sStep) ID() string {
 	return fmt.Sprintf("%s:k0s-uninstall", s.id)
 }
 
@@ -27,7 +27,7 @@ func (s uninstallK0sStep) Run(ctx context.Context) error {
 
 	} else {
 		if err := whs.Each(ctx, func(ctx context.Context, h *host.Host) error {
-			slog.InfoContext(ctx, fmt.Sprintf("%s: k0s reset", h.Id()))
+			slog.InfoContext(ctx, fmt.Sprintf("%s: k0s reset", h.ID()))
 			return hostReset(ctx, h)
 		}); err != nil {
 			errs = append(errs, err)
@@ -44,7 +44,7 @@ func (s uninstallK0sStep) Run(ctx context.Context) error {
 func hostReset(ctx context.Context, h *host.Host) error {
 	kh := HostGetK0s(h)
 	if kh == nil {
-		return fmt.Errorf("%s: not a K0s host", h.Id())
+		return fmt.Errorf("%s: not a K0s host", h.ID())
 	}
 
 	kh.K0sStop(ctx)

@@ -9,7 +9,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	dockertypes "github.com/docker/docker/api/types"
 	dockertypesswarm "github.com/docker/docker/api/types/swarm"
 	dockertypessystem "github.com/docker/docker/api/types/system"
 
@@ -20,7 +19,6 @@ import (
 )
 
 func (c Component) CliBuild(cmd *cobra.Command, _ project.Project) error {
-
 	g := &cobra.Group{
 		ID:    c.Name(),
 		Title: c.Name(),
@@ -37,7 +35,7 @@ func (c Component) CliBuild(cmd *cobra.Command, _ project.Project) error {
 
 			hs, gherr := c.GetAllHosts(ctx)
 			if gherr != nil {
-				return fmt.Errorf("MCR has no hosts to discover: %s", gherr.Error())
+				return fmt.Errorf("mcr has no hosts to discover: %s", gherr.Error())
 			}
 
 			info := map[string]dockertypessystem.Info{}
@@ -45,16 +43,16 @@ func (c Component) CliBuild(cmd *cobra.Command, _ project.Project) error {
 
 			if err := hs.Each(ctx, func(ctx context.Context, h *host.Host) error {
 				exec.HostGetExecutor(h).Connect(ctx)
-				slog.InfoContext(ctx, fmt.Sprintf("%s: discovering MCR state", h.Id()), slog.Any("host", h))
+				slog.InfoContext(ctx, fmt.Sprintf("%s: discovering MCR state", h.ID()), slog.Any("host", h))
 
 				i, err := dockerhost.HostGetDockerExec(h).Info(ctx)
 				if err != nil {
-					slog.WarnContext(ctx, fmt.Sprintf("%s: MCR state discovery failure", h.Id()), slog.Any("host", h), slog.Any("error", err))
-					return fmt.Errorf("%s: failed to update docker info: %s", h.Id(), err.Error())
+					slog.WarnContext(ctx, fmt.Sprintf("%s: MCR state discovery failure", h.ID()), slog.Any("host", h), slog.Any("error", err))
+					return fmt.Errorf("%s: failed to update docker info: %s", h.ID(), err.Error())
 				}
 
 				infomu.Lock()
-				info[h.Id()] = i
+				info[h.ID()] = i
 				infomu.Unlock()
 
 				return nil
@@ -80,7 +78,7 @@ func (c Component) CliBuild(cmd *cobra.Command, _ project.Project) error {
 
 			mhs, gherr := c.GetManagerHosts(ctx)
 			if gherr != nil {
-				return fmt.Errorf("MCR has no hosts to discover: %s", gherr.Error())
+				return fmt.Errorf("mcr has no hosts to discover: %s", gherr.Error())
 			}
 
 			var l *host.Host
@@ -92,7 +90,7 @@ func (c Component) CliBuild(cmd *cobra.Command, _ project.Project) error {
 				}
 
 				if i.Swarm.ControlAvailable {
-					slog.DebugContext(ctx, fmt.Sprintf("%s: swarm already active, this host can act as a leader.", h.Id()), slog.Any("host", h))
+					slog.DebugContext(ctx, fmt.Sprintf("%s: swarm already active, this host can act as a leader.", h.ID()), slog.Any("host", h))
 					l = h
 					break
 				}
@@ -106,15 +104,15 @@ func (c Component) CliBuild(cmd *cobra.Command, _ project.Project) error {
 
 			li, lierr := ld.Info(ctx)
 			if lierr != nil {
-				return fmt.Errorf("%s: swarm join failed because leader docker info error: %s", l.Id(), lierr.Error())
+				return fmt.Errorf("%s: swarm join failed because leader docker info error: %s", l.ID(), lierr.Error())
 			}
 			si, sierr := ld.SwarmInspect(ctx)
 			if sierr != nil {
-				return fmt.Errorf("%s: swarm join failed because leader docker swarm inspect error: %s", l.Id(), sierr.Error())
+				return fmt.Errorf("%s: swarm join failed because leader docker swarm inspect error: %s", l.ID(), sierr.Error())
 			}
-			ni, nierr := ld.NodeList(ctx, dockertypes.NodeListOptions{})
+			ni, nierr := ld.NodeList(ctx, dockertypesswarm.NodeListOptions{})
 			if nierr != nil {
-				return fmt.Errorf("%s: swarm join failed because leader docker swarm node list error: %s", l.Id(), nierr.Error())
+				return fmt.Errorf("%s: swarm join failed because leader docker swarm node list error: %s", l.ID(), nierr.Error())
 			}
 
 			info := struct {

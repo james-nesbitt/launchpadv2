@@ -34,15 +34,15 @@ func (c *Component) RequiresDependencies(ctx context.Context) dependency.Require
 				for _, h := range hs {
 					mhp := HostGetMCR(h)
 					if mhp == nil {
-						slog.WarnContext(ctx, fmt.Sprintf("%s: host '%s' is not an MCR host, ignoring", c.Name(), h.Id()))
+						slog.WarnContext(ctx, fmt.Sprintf("%s: host '%s' is not an MCR host, ignoring", c.Name(), h.ID()))
 						continue
 					}
 
 					if mhp.IsManager() {
-						slog.InfoContext(ctx, fmt.Sprintf("%s: host '%s' is included as a manager", c.Name(), h.Id()))
+						slog.InfoContext(ctx, fmt.Sprintf("%s: host '%s' is included as a manager", c.Name(), h.ID()))
 						mc = mc + 1
 					} else {
-						slog.InfoContext(ctx, fmt.Sprintf("%s: host '%s' is included as a worker", c.Name(), h.Id()))
+						slog.InfoContext(ctx, fmt.Sprintf("%s: host '%s' is included as a worker", c.Name(), h.ID()))
 					}
 
 					fhs.Add(h)

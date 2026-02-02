@@ -1,3 +1,6 @@
+/*
+Package host component for launchpad that allows host specific functionality.
+*/
 package host
 
 import (
@@ -33,7 +36,7 @@ func (hc HostsComponent) Name() string {
 	return fmt.Sprintf("%s:%s", ComponentType, hc.id)
 }
 
-func (hc HostsComponent) Debug() interface{} {
+func (hc HostsComponent) Debug() any {
 	return struct {
 		ID    string `json:"ID"`
 		Hosts Hosts  `json:"Hosts"`

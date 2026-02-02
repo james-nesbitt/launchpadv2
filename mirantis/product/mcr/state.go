@@ -13,6 +13,6 @@ type state struct {
 }
 
 // Debug state for output.
-func (s *state) Debug() interface{} {
+func (s *state) Debug() any {
 	return nil
 }

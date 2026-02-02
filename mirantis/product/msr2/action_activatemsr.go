@@ -10,11 +10,11 @@ type activateMSRStep struct {
 	id string
 }
 
-func (s activateMSRStep) Id() string {
+func (s activateMSRStep) ID() string {
 	return fmt.Sprintf("%s:msr2-activate", s.id)
 }
 
 func (s activateMSRStep) Run(ctx context.Context) error {
-	slog.InfoContext(ctx, "running MSR2 activate step", slog.String("ID", s.Id()))
+	slog.InfoContext(ctx, "running MSR2 activate step", slog.String("ID", s.ID()))
 	return nil
 }

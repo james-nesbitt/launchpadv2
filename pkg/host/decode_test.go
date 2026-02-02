@@ -25,7 +25,7 @@ mock:
 		t.Fatalf("yaml unmarshalling fail: %s", err.Error())
 	}
 
-	hpds := map[string]func(interface{}) error{}
+	hpds := map[string]func(any) error{}
 	for k, hpd := range hpsc {
 		hpds[k] = hpd.Decode
 	}

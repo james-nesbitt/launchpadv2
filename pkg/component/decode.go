@@ -12,16 +12,16 @@ var (
 
 var (
 	// ComponentDecoders handlers which can build Product components based on a key type.
-	ComponentDecoders = map[string]func(string, func(interface{}) error) (Component, error){}
+	ComponentDecoders = map[string]func(string, func(any) error) (Component, error){}
 )
 
 // RegisterDecoder register a new host decoder.
-func RegisterDecoder(k string, d func(string, func(interface{}) error) (Component, error)) {
+func RegisterDecoder(k string, d func(string, func(any) error) (Component, error)) {
 	ComponentDecoders[k] = d
 }
 
 // DecodeComponent Component of a specific from a decoder such as a yaml decoder.
-func DecodeComponent(t string, id string, d func(interface{}) error) (Component, error) {
+func DecodeComponent(t string, id string, d func(any) error) (Component, error) {
 	if len(ComponentDecoders) == 0 {
 		return nil, ErrNoComponentDecodersRegistered
 	}

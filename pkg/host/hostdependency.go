@@ -8,11 +8,9 @@ import (
 	"github.com/Mirantis/launchpad/pkg/dependency"
 )
 
-var (
-	ErrNoHostsFunction = errors.New("No hosts dependency option")
-)
+var ErrNoHostsFunction = errors.New("no hosts dependency option")
 
-// HostsDepencency a Dependency that provides hosts.
+// HostsDependency a Dependency that provides hosts.
 type HostsDependency interface {
 	ProduceHosts(context.Context) (Hosts, error)
 }
@@ -35,7 +33,7 @@ type hostsDep struct {
 }
 
 // Id uniquely identify the Dependency.
-func (hd hostsDep) Id() string {
+func (hd hostsDep) ID() string {
 	return hd.id
 }
 
@@ -68,10 +66,10 @@ func (hd *hostsDep) DeliversEvents(ctx context.Context) dependency.Events {
 	if hd.events == nil {
 		hd.events = dependency.Events{
 			dependency.EventKeyActivated: &dependency.Event{
-				Id: fmt.Sprintf("%s:%s", hd.Id(), dependency.EventKeyActivated),
+				ID: fmt.Sprintf("%s:%s", hd.ID(), dependency.EventKeyActivated),
 			},
 			dependency.EventKeyDeActivated: &dependency.Event{
-				Id: fmt.Sprintf("%s:%s", hd.Id(), dependency.EventKeyDeActivated),
+				ID: fmt.Sprintf("%s:%s", hd.ID(), dependency.EventKeyDeActivated),
 			},
 		}
 	}

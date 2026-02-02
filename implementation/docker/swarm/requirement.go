@@ -32,7 +32,7 @@ type dockerSwarmReq struct {
 	dep dependency.Dependency
 }
 
-func (dhr dockerSwarmReq) Id() string {
+func (dhr dockerSwarmReq) ID() string {
 	return dhr.id
 }
 

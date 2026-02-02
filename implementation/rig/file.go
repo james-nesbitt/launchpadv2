@@ -10,14 +10,13 @@ import (
 	"os"
 
 	"github.com/Mirantis/launchpad/pkg/host/exec"
-	rig "github.com/k0sproject/rig/v2"
 )
 
 // Stat return file info on a file, or an error.
 func (p *hostPlugin) Stat(ctx context.Context, path string, opts exec.ExecOptions) (os.FileInfo, error) {
 	slog.DebugContext(ctx, fmt.Sprintf("%s: Rig Stat: %s", p.hid(), path))
 
-	var c *rig.Client = p.rig.Client
+	c := p.rig.Client
 	if cerr := c.Connect(ctx); cerr != nil {
 		return nil, cerr
 	}
@@ -37,7 +36,7 @@ func (p *hostPlugin) Stat(ctx context.Context, path string, opts exec.ExecOption
 func (p *hostPlugin) FileExist(ctx context.Context, path string, opts exec.ExecOptions) error {
 	slog.DebugContext(ctx, fmt.Sprintf("%s: Rig FileExists: %s", p.hid(), path))
 
-	var c *rig.Client = p.rig.Client
+	c := p.rig.Client
 	if cerr := c.Connect(ctx); cerr != nil {
 		return cerr
 	}
@@ -60,7 +59,7 @@ func (p *hostPlugin) FileExist(ctx context.Context, path string, opts exec.ExecO
 func (p *hostPlugin) Upload(ctx context.Context, src io.Reader, dst string, fm fs.FileMode, opts exec.ExecOptions) error {
 	slog.DebugContext(ctx, fmt.Sprintf("%s: Rig Upload: %s", p.hid(), dst))
 
-	var c *rig.Client = p.rig.Client
+	c := p.rig.Client
 	if cerr := c.Connect(ctx); cerr != nil {
 		return cerr
 	}
@@ -90,13 +89,13 @@ func (p *hostPlugin) Upload(ctx context.Context, src io.Reader, dst string, fm f
 // @TODO this implementation is currently locked to linux machines with curl installed.
 func (p *hostPlugin) Download(ctx context.Context, url string, dst string, fm fs.FileMode, opts exec.ExecOptions) error {
 	if _, e, err := p.Exec(ctx, fmt.Sprintf("rm -f %s", dst), nil, opts); err != nil {
-		return fmt.Errorf("%s: host couldn't delete the existing K0s binary: %s -> %s :: %s : %s", p.h.Id(), url, dst, err.Error(), e)
+		return fmt.Errorf("%s: host couldn't delete the existing K0s binary: %s -> %s :: %s : %s", p.h.ID(), url, dst, err.Error(), e)
 	}
 	if _, e, err := p.Exec(ctx, fmt.Sprintf("curl --get --silent --location --output %s %s", dst, url), nil, opts); err != nil {
-		return fmt.Errorf("%s: host couldn't download the K0s binary: %s -> %s :: %s : %s", p.h.Id(), url, dst, err.Error(), e)
+		return fmt.Errorf("%s: host couldn't download the K0s binary: %s -> %s :: %s : %s", p.h.ID(), url, dst, err.Error(), e)
 	}
 	if _, e, err := p.Exec(ctx, fmt.Sprintf("chmod ug+x %s", dst), nil, opts); err != nil {
-		return fmt.Errorf("%s: host couldn't chmod the K0s binary [%s]: %s :: %s", p.h.Id(), dst, err.Error(), e)
+		return fmt.Errorf("%s: host couldn't chmod the K0s binary [%s]: %s :: %s", p.h.ID(), dst, err.Error(), e)
 	}
 	return nil
 }
@@ -105,7 +104,7 @@ func (p *hostPlugin) Download(ctx context.Context, url string, dst string, fm fs
 func (p *hostPlugin) Rename(ctx context.Context, before, after string, opts exec.ExecOptions) error {
 	slog.DebugContext(ctx, fmt.Sprintf("%s: Rig Rename: %s -> %s", p.hid(), before, after))
 
-	var c *rig.Client = p.rig.Client
+	c := p.rig.Client
 	if cerr := c.Connect(ctx); cerr != nil {
 		return cerr
 	}
@@ -125,7 +124,7 @@ func (p *hostPlugin) Rename(ctx context.Context, before, after string, opts exec
 func (p *hostPlugin) Delete(ctx context.Context, path string, opts exec.ExecOptions) error {
 	slog.DebugContext(ctx, fmt.Sprintf("%s: Rig Delete: %s", p.hid(), path))
 
-	var c *rig.Client = p.rig.Client
+	c := p.rig.Client
 	if cerr := c.Connect(ctx); cerr != nil {
 		return cerr
 	}
@@ -143,9 +142,9 @@ func (p *hostPlugin) Delete(ctx context.Context, path string, opts exec.ExecOpti
 
 // Cat stream file content bytes.
 func (p *hostPlugin) Cat(ctx context.Context, dst string, opts exec.ExecOptions) (io.Reader, error) {
-	slog.DebugContext(ctx, fmt.Sprintf("%s: Rig Cat: %s", p.h.Id(), dst))
+	slog.DebugContext(ctx, fmt.Sprintf("%s: Rig Cat: %s", p.h.ID(), dst))
 
-	var c *rig.Client = p.rig.Client
+	c := p.rig.Client
 	if cerr := c.Connect(ctx); cerr != nil {
 		return nil, cerr
 	}

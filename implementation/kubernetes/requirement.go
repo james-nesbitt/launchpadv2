@@ -30,7 +30,7 @@ type kubeReq struct {
 }
 
 // Id.
-func (kr kubeReq) Id() string {
+func (kr kubeReq) ID() string {
 	return kr.id
 }
 
@@ -57,7 +57,7 @@ func (kr kubeReq) RequiresKubernetes(context.Context) Version {
 func (kr *kubeReq) Match(d dependency.Dependency) error {
 	_, ok := d.(KubernetesDependency)
 	if !ok {
-		return fmt.Errorf("Wrong type of dependency given to KubernetesRequirement: %+v", d)
+		return fmt.Errorf("wrong type of dependency given to KubernetesRequirement: %+v", d)
 	}
 
 	kr.d = d

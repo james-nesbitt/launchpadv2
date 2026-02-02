@@ -27,11 +27,11 @@ func (mpf *MockHostPluginFactory) HostPlugin(_ context.Context, h *host.Host) ho
 	return p
 }
 
-// Decoder provide a Host Plugin decoder function
+// HostPluginDecode provide a Host Plugin decoder function
 //
 // The decoder function is ugly, but it is meant to to take a
 // yaml/json .HostPluginDecode() function, and turn it into a plugin.
-func (mpf *MockHostPluginFactory) HostPluginDecode(_ context.Context, h *host.Host, d func(interface{}) error) (host.HostPlugin, error) {
+func (mpf *MockHostPluginFactory) HostPluginDecode(_ context.Context, h *host.Host, d func(any) error) (host.HostPlugin, error) {
 	hp := &mockHostPlugin{
 		h: h,
 		n: &network.Network{},

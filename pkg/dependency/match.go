@@ -27,13 +27,13 @@ func MatchRequirements(ctx context.Context, rds []RequiresDependencies, pds []Pr
 			rs = append(rs, r)
 
 			if d, err := MatchRequirementDependency(ctx, r, pds); err != nil {
-				slog.WarnContext(ctx, fmt.Sprintf("project: requirement '%s' not matched: %s", r.Id(), err.Error()), slog.Any("requirement", r), slog.Any("error", err))
+				slog.WarnContext(ctx, fmt.Sprintf("project: requirement '%s' not matched: %s", r.ID(), err.Error()), slog.Any("requirement", r), slog.Any("error", err))
 			} else if d == nil { // this should never happen, but nil err sometimes means no match
-				slog.WarnContext(ctx, fmt.Sprintf("project: requirement '%s' not matched (empty)", r.Id()), slog.Any("requirement", r), slog.Any("error", err))
+				slog.WarnContext(ctx, fmt.Sprintf("project: requirement '%s' not matched (empty)", r.ID()), slog.Any("requirement", r), slog.Any("error", err))
 			} else if err := r.Match(d); err != nil {
-				slog.WarnContext(ctx, fmt.Sprintf("project: component requirement dependency match error %s->%s : %s", r.Id(), d.Id(), err.Error()), slog.Any("requirement", r), slog.Any("dependency", d), slog.Any("error", err))
+				slog.WarnContext(ctx, fmt.Sprintf("project: component requirement dependency match error %s->%s : %s", r.ID(), d.ID(), err.Error()), slog.Any("requirement", r), slog.Any("dependency", d), slog.Any("error", err))
 			} else if d := r.Matched(ctx); d == nil {
-				slog.WarnContext(ctx, fmt.Sprintf("project: component requirement dependency match failed (didn't stick) %s", r.Id()), slog.Any("requirement", r), slog.Any("dependency", d))
+				slog.WarnContext(ctx, fmt.Sprintf("project: component requirement dependency match failed (didn't stick) %s", r.ID()), slog.Any("requirement", r), slog.Any("dependency", d))
 			} else {
 				slog.DebugContext(ctx, "project: component requirement dependency matched", slog.Any("requirement", r), slog.Any("dependency", d))
 				ds = append(ds, d)
@@ -53,7 +53,7 @@ func MatchRequirements(ctx context.Context, rds []RequiresDependencies, pds []Pr
 //	    NOTE: WE DO NOT TELL THE REQUIREMENT ABOUT THE DEPENDENCY - YOU NEED TO DO THAT
 func MatchRequirementDependency(ctx context.Context, r Requirement, pds []ProvidesDependencies) (Dependency, error) {
 	if len(pds) == 0 {
-		return nil, fmt.Errorf("%w; no dependency handlers providers for requirement %s", ErrNotHandled, r.Id())
+		return nil, fmt.Errorf("%w; no dependency handlers providers for requirement %s", ErrNotHandled, r.ID())
 	}
 
 	for i, pd := range pds {
@@ -71,17 +71,17 @@ func MatchRequirementDependency(ctx context.Context, r Requirement, pds []Provid
 		}
 
 		if err == nil {
-			slog.DebugContext(ctx, fmt.Sprintf("dependency: requirement '%s'match with %s", r.Id(), d.Id()), slog.Any("requirement", r), slog.Any("dependency", d), slog.Any("handler", pd))
+			slog.DebugContext(ctx, fmt.Sprintf("dependency: requirement '%s'match with %s", r.ID(), d.ID()), slog.Any("requirement", r), slog.Any("dependency", d), slog.Any("handler", pd))
 			return d, nil // successful dependency creation
 		}
 
 		if errors.Is(err, ErrShouldHaveHandled) {
-			slog.WarnContext(ctx, fmt.Sprintf("dependency: Dependency generation failure: (%s) %s", r.Id(), err.Error()), slog.Any("requirement", r), slog.Any("handler", pd), slog.String("error", err.Error()))
+			slog.WarnContext(ctx, fmt.Sprintf("dependency: Dependency generation failure: (%s) %s", r.ID(), err.Error()), slog.Any("requirement", r), slog.Any("handler", pd), slog.String("error", err.Error()))
 			return d, err // Handler says that it should have handled it, but couldn't, so return an error
 		}
 
 		if !errors.Is(err, ErrNotHandled) {
-			slog.WarnContext(ctx, fmt.Sprintf("dependency: Unknown Dependency generation error: (%s) %s", r.Id(), err.Error()), slog.String("error", err.Error()))
+			slog.WarnContext(ctx, fmt.Sprintf("dependency: Unknown Dependency generation error: (%s) %s", r.ID(), err.Error()), slog.String("error", err.Error()))
 		}
 	}
 

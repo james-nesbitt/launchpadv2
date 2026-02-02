@@ -35,7 +35,7 @@ func (c Component) CliBuild(cmd *cobra.Command, _ *project.Project) error {
 
 			mhs, gherr := c.GetManagerHosts(ctx)
 			if gherr != nil {
-				return fmt.Errorf("MCR has no hosts to discover: %s", gherr.Error())
+				return fmt.Errorf("mcr has no hosts to discover: %s", gherr.Error())
 			}
 
 			fmt.Println(fmt.Sprint(mhs))
@@ -57,7 +57,7 @@ func (c Component) CliBuild(cmd *cobra.Command, _ *project.Project) error {
 
 			mhs, gherr := c.GetManagerHosts(ctx)
 			if gherr != nil {
-				return fmt.Errorf("MCR has no hosts to discover: %s", gherr.Error())
+				return fmt.Errorf("mcr has no hosts to discover: %s", gherr.Error())
 			}
 
 			var m *host.Host
@@ -81,19 +81,19 @@ func (c Component) CliBuild(cmd *cobra.Command, _ *project.Project) error {
 				for _, h := range mhs {
 					i, ierr := dockerhost.HostGetDockerExec(h).Info(ctx)
 					if ierr != nil {
-						slog.WarnContext(ctx, fmt.Sprintf("%s: host is not a docker machine", h.Id()), slog.Any("host", h))
+						slog.WarnContext(ctx, fmt.Sprintf("%s: host is not a docker machine", h.ID()), slog.Any("host", h))
 						continue
 					}
 
 					if i.Swarm.ControlAvailable {
-						slog.DebugContext(ctx, fmt.Sprintf("%s: this host can act as a leader.", h.Id()), slog.Any("host", h))
+						slog.DebugContext(ctx, fmt.Sprintf("%s: this host can act as a leader.", h.ID()), slog.Any("host", h))
 
 						m = h
 						mi = i
 
 						break
 					}
-					slog.WarnContext(ctx, fmt.Sprintf("%s: host rejected as leader", h.Id()), slog.Any("info", i))
+					slog.WarnContext(ctx, fmt.Sprintf("%s: host rejected as leader", h.ID()), slog.Any("info", i))
 				}
 			}
 
@@ -101,10 +101,10 @@ func (c Component) CliBuild(cmd *cobra.Command, _ *project.Project) error {
 				return fmt.Errorf("no swarm leader found")
 			}
 
-			slog.DebugContext(ctx, fmt.Sprintf("%s: Leader found for installation", m.Id()), slog.Any("info", mi))
+			slog.DebugContext(ctx, fmt.Sprintf("%s: Leader found for installation", m.ID()), slog.Any("info", mi))
 
 			if err := mkeInstall(ctx, m, c.config); err != nil {
-				return fmt.Errorf("%s: bootstrap fail: %s", m.Id(), err.Error())
+				return fmt.Errorf("%s: bootstrap fail: %s", m.ID(), err.Error())
 			}
 
 			slog.InfoContext(ctx, "MKE3 install completed")
@@ -127,7 +127,7 @@ func (c Component) CliBuild(cmd *cobra.Command, _ *project.Project) error {
 			slog.DebugContext(ctx, "discovering project (retrieving docker info)")
 			mhs, gherr := c.GetManagerHosts(ctx)
 			if gherr != nil {
-				return fmt.Errorf("MCR has no hosts to discover: %s", gherr.Error())
+				return fmt.Errorf("mcr has no hosts to discover: %s", gherr.Error())
 			}
 
 			var m *host.Host
@@ -151,19 +151,19 @@ func (c Component) CliBuild(cmd *cobra.Command, _ *project.Project) error {
 				for _, h := range mhs {
 					i, ierr := dockerhost.HostGetDockerExec(h).Info(ctx)
 					if ierr != nil {
-						slog.WarnContext(ctx, fmt.Sprintf("%s: host is not a docker machine", h.Id()), slog.Any("host", h))
+						slog.WarnContext(ctx, fmt.Sprintf("%s: host is not a docker machine", h.ID()), slog.Any("host", h))
 						continue
 					}
 
 					if i.Swarm.ControlAvailable {
-						slog.DebugContext(ctx, fmt.Sprintf("%s: this host can act as a leader.", h.Id()), slog.Any("host", h))
+						slog.DebugContext(ctx, fmt.Sprintf("%s: this host can act as a leader.", h.ID()), slog.Any("host", h))
 
 						m = h
 						mi = i
 
 						break
 					}
-					slog.WarnContext(ctx, fmt.Sprintf("%s: host rejected as leader", h.Id()), slog.Any("info", i))
+					slog.WarnContext(ctx, fmt.Sprintf("%s: host rejected as leader", h.ID()), slog.Any("info", i))
 				}
 			}
 
@@ -171,10 +171,10 @@ func (c Component) CliBuild(cmd *cobra.Command, _ *project.Project) error {
 				return fmt.Errorf("no swarm leader found")
 			}
 
-			slog.DebugContext(ctx, fmt.Sprintf("%s: Leader found for un-installation", m.Id()), slog.Any("info", mi))
+			slog.DebugContext(ctx, fmt.Sprintf("%s: Leader found for un-installation", m.ID()), slog.Any("info", mi))
 
 			if err := mkeUninstall(ctx, m, c.config); err != nil {
-				return fmt.Errorf("%s: uninstall fail: %s", m.Id(), err.Error())
+				return fmt.Errorf("%s: uninstall fail: %s", m.ID(), err.Error())
 			}
 
 			slog.InfoContext(ctx, "Pruning nodes after MKE uninstall")

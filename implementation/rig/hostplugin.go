@@ -34,11 +34,11 @@ func (rpf *HostPluginFactory) HostPlugin(_ context.Context, h *host.Host) host.H
 	return p
 }
 
-// Decoder provide a Host Plugin decoder function
+// HostPluginDecode provide a Host Plugin decoder function
 //
 // The decoder function is ugly, but it is meant to to take a
 // yaml/json .HostPluginDecode() function, and turn it into a plugin.
-func (rpf *HostPluginFactory) HostPluginDecode(_ context.Context, h *host.Host, d func(interface{}) error) (host.HostPlugin, error) {
+func (rpf *HostPluginFactory) HostPluginDecode(_ context.Context, h *host.Host, d func(any) error) (host.HostPlugin, error) {
 	p := &hostPlugin{
 		rig: &rig.ClientWithConfig{},
 		h:   h,
@@ -65,7 +65,7 @@ type hostPlugin struct {
 	rig *rig.ClientWithConfig
 }
 
-func (mhc hostPlugin) Id() string {
+func (mhc hostPlugin) ID() string {
 	return "rig"
 }
 
@@ -90,5 +90,5 @@ func (mhc hostPlugin) RoleMatch(role string) bool {
 }
 
 func (p hostPlugin) hid() string {
-	return p.h.Id()
+	return p.h.ID()
 }

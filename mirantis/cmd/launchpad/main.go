@@ -1,5 +1,4 @@
 /*
-t
 Copyright © 2023 Mirantis <tools@mirantis.com>
 */
 package main
@@ -28,20 +27,17 @@ import (
 	_ "github.com/Mirantis/launchpad/mirantis/product/mcr"
 	_ "github.com/Mirantis/launchpad/mirantis/product/mke3"
 	_ "github.com/Mirantis/launchpad/mirantis/product/mke4"
-	_ "github.com/Mirantis/launchpad/mirantis/product/mkex"
+
 	_ "github.com/Mirantis/launchpad/mirantis/product/msr2"
 	_ "github.com/Mirantis/launchpad/mirantis/product/msr3"
 	_ "github.com/Mirantis/launchpad/mirantis/product/msr4"
-
-	// Register some more components.
-	_ "github.com/Mirantis/launchpad/implementation/kubernetes/component"
 
 	// Register mock stuff, in case it gets used.
 	_ "github.com/Mirantis/launchpad/pkg/mock"
 )
 
 func main() {
-	var rootCmd = &cobra.Command{
+	rootCmd := &cobra.Command{
 		Use:   "launchpad",
 		Short: "A Mirantis installer",
 		Long:  `manage various Mirantis products.`,

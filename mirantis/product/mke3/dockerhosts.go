@@ -23,7 +23,7 @@ func IsDockerSwarmManager(ctx context.Context, h *host.Host) bool {
 func (c Component) GetManagerHosts(ctx context.Context) (host.Hosts, error) {
 	hs, err := c.GetAllHosts(ctx)
 	if err != nil {
-		return hs, fmt.Errorf("MCR manager hosts retrieval error; %w", err)
+		return hs, fmt.Errorf("mcr manager hosts retrieval error; %w", err)
 	}
 
 	mhs := host.NewHosts()
@@ -42,7 +42,7 @@ func (c Component) GetManagerHosts(ctx context.Context) (host.Hosts, error) {
 func (c Component) GetWorkerHosts(ctx context.Context) (host.Hosts, error) {
 	hs, err := c.GetAllHosts(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("MCR worker hosts retrieval error; %w", err)
+		return nil, fmt.Errorf("mcr worker hosts retrieval error; %w", err)
 	}
 
 	whs := host.NewHosts()
@@ -64,23 +64,23 @@ func (c Component) GetAllHosts(ctx context.Context) (host.Hosts, error) {
 		return nil, fmt.Errorf("hosts retrieval error; %w", err)
 	}
 	if len(ghs) == 0 {
-		return nil, fmt.Errorf("MCR has no hosts to install on; %w", err)
+		return nil, fmt.Errorf("mcr has no hosts to install on; %w", err)
 	}
 
 	hs := host.NewHosts()
 	for _, h := range ghs {
 		if d := dockerhost.HostGetDockerExec(h); d == nil {
-			slog.WarnContext(ctx, fmt.Sprintf("%s: host provided to MKE3 has no docker-exec plugin", h.Id()))
+			slog.WarnContext(ctx, fmt.Sprintf("%s: host provided to MKE3 has no docker-exec plugin", h.ID()))
 			continue
 		}
 
 		if e := exec.HostGetExecutor(h); e == nil {
-			slog.WarnContext(ctx, fmt.Sprintf("%s: host provided to MKE3 has no exec plugin", h.Id()))
+			slog.WarnContext(ctx, fmt.Sprintf("%s: host provided to MKE3 has no exec plugin", h.ID()))
 			continue
 		}
 
 		if p := exec.HostGetPlatform(h); p == nil {
-			slog.WarnContext(ctx, fmt.Sprintf("%s: host provided to MKE3 has no platform plugin", h.Id()))
+			slog.WarnContext(ctx, fmt.Sprintf("%s: host provided to MKE3 has no platform plugin", h.ID()))
 			continue
 		}
 
@@ -107,7 +107,7 @@ func getRequirementHosts(ctx context.Context, r dependency.Requirement) (host.Ho
 	mhddh, ok := mhd.(host.HostsDependency) // check that we have a hosts dependency
 	if !ok {
 		// this should never happen, but it is possible
-		return nil, fmt.Errorf("%w; %s Dependency is the wrong type", dependency.ErrDependencyNotMatched, mhd.Id())
+		return nil, fmt.Errorf("%w; %s Dependency is the wrong type", dependency.ErrDependencyNotMatched, mhd.ID())
 	}
 
 	return mhddh.ProduceHosts(ctx) // get the Hosts

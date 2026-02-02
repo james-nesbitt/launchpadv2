@@ -14,8 +14,8 @@ import (
 // @SEE https://github.com/MirantisContainers/blueprint-cli/blob/main/pkg/constants/constants.go#L5
 // @TODO consider importing it instead of duplicating it (if they OSS it).
 const (
-	// ManifestUrlLatest is the URL of the latest manifest YAML for the Boundless Operator.
-	ManifestUrlLatest = "https://raw.githubusercontent.com/mirantiscontainers/boundless/main/deploy/static/boundless-operator.yaml"
+	// ManifestURLLatest is the URL of the latest manifest YAML for the Boundless Operator.
+	ManifestURLLatest = "https://raw.githubusercontent.com/mirantiscontainers/boundless/main/deploy/static/boundless-operator.yaml"
 
 	// NamespaceBlueprint is the system namespace where the Boundless Operator and its components are installed.
 	NamespaceBlueprint = "blueprint-system"
@@ -34,7 +34,7 @@ var (
 	ErrBlueprintUninstall = errors.New("could not uninstall MKE4 instance")
 )
 
-// OperaterInstall install the MKE4 operator onto the cluster.
+// OperatorInstall install the MKE4 operator onto the cluster.
 func OperatorInstall(ctx context.Context, k kubernetes.Kubernetes, c Config) error {
 	ors, orserr := c.OperatorResources()
 	if orserr != nil {

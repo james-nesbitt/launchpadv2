@@ -23,7 +23,7 @@ type activateK0sStep struct {
 	id string
 }
 
-func (s activateK0sStep) Id() string {
+func (s activateK0sStep) ID() string {
 	return fmt.Sprintf("%s:k0s-activate", s.id)
 }
 
@@ -42,14 +42,14 @@ func (s activateK0sStep) Run(ctx context.Context) error {
 	lkh := HostGetK0s(l)
 
 	if ls, lserr := lkh.Status(ctx); lserr == nil {
-		slog.DebugContext(ctx, fmt.Sprintf("%s: discovered as leader", l.Id()), slog.Any("status", ls))
+		slog.DebugContext(ctx, fmt.Sprintf("%s: discovered as leader", l.ID()), slog.Any("status", ls))
 	} else {
 		// leader has no k0s running, so start a new cluster
-		slog.DebugContext(ctx, fmt.Sprintf("%s: using as leader in new cluster", l.Id()), slog.Any("status", ls))
+		slog.DebugContext(ctx, fmt.Sprintf("%s: using as leader in new cluster", l.ID()), slog.Any("status", ls))
 
 		lkh := HostGetK0s(l)
 
-		slog.InfoContext(ctx, fmt.Sprintf("%s: writing config to leader host", l.Id()))
+		slog.InfoContext(ctx, fmt.Sprintf("%s: writing config to leader host", l.ID()))
 		if werr := lkh.BuildAndWriteK0sConfig(ctx, baseCfg, csans); werr != nil {
 			return werr
 		}
@@ -65,12 +65,12 @@ func (s activateK0sStep) Run(ctx context.Context) error {
 	if err := chs.Sequential(ctx, func(ctx context.Context, h *host.Host) error {
 		kh := HostGetK0s(h)
 
-		slog.InfoContext(ctx, fmt.Sprintf("%s: writing config to controller host", h.Id()))
+		slog.InfoContext(ctx, fmt.Sprintf("%s: writing config to controller host", h.ID()))
 		if werr := kh.BuildAndWriteK0sConfig(ctx, baseCfg, csans); werr != nil {
 			return werr
 		}
 
-		slog.InfoContext(ctx, fmt.Sprintf("%s: joining as controller to '%s' cluster", h.Id(), l.Id()))
+		slog.InfoContext(ctx, fmt.Sprintf("%s: joining as controller to '%s' cluster", h.ID(), l.ID()))
 		return kh.JoinCluster(ctx, l, RoleController, s.c.config)
 	}, true); err != nil {
 		return fmt.Errorf("error joining controller hosts: %s", err.Error())
@@ -86,7 +86,7 @@ func (s activateK0sStep) Run(ctx context.Context) error {
 		eh.Connect(ctx)
 		kh := HostGetK0s(h)
 
-		slog.InfoContext(ctx, fmt.Sprintf("%s: joining as worker to '%s' cluster", h.Id(), l.Id()))
+		slog.InfoContext(ctx, fmt.Sprintf("%s: joining as worker to '%s' cluster", h.ID(), l.ID()))
 		return kh.JoinCluster(ctx, l, RoleWorker, s.c.config)
 	}); err != nil {
 		return fmt.Errorf("error joining worker hosts: %s", err.Error())

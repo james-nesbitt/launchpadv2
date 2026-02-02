@@ -19,7 +19,7 @@ func init() {
 }
 
 // Decode a project from the spec.
-func Decode(cl *project.Project, d func(interface{}) error) error {
+func Decode(cl *project.Project, d func(any) error) error {
 	var cs Spec
 
 	if err := d(&cs); err != nil {

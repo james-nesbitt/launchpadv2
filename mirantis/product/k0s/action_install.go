@@ -24,7 +24,7 @@ type installK0sStep struct {
 	Force bool
 }
 
-func (s installK0sStep) Id() string {
+func (s installK0sStep) ID() string {
 	return fmt.Sprintf("%s:k0s-install", s.id)
 }
 
@@ -37,7 +37,7 @@ func (s installK0sStep) Run(ctx context.Context) error {
 	}
 
 	if err := hs.Each(ctx, func(ctx context.Context, h *host.Host) error {
-		slog.DebugContext(ctx, fmt.Sprintf("%s: downloading k0s binary on host", h.Id()))
+		slog.DebugContext(ctx, fmt.Sprintf("%s: downloading k0s binary on host", h.ID()))
 
 		kh := HostGetK0s(h)
 

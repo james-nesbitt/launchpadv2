@@ -26,7 +26,7 @@ type phase struct {
 	after    dependency.Events
 }
 
-func (p phase) Id() string {
+func (p phase) ID() string {
 	return p.id
 }
 

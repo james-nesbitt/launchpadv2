@@ -12,7 +12,7 @@ type configureMCRStep struct {
 	id string
 }
 
-func (s configureMCRStep) Id() string {
+func (s configureMCRStep) ID() string {
 	return fmt.Sprintf("%s:mcr-configure", s.id)
 }
 

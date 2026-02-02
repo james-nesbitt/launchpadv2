@@ -11,7 +11,7 @@ type discoverStep struct {
 	id string
 }
 
-func (s discoverStep) Id() string {
+func (s discoverStep) ID() string {
 	return fmt.Sprintf("%s:k0s-discover", s.id)
 }
 

@@ -37,7 +37,7 @@ func Test_MockHostPluginInAHost(t *testing.T) {
 	h := host.NewHost(id)
 	p := mock.NewMockHostPlugin(h, &network.Network{})
 
-	assert.Equal(t, mock.HostRoleMock, p.Id(), "mock host plugin returned the wrong ID")
+	assert.Equal(t, mock.HostRoleMock, p.ID(), "mock host plugin returned the wrong ID")
 	assert.Nil(t, p.Validate(), "mock host plugin validate failed")
 	assert.True(t, p.RoleMatch(mock.HostRoleMock), "mock host plugin like to match the mock role")
 
@@ -45,7 +45,7 @@ func Test_MockHostPluginInAHost(t *testing.T) {
 	hm := mock.HostGetMock(h)
 
 	assert.NotNil(t, hm, "mock host plugin added to host did not allow the host to provide mock role functionality")
-	assert.Equal(t, mock.HostRoleMock, hm.Id(), "mock host plugin from host gave wrong ID")
+	assert.Equal(t, mock.HostRoleMock, hm.ID(), "mock host plugin from host gave wrong ID")
 }
 
 func Test_MockHostPluginNetworkNil(t *testing.T) {

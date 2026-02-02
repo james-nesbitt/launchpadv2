@@ -11,7 +11,7 @@ type kubernetesConfStep struct {
 	id string
 }
 
-func (s kubernetesConfStep) Id() string {
+func (s kubernetesConfStep) ID() string {
 	return fmt.Sprintf("%s:k0s-kube-config", s.id)
 }
 

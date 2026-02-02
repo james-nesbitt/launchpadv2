@@ -10,7 +10,7 @@ import (
 	"github.com/Mirantis/launchpad/pkg/dependency"
 )
 
-// Requires declare that we need a HostsRoles dependency.
+// RequiresDependencies declare that we need a HostsRoles dependency.
 func (c *Component) RequiresDependencies(_ context.Context) dependency.Requirements {
 	if c.dhr == nil {
 		c.dhr = dockerhost.NewDockerHostsRequirement(

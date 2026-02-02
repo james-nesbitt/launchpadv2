@@ -25,13 +25,13 @@ const (
 func HostGetFiles(h *host.Host) HostFiles {
 	hgf := h.MatchPlugin(HostRoleFiles)
 	if hgf == nil {
-		slog.Info(fmt.Sprintf("%s: no matching plugin for files: %s", h.Id(), HostRoleFiles))
+		slog.Info(fmt.Sprintf("%s: no matching plugin for files: %s", h.ID(), HostRoleFiles))
 		return nil
 	}
 
 	hf, ok := hgf.(HostFiles)
 	if !ok {
-		slog.Info(fmt.Sprintf("%s: plugin is not a files plugin: %s", h.Id(), h.Id()))
+		slog.Info(fmt.Sprintf("%s: plugin is not a files plugin: %s", h.ID(), h.ID()))
 		return nil
 	}
 

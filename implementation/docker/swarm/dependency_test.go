@@ -74,7 +74,7 @@ func Test_DependencySanity(t *testing.T) {
 		t.Fatalf("DockerSwarm requirement didn't return matched dependency: %+v", r)
 	}
 
-	if d2.Id() != "test" {
+	if d2.ID() != "test" {
 		t.Errorf("DockerSwarm Requirement produced the wrong dependency after being matched: %+v", d2)
 	}
 

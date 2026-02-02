@@ -1,4 +1,4 @@
 package msr2
 
-// State.
+// State encapsulation.
 type State struct{}

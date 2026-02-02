@@ -6,81 +6,81 @@ import (
 )
 
 // Debug the project.
-func (cl *Project) Debug(ctx context.Context) interface{} {
-	cld := map[string]interface{}{}
+func (p *Project) Debug(ctx context.Context) any {
+	cld := map[string]any{}
 
 	nctx, c := context.WithTimeout(context.Background(), time.Second*30)
 	defer c()
 
-	rs, ds, _ := cl.matchRequirements(nctx)
+	rs, ds, _ := p.matchRequirements(nctx)
 
-	cl_v := "valid"
-	if err := cl.Validate(ctx); err != nil {
-		cl_v = err.Error()
+	clv := "valid"
+	if err := p.Validate(ctx); err != nil {
+		clv = err.Error()
 	}
 	cld["project"] = struct {
 		Valid string
 	}{
-		Valid: cl_v,
+		Valid: clv,
 	}
 
-	cld_components := map[string]interface{}{}
-	for id, c := range cl.Components {
-		c_v := "valid"
+	cldComponents := map[string]any{}
+	for id, c := range p.Components {
+		cv := "valid"
 		if err := c.Validate(ctx); err != nil {
-			c_v = err.Error()
+			cv = err.Error()
 		}
 
-		cld_components[id] = struct {
-			Name  string      `json:"name"`
-			Debug interface{} `json:"debug"`
-			Valid string      `json:"valid"`
+		cldComponents[id] = struct {
+			Name  string `json:"name"`
+			Debug any    `json:"debug"`
+			Valid string `json:"valid"`
 		}{
 			Name:  c.Name(),
 			Debug: c.Debug(),
-			Valid: c_v,
+			Valid: cv,
 		}
 	}
-	cld["components"] = cld_components
+	cld["components"] = cldComponents
 
-	cld_requirements := map[string]interface{}{}
+	cldRequirements := map[string]any{}
 	for _, r := range rs {
-		cld_r_d := "<un-met>"
+		cldRD := "<un-met>"
 		if d := r.Matched(ctx); d != nil {
-			cld_r_d = d.Id()
+			cldRD = d.ID()
 		}
 
-		cld_requirements[r.Id()] = struct {
-			Id          string `json:"id"`
+		cldRequirements[r.ID()] = struct {
+			ID          string `json:"id"`
 			Description string `json:"description"`
 			Dependency  string `json:"dependency"`
 		}{
-			Id:          r.Id(),
+			ID:          r.ID(),
 			Description: r.Describe(),
-			Dependency:  cld_r_d,
+			Dependency:  cldRD,
 		}
 	}
-	cld["requirements"] = cld_requirements
+	cld["requirements"] = cldRequirements
 
-	cld_dependencies := map[string]interface{}{}
+	cldDependencies := map[string]any{}
 	for _, d := range ds {
-		d_v := "valid"
+		dv := "valid"
 		if err := d.Validate(ctx); err != nil {
-			d_v = err.Error()
+			dv = err.Error()
 		}
 
-		cld_dependencies[d.Id()] = struct {
-			Id          string `json:"id"`
+		cldDependencies[d.ID()] = struct {
+			ID          string `json:"id"`
 			Description string `json:"description"`
 			Valid       string `json:"valid"`
 		}{
-			Id:          d.Id(),
+			ID:          d.ID(),
 			Description: d.Describe(),
-			Valid:       d_v,
+			Valid:       dv,
 		}
 
 	}
-	cld["dependencies"] = cld_dependencies
+	cld["dependencies"] = cldDependencies
 
 	return cld
 }

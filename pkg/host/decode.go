@@ -11,16 +11,14 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var (
-	ErrUnknownHostPluginDecodeType = errors.New("Unknown host plugin type for decoding")
-)
+var ErrUnknownHostPluginDecodeType = errors.New("unknown host plugin type for decoding")
 
 func init() {
 	component.RegisterDecoder(ComponentType, DecodeComponent)
 }
 
 // DecodeComponent decode a new hosts component from an unmarshall decoder.
-func DecodeComponent(id string, d func(interface{}) error) (component.Component, error) {
+func DecodeComponent(id string, d func(any) error) (component.Component, error) {
 	chs := NewHosts()
 	hc := NewHostsComponent(id, chs)
 
@@ -39,7 +37,7 @@ func DecodeComponent(id string, d func(interface{}) error) (component.Component,
 
 	errs := []error{}
 	for id, shc := range shsc {
-		ds := map[string]func(interface{}) error{}
+		ds := map[string]func(any) error{}
 		for k, d := range shc { // collect all of the plugin node .Decode functions
 			ds[k] = d.Decode
 		}
@@ -60,7 +58,7 @@ func DecodeComponent(id string, d func(interface{}) error) (component.Component,
 }
 
 // DecodeHost create a Host from the registered iplugin decode functions.
-func DecodeHost(ctx context.Context, id string, ds map[string]func(interface{}) error) (*Host, error) {
+func DecodeHost(ctx context.Context, id string, ds map[string]func(any) error) (*Host, error) {
 	h := NewHost(id)
 
 	if len(hostPluginFactories) == 0 {
@@ -82,8 +80,8 @@ func DecodeHost(ctx context.Context, id string, ds map[string]func(interface{}) 
 	return h, nil
 }
 
-// DecodeHost create a Host from the registered iplugin decode functions.
-func (h *Host) DecodeHostPlugin(ctx context.Context, t string, d func(interface{}) error) error {
+// DecodeHostPlugin create a Host from the registered iplugin decode functions.
+func (h *Host) DecodeHostPlugin(ctx context.Context, t string, d func(any) error) error {
 	hpf, ok := hostPluginFactories[t]
 	if !ok {
 		return fmt.Errorf("%w: unknown host plugin type %s :: %+v", ErrUnknownHostPluginDecodeType, t, hostPluginFactories)
@@ -94,7 +92,7 @@ func (h *Host) DecodeHostPlugin(ctx context.Context, t string, d func(interface{
 		return fmt.Errorf("%s: error building host plugin: %s", t, hperr.Error())
 	}
 
-	slog.Debug(fmt.Sprintf("%s: host plugin: %s", h.Id(), t), slog.Any("plugin", hp))
+	slog.Debug(fmt.Sprintf("%s: host plugin: %s", h.ID(), t), slog.Any("plugin", hp))
 
 	h.AddPlugin(hp)
 

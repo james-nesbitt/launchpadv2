@@ -1,3 +1,6 @@
+/*
+Package mcr launchpad component plugin for MCR swarm clusters.
+*/
 package mcr
 
 import (
@@ -37,19 +40,21 @@ type Component struct {
 }
 
 // Name for the component.
-func (p Component) Name() string {
-	if p.id == ComponentType {
-		return p.id
+func (c Component) Name() string {
+	if c.id == ComponentType {
+		return c.id
 	}
-	return fmt.Sprintf("%s:%s", ComponentType, p.id)
+	return fmt.Sprintf("%s:%s", ComponentType, c.id)
 }
 
 // Debug product debug.
-func (c *Component) Debug() interface{} {
+func (c *Component) Debug() any {
 	return struct {
+		Name   string
 		Config Config
-		State  interface{}
+		State  any
 	}{
+		Name:   c.Name(),
 		Config: c.config,
 		State:  c.state.Debug(),
 	}
@@ -67,7 +72,7 @@ func (c *Component) Validate(ctx context.Context) error {
 	}
 
 	if len(errs) > 0 {
-		return fmt.Errorf("MCR validation failed: %s", errors.Join(errs...))
+		return fmt.Errorf("mcr validation failed: %s", errors.Join(errs...))
 	}
 	return nil
 }

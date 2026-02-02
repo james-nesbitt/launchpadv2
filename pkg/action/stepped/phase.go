@@ -34,7 +34,7 @@ type SteppedPhase struct {
 	deks  []string
 }
 
-func (sp SteppedPhase) Id() string {
+func (sp SteppedPhase) ID() string {
 	return sp.id
 }
 
@@ -63,19 +63,19 @@ func (sp SteppedPhase) Validate(ctx context.Context) error {
 	}
 
 	if len(errs) > 0 {
-		return fmt.Errorf("phase '%s' validation failure: %s", sp.Id(), errors.Join(errs...))
+		return fmt.Errorf("phase '%s' validation failure: %s", sp.ID(), errors.Join(errs...))
 	}
 
 	return nil
 }
 
 func (sp SteppedPhase) Run(ctx context.Context) error {
-	var ss Steps = *sp.steps
+	var ss = *sp.steps
 
 	for _, s := range ss {
-		slog.InfoContext(ctx, fmt.Sprintf("-- STEP: %s", s.Id()), slog.Any("step", s))
+		slog.InfoContext(ctx, fmt.Sprintf("-- STEP: %s", s.ID()), slog.Any("step", s))
 		if err := s.Run(ctx); err != nil {
-			slog.ErrorContext(ctx, fmt.Sprintf("Step %s error, exiting: %s", s.Id(), err.Error()), slog.Any("step", s))
+			slog.ErrorContext(ctx, fmt.Sprintf("Step %s error, exiting: %s", s.ID(), err.Error()), slog.Any("step", s))
 			return err
 		}
 	}

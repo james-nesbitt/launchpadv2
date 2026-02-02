@@ -20,18 +20,18 @@ func Test_HostPluginRoleTypeSanity(t *testing.T) {
 	h.AddPlugin(p)
 
 	if e := exec.HostGetExecutor(h); e == nil {
-		t.Errorf("%s: K0S not an exec host-plugin", h.Id())
+		t.Errorf("%s: K0S not an exec host-plugin", h.ID())
 	}
 
 	if f := exec.HostGetFiles(h); f == nil {
-		t.Errorf("%s: K0S not a files host-plugin", h.Id())
+		t.Errorf("%s: K0S not a files host-plugin", h.ID())
 	}
 
 	if n := network.HostGetNetwork(h); n == nil {
-		t.Errorf("%s: K0S not a files host-plugin", h.Id())
+		t.Errorf("%s: K0S not a files host-plugin", h.ID())
 	}
 
 	if p := exec.HostGetPlatform(h); p == nil {
-		t.Errorf("%s: K0S not a platform host-plugin", h.Id())
+		t.Errorf("%s: K0S not a platform host-plugin", h.ID())
 	}
 }

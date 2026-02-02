@@ -19,13 +19,13 @@ func (c *Component) GetKubernetesImplementation(ctx context.Context) (*kubernete
 
 	d := r.Matched(ctx)
 	if d == nil {
-		return nil, fmt.Errorf("%w; %s kubernetes requirement not matched", dependency.ErrDependencyNotMatched, r.Id())
+		return nil, fmt.Errorf("%w; %s kubernetes requirement not matched", dependency.ErrDependencyNotMatched, r.ID())
 	}
 
 	kd, ok := d.(kubernetes.KubernetesDependency) // check that we have a kubernetes dependency
 	if !ok {
 		// this should never happen, but it is possible
-		return nil, fmt.Errorf("%w; %s Dependency is the wrong type for requirement %s", dependency.ErrDependencyNotMatched, d.Id(), r.Id())
+		return nil, fmt.Errorf("%w; %s Dependency is the wrong type for requirement %s", dependency.ErrDependencyNotMatched, d.ID(), r.ID())
 	}
 
 	return kd.Kubernetes(ctx)

@@ -35,14 +35,14 @@ func (ps Phases) Contains(id string) bool {
 func (ps Phases) Add(nps ...Phase) {
 	for _, np := range nps {
 		// @TODO should we test for empty string?
-		ps[np.Id()] = np
+		ps[np.ID()] = np
 	}
 }
 
 func (ps Phases) Merge(nps Phases) {
 	for _, np := range nps {
 		// @TODO should we test for empty string?
-		ps[np.Id()] = np
+		ps[np.ID()] = np
 	}
 }
 
@@ -58,7 +58,7 @@ func (ps Phases) Order(ctx context.Context) ([]Phase, error) {
 		d := []string{}
 		if pds, ok := p.(dependency.DeliversEvents); ok {
 			for _, pd := range pds.DeliversEvents(ctx) {
-				d = append(d, pd.Id)
+				d = append(d, pd.ID)
 			}
 		}
 
@@ -67,16 +67,16 @@ func (ps Phases) Order(ctx context.Context) ([]Phase, error) {
 		if res, ok := p.(dependency.RequiresEvents); ok {
 			bes, aes := res.RequiresEvents(ctx)
 			for _, pd := range bes {
-				b = append(b, pd.Id)
+				b = append(b, pd.ID)
 			}
 
 			for _, pd := range aes {
-				a = append(a, pd.Id)
+				a = append(a, pd.ID)
 			}
 		}
 
 		os = append(os, order.Orderable{
-			Key:      p.Id(),
+			Key:      p.ID(),
 			Delivers: d,
 			Before:   b,
 			After:    a,

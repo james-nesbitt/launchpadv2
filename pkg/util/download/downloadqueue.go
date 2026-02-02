@@ -1,3 +1,6 @@
+/*
+Package download multiple file download helper.
+*/
 package download
 
 import (

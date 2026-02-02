@@ -15,28 +15,28 @@ type runMKEBootstrapper struct {
 	id string
 }
 
-func (s runMKEBootstrapper) Id() string {
+func (s runMKEBootstrapper) ID() string {
 	return fmt.Sprintf("%s:mke3-bootstrap", s.id)
 }
 
 func (s *runMKEBootstrapper) Run(ctx context.Context) error {
-	slog.InfoContext(ctx, "running MKE3 Bootstrapper step", slog.String("ID", s.Id()))
+	slog.InfoContext(ctx, "running MKE3 Bootstrapper step", slog.String("ID", s.ID()))
 
 	hs, gerr := s.c.GetManagerHosts(ctx)
 	if gerr != nil {
-		return fmt.Errorf("MKE3 bootstrap step could not retrieve manager list: %s", gerr.Error())
+		return fmt.Errorf("mke3 bootstrap step could not retrieve manager list: %s", gerr.Error())
 	}
 	if len(hs) == 0 {
-		return fmt.Errorf("MKE3 bootstrap step received an empty manager list: %s", gerr.Error())
+		return fmt.Errorf("mke3 bootstrap step received an empty manager list: %s", gerr.Error())
 	}
 
 	for _, h := range hs {
 		err := mkeInstall(ctx, h, s.c.config)
 		if err == nil {
-			slog.InfoContext(ctx, fmt.Sprintf("%s: MKE bootstrap succeeded", h.Id()))
+			slog.InfoContext(ctx, fmt.Sprintf("%s: MKE bootstrap succeeded", h.ID()))
 			break
 		}
-		slog.ErrorContext(ctx, fmt.Sprintf("%s: install failed: %s", h.Id(), err.Error()))
+		slog.ErrorContext(ctx, fmt.Sprintf("%s: install failed: %s", h.ID(), err.Error()))
 	}
 
 	return nil
@@ -48,10 +48,10 @@ func mkeInstall(ctx context.Context, h *host.Host, c Config) error {
 
 	o, e, err := dockerhost.HostGetDockerExec(h).Run(ctx, cmd, dockerimplementation.RunOptions{ShowOutput: true, ShowError: true})
 	if err != nil {
-		return fmt.Errorf("MKE bootstrap failed: %s :: %s", err.Error(), e)
+		return fmt.Errorf("mke bootstrap failed: %s :: %s", err.Error(), e)
 	}
 
-	slog.InfoContext(ctx, fmt.Sprintf("%s: MKE bootstrapper install succeeded: %s", h.Id(), o))
+	slog.InfoContext(ctx, fmt.Sprintf("%s: MKE bootstrapper install succeeded: %s", h.ID(), o))
 
 	return nil
 }

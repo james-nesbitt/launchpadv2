@@ -7,9 +7,7 @@ import (
 	"log/slog"
 )
 
-var (
-	ErrDependencyEventsFailure = errors.New("could not sort out dependency events")
-)
+var ErrDependencyEventsFailure = errors.New("could not sort out dependency events")
 
 // DeliversEvents this action delivers events.
 type DeliversEvents interface {
@@ -32,13 +30,13 @@ func DependencyDeliversEvents(ctx context.Context, deps Dependencies, eventKeys 
 
 	for _, d := range deps {
 		if d == nil {
-			//errs = append(errs, fmt.Errorf("%w; dependency empty", ErrNotHandled))
+			// errs = append(errs, fmt.Errorf("%w; dependency empty", ErrNotHandled))
 			continue
 		}
 
 		ddes, ok := d.(DeliversEvents) // Does this dependency deliver events?
 		if !ok {
-			errs = append(errs, fmt.Errorf("%w; %s dependency does not deliver events", ErrNotHandled, d.Id()))
+			errs = append(errs, fmt.Errorf("%w; %s dependency does not deliver events", ErrNotHandled, d.ID()))
 			continue
 		}
 
@@ -75,25 +73,25 @@ func DependencyRequiresEvents(ctx context.Context, reqs Requirements) (Events, E
 
 	for _, r := range reqs {
 		if r == nil {
-			errs = append(errs, fmt.Errorf("%w; %s requirement is empty", ErrRequirementNotCreated, r.Id()))
+			errs = append(errs, fmt.Errorf("%w; requirement is empty (nil)", ErrRequirementNotCreated))
 			continue
 		}
 
 		d := r.Matched(ctx)
 		if d == nil {
-			errs = append(errs, fmt.Errorf("%w; %s requirement not matched", ErrRequirementNotMatched, r.Id()))
+			errs = append(errs, fmt.Errorf("%w; %s requirement not matched", ErrRequirementNotMatched, r.ID()))
 			continue
 		}
 
 		ddes, ok := d.(DeliversEvents) // Does this requirement dependnecy deliver any events?
 		if !ok {
-			slog.DebugContext(ctx, fmt.Sprintf("Dependency required doesn't deliver events for %s", r.Id()), slog.Any("requirement", r))
+			slog.DebugContext(ctx, fmt.Sprintf("Dependency required doesn't deliver events for %s", r.ID()), slog.Any("requirement", r))
 			continue
 		}
 
 		es := ddes.DeliversEvents(ctx)
 
-		slog.DebugContext(ctx, fmt.Sprintf("Dependency required events found for %s", r.Id()), slog.Any("requirement", r), slog.Any("events", es))
+		slog.DebugContext(ctx, fmt.Sprintf("Dependency required events found for %s", r.ID()), slog.Any("requirement", r), slog.Any("events", es))
 
 		if be := es.Get(EventKeyActivated); be != nil {
 			bes.Add(be)
@@ -124,7 +122,7 @@ type Events map[string]*Event
 
 func (es Events) Add(nes ...*Event) {
 	for _, ne := range nes {
-		es[ne.Id] = ne
+		es[ne.ID] = ne
 	}
 }
 
@@ -140,10 +138,10 @@ func (es Events) Contains(id string) bool {
 }
 
 func (es Events) Get(id string) *Event {
-	e, _ := es[id] //nolint:gosimple
+	e := es[id] //nolint:gosimple
 	return e
 }
 
 type Event struct {
-	Id string
+	ID string
 }

@@ -15,7 +15,7 @@ import (
 	_ "github.com/Mirantis/launchpad/mirantis/product/mcr"
 	_ "github.com/Mirantis/launchpad/mirantis/product/mke3"
 	_ "github.com/Mirantis/launchpad/mirantis/product/mke4"
-	_ "github.com/Mirantis/launchpad/mirantis/product/mkex"
+
 	_ "github.com/Mirantis/launchpad/mirantis/product/msr2"
 	_ "github.com/Mirantis/launchpad/mirantis/product/msr4"
 
@@ -144,33 +144,6 @@ products:
 
 	if err := v2_0.Decode(&cl, df); err != nil {
 		t.Fatalf("NextGen 2.0 Spec decode failed unexpectedly: %s", err.Error())
-	}
-
-	if len(cl.Components) != 4 { // 3 products and the hosts component
-		t.Errorf("Wrong number of components: %+v", cl.Components)
-	}
-}
-
-func TestConfig_MKEx(t *testing.T) {
-	cl := project.Project{}
-	cy := `
-hosts:
-  dummy:
-    mkex:
-      role: manager
-products:
-  mkex:
-    version: v1.28.4+k0s.0
-  mke3:
-    version: 3.7.6
-  msr2:
-    version: 2.9.10
-`
-
-	df := decode.DecodeTestYaml([]byte(cy))
-
-	if err := v2_0.Decode(&cl, df); err != nil {
-		t.Fatalf("MKEX 2.0 Spec decode failed unexpectedly: %s", err.Error())
 	}
 
 	if len(cl.Components) != 4 { // 3 products and the hosts component

@@ -107,9 +107,9 @@ func (cmd *Command) Run(ctx context.Context) error {
 
 	slog.InfoContext(ctx, fmt.Sprintf("COMMAND: %s", cmd.Key), slog.Any("command", cmd))
 	for _, p := range po {
-		slog.InfoContext(ctx, fmt.Sprintf("PHASE: %s", p.Id()), slog.Any("phase", p))
+		slog.InfoContext(ctx, fmt.Sprintf("PHASE: %s", p.ID()), slog.Any("phase", p))
 		if err := p.Run(ctx); err != nil {
-			return fmt.Errorf("command run failed on phase [%s] : %s", p.Id(), err.Error())
+			return fmt.Errorf("command run failed on phase [%s] : %s", p.ID(), err.Error())
 		}
 	}
 

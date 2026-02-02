@@ -59,7 +59,7 @@ func (rpf *hookHostPluginFactory) HostPlugin(_ context.Context, h *host.Host) ho
 //
 // The decoder function is ugly, but it is meant to to take a
 // yaml/json .Decode() function, and turn it into a plugin.
-func (rpf *hookHostPluginFactory) HostPluginDecode(_ context.Context, h *host.Host, d func(interface{}) error) (host.HostPlugin, error) {
+func (rpf *hookHostPluginFactory) HostPluginDecode(_ context.Context, h *host.Host, d func(any) error) (host.HostPlugin, error) {
 	p := &hookHostPlugin{
 		h:     h,
 		hooks: Hooks{},
@@ -84,7 +84,7 @@ type hookHostPlugin struct {
 	hooks Hooks
 }
 
-func (mhc hookHostPlugin) Id() string {
+func (mhc hookHostPlugin) ID() string {
 	return "hook"
 }
 
@@ -101,5 +101,5 @@ func (mhc hookHostPlugin) RoleMatch(role string) bool {
 }
 
 func (p hookHostPlugin) hid() string {
-	return p.h.Id()
+	return p.h.ID()
 }

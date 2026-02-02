@@ -1,3 +1,6 @@
+/*
+Package uploadfile helper to upload files.
+*/
 package uploadfile
 
 import (
@@ -23,8 +26,8 @@ type UploadFile struct {
 	Source          string       `yaml:"src"`
 	DestinationDir  string       `yaml:"dstDir"`
 	DestinationFile string       `yaml:"dst"`
-	PermMode        interface{}  `yaml:"perm"`
-	DirPermMode     interface{}  `yaml:"dirPerm"`
+	PermMode        any          `yaml:"perm"`
+	DirPermMode     any          `yaml:"dirPerm"`
 	User            string       `yaml:"user"`
 	Group           string       `yaml:"group"`
 	PermString      string       `yaml:"-"`
@@ -42,7 +45,7 @@ func (u UploadFile) Validate() error {
 }
 
 // converts string or integer value to octal string for chmod.
-func permToString(val interface{}) (string, error) {
+func permToString(val any) (string, error) {
 	var s string
 	switch t := val.(type) {
 	case int, float64:
@@ -85,7 +88,7 @@ func permToString(val interface{}) (string, error) {
 }
 
 // UnmarshalYAML sets in some sane defaults when unmarshaling the data from yaml.
-func (u *UploadFile) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (u *UploadFile) UnmarshalYAML(unmarshal func(any) error) error {
 	type uploadFile UploadFile
 	yu := (*uploadFile)(u)
 

@@ -11,12 +11,12 @@ type installMSRStep struct {
 	id string
 }
 
-func (s installMSRStep) Id() string {
+func (s installMSRStep) ID() string {
 	return fmt.Sprintf("%s:msr4-install", s.id)
 }
 
 func (s installMSRStep) Run(ctx context.Context) error {
-	slog.InfoContext(ctx, "running MSR4 install step", slog.String("ID", s.Id()))
+	slog.InfoContext(ctx, "running MSR4 install step", slog.String("ID", s.ID()))
 
 	if err := s.c.addMsr4HelmRepo(ctx); err != nil {
 		return err

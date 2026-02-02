@@ -11,11 +11,11 @@ type activateStep struct {
 	id string
 }
 
-func (s activateStep) Id() string {
+func (s activateStep) ID() string {
 	return fmt.Sprintf("%s:activate-mke4", s.id)
 }
 
 func (s activateStep) Run(ctx context.Context) error {
-	slog.InfoContext(ctx, "running MKE4 install step", slog.String("ID", s.Id()))
+	slog.InfoContext(ctx, "running MKE4 install step", slog.String("ID", s.ID()))
 	return nil
 }

@@ -44,7 +44,7 @@ func (c Component) GetLeaderHost(ctx context.Context) *host.Host {
 func (c Component) GetControllerHosts(ctx context.Context) (host.Hosts, error) {
 	hs, err := c.GetAllHosts(ctx)
 	if err != nil {
-		return hs, fmt.Errorf("K0S manager hosts retrieval error; %w", err)
+		return hs, fmt.Errorf("k0s manager hosts retrieval error; %w", err)
 	}
 
 	mhs := host.NewHosts()
@@ -64,7 +64,7 @@ func (c Component) GetControllerHosts(ctx context.Context) (host.Hosts, error) {
 func (c Component) GetWorkerHosts(ctx context.Context) (host.Hosts, error) {
 	hs, err := c.GetAllHosts(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("K0S worker hosts retrieval error; %w", err)
+		return nil, fmt.Errorf("k0s worker hosts retrieval error; %w", err)
 	}
 
 	whs := host.NewHosts()
@@ -87,28 +87,28 @@ func (c Component) GetAllHosts(ctx context.Context) (host.Hosts, error) {
 		return nil, fmt.Errorf("hosts retrieval error; %w", err)
 	}
 	if len(ghs) == 0 {
-		return nil, fmt.Errorf("K0S has no hosts to install on; %w", err)
+		return nil, fmt.Errorf("k0s has no hosts to install on; %w", err)
 	}
 
 	hs := host.NewHosts()
 	for _, h := range ghs {
 		if m := HostGetK0s(h); m == nil {
-			slog.WarnContext(ctx, fmt.Sprintf("%s: host provided to K0S has no K0S plugin", h.Id()))
+			slog.WarnContext(ctx, fmt.Sprintf("%s: host provided to K0S has no K0S plugin", h.ID()))
 			continue
 		}
 
 		if e := exec.HostGetExecutor(h); e == nil {
-			slog.WarnContext(ctx, fmt.Sprintf("%s: host provided to K0S has no exec plugin", h.Id()))
+			slog.WarnContext(ctx, fmt.Sprintf("%s: host provided to K0S has no exec plugin", h.ID()))
 			continue
 		}
 
 		if e := exec.HostGetFiles(h); e == nil {
-			slog.WarnContext(ctx, fmt.Sprintf("%s: host provided to K0S has no files plugin: %+v", h.Id(), h))
+			slog.WarnContext(ctx, fmt.Sprintf("%s: host provided to K0S has no files plugin: %+v", h.ID(), h))
 			continue
 		}
 
 		if p := exec.HostGetPlatform(h); p == nil {
-			slog.WarnContext(ctx, fmt.Sprintf("%s: host provided to K0S has no platform plugin", h.Id()))
+			slog.WarnContext(ctx, fmt.Sprintf("%s: host provided to K0S has no platform plugin", h.ID()))
 			continue
 		}
 
@@ -135,7 +135,7 @@ func getRequirementHosts(ctx context.Context, r dependency.Requirement) (host.Ho
 	mhddh, ok := mhd.(host.HostsDependency) // check that we have a hosts dependency
 	if !ok {
 		// this should never happen, but it is possible
-		return nil, fmt.Errorf("%w; %s Dependency is the wrong type", dependency.ErrDependencyNotMatched, mhd.Id())
+		return nil, fmt.Errorf("%w; %s Dependency is the wrong type", dependency.ErrDependencyNotMatched, mhd.ID())
 	}
 
 	return mhddh.ProduceHosts(ctx) // get the Hosts

@@ -24,7 +24,7 @@ type dockerSwarmDep struct {
 	factory func(context.Context) (*Swarm, error)
 }
 
-func (dhd dockerSwarmDep) Id() string {
+func (dhd dockerSwarmDep) ID() string {
 	return dhd.id
 }
 

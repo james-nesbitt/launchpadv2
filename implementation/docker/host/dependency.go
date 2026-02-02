@@ -32,7 +32,7 @@ type dockerHostsDep struct {
 	events dependency.Events
 }
 
-func (dhd dockerHostsDep) Id() string {
+func (dhd dockerHostsDep) ID() string {
 	return dhd.id
 }
 
@@ -62,10 +62,10 @@ func (dhd dockerHostsDep) DeliversEvents(context.Context) dependency.Events {
 	if dhd.events == nil {
 		dhd.events = dependency.Events{
 			dependency.EventKeyActivated: &dependency.Event{
-				Id: fmt.Sprintf("%s:%s", dhd.Id(), dependency.EventKeyActivated),
+				ID: fmt.Sprintf("%s:%s", dhd.ID(), dependency.EventKeyActivated),
 			},
 			dependency.EventKeyDeActivated: &dependency.Event{
-				Id: fmt.Sprintf("%s:%s", dhd.Id(), dependency.EventKeyDeActivated),
+				ID: fmt.Sprintf("%s:%s", dhd.ID(), dependency.EventKeyDeActivated),
 			},
 		}
 	}

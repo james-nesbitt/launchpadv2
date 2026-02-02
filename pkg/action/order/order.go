@@ -1,3 +1,8 @@
+/*
+Package order ordering functionality
+
+Primarily used to order dependencies and steps.
+*/
 package order
 
 import (

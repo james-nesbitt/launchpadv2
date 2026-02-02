@@ -11,12 +11,12 @@ type uninstallMSRStep struct {
 	id string
 }
 
-func (s uninstallMSRStep) Id() string {
+func (s uninstallMSRStep) ID() string {
 	return fmt.Sprintf("%s:msr4-uninstall", s.id)
 }
 
 func (s uninstallMSRStep) Run(ctx context.Context) error {
-	slog.InfoContext(ctx, "running MSR4 uninstall step", slog.String("ID", s.Id()))
+	slog.InfoContext(ctx, "running MSR4 uninstall step", slog.String("ID", s.ID()))
 
 	if err := s.c.uninstallMsr4Release(ctx); err != nil {
 		return err

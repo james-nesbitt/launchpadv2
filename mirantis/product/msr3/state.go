@@ -1,5 +1,4 @@
 package msr3
 
-// State.
-type State struct {
-}
+// State encapsulation.
+type State struct{}

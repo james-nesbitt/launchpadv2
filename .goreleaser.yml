@@ -27,28 +27,7 @@ builds:
     - arm64
   binary: "release/launchpad_{{ .Os }}_{{ .Arch }}_{{ .Version }}"
   no_unique_dist_dir: true
-- id : mkex
-  main: ./mirantis/cmd/mkex
-  env:
-    - CGO_ENABLED=0
-  mod_timestamp: '{{ .CommitTimestamp }}'
-  flags:
-    - -trimpath
-  ldflags:
-      - -X github.com/Mirantis/launchpad/version.Environment=development
-      - -X github.com/Mirantis/launchpad/version.GitCommit={{ .FullCommit }}
-      - -X github.com/Mirantis/launchpad/version.Version={{ .Version }}
-  goos:
-    - freebsd
-    - windows
-    - linux
-    - darwin
-  goarch:
-    - amd64
-    - arm
-    - arm64
-  binary: "release/mkex_{{ .Os }}_{{ .Arch }}_{{ .Version }}"
-  no_unique_dist_dir: true
+
 archives:
 - formats:
   - zip

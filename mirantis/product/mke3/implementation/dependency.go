@@ -39,7 +39,7 @@ type mke3Dep struct {
 }
 
 // Id uniquely identify this Dependency.
-func (mke3d mke3Dep) Id() string {
+func (mke3d mke3Dep) ID() string {
 	return mke3d.id
 }
 
@@ -70,10 +70,10 @@ func (mke3d *mke3Dep) DeliversEvents(context.Context) dependency.Events {
 	if mke3d.events == nil {
 		mke3d.events = dependency.Events{
 			dependency.EventKeyActivated: &dependency.Event{
-				Id: fmt.Sprintf("%s:%s", mke3d.Id(), dependency.EventKeyActivated),
+				ID: fmt.Sprintf("%s:%s", mke3d.ID(), dependency.EventKeyActivated),
 			},
 			dependency.EventKeyDeActivated: &dependency.Event{
-				Id: fmt.Sprintf("%s:%s", mke3d.Id(), dependency.EventKeyDeActivated),
+				ID: fmt.Sprintf("%s:%s", mke3d.ID(), dependency.EventKeyDeActivated),
 			},
 		}
 	}

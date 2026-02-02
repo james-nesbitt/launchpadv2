@@ -48,7 +48,7 @@ func Test_MockDependencyDepMatch(t *testing.T) {
 	neg := mock.SimpleRequirement("not-this", "expected to not match")
 
 	d := mock.StaticDependency("this-dep", "expected dependency", nil, nil)
-	dnfs := mock.DepFactoryIdMatch("this", d)
+	dnfs := mock.DepFactoryIDMatch("this", d)
 
 	dnfsposd, dnfsposderr := dnfs(ctx, pos)
 	assert.Nil(t, dnfsposderr, "Dep match factory function produced unexpected error")

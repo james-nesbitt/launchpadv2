@@ -11,6 +11,6 @@ type Host struct {
 	plugins []HostPlugin
 }
 
-func (h Host) Id() string {
+func (h Host) ID() string {
 	return h.id
 }

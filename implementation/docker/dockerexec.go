@@ -26,9 +26,7 @@ import (
  * @see https://pkg.go.dev/github.com/docker/docker/client
  */
 
-var (
-	ErrDockerExecuteError = errors.New("error occurred running Docker command")
-)
+var ErrDockerExecuteError = errors.New("error occurred running Docker command")
 
 func NewDockerExec(executor func(ctx context.Context, cmd string, inr io.Reader, options RunOptions) (string, string, error)) *DockerExec {
 	return &DockerExec{
@@ -97,7 +95,7 @@ func (de DockerExec) Info(ctx context.Context) (dockertypessystem.Info, error) {
 	return di, nil
 }
 
-// ImagePull.
+// ImagePull pull an docker image on the executor.
 func (de DockerExec) ImagePull(ctx context.Context, refStr string, options dockertypesimage.PullOptions) (io.ReadCloser, error) {
 	o, e, eerr := de.dockerCommand(ctx, []string{"image", "pull", refStr}, RunOptions{})
 	if eerr != nil {
@@ -108,7 +106,7 @@ func (de DockerExec) ImagePull(ctx context.Context, refStr string, options docke
 }
 
 // NodeList retried the list of nodes in the swarm.
-func (de DockerExec) NodeList(ctx context.Context, options dockertypes.NodeListOptions) ([]dockertypesswarm.Node, error) {
+func (de DockerExec) NodeList(ctx context.Context, options dockertypesswarm.NodeListOptions) ([]dockertypesswarm.Node, error) {
 	cmd := []string{"node", "ls", "--format=json"}
 
 	for _, k := range options.Filters.Keys() {

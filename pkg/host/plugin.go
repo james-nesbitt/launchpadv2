@@ -6,15 +6,15 @@ import (
 )
 
 var (
-	ErrNoHostPluginHandlerRegistered = errors.New("No host plugin handlers have been registered")
-	ErrUnknownHostPluginType         = errors.New("Unknown host plugin handler")
+	ErrNoHostPluginHandlerRegistered = errors.New("no host plugin handlers have been registered")
+	ErrUnknownHostPluginType         = errors.New("unknown host plugin handler")
 
 	// hostPluginFactories the global map of PluginFactories, managed by
 	// the register function below.
 	hostPluginFactories = map[string]HostPluginFactory{}
 )
 
-// RegisterHostPlugin register a host plugin factory.
+// RegisterHostPluginFactory register a host plugin factory.
 func RegisterHostPluginFactory(key string, hp HostPluginFactory) {
 	hostPluginFactories[key] = hp
 }
@@ -32,7 +32,7 @@ type HostPluginFactory interface {
 	//
 	// The decoder function is ugly, but it is meant to to take a
 	// yaml/json .HostPluginDecode() function, and turn it into a plugin
-	HostPluginDecode(context.Context, *Host, func(interface{}) error) (HostPlugin, error)
+	HostPluginDecode(context.Context, *Host, func(any) error) (HostPlugin, error)
 }
 
 // HostPlugin the base interface for host plugins
@@ -40,8 +40,8 @@ type HostPluginFactory interface {
 // Note that plugins are mutable, and the other interfaces
 // are more important than this interface.
 type HostPlugin interface {
-	// Id return the host unique identifier
-	Id() string
+	// ID return the host unique identifier
+	ID() string
 	// RoleMatch find a host plugin that matches a role
 	RoleMatch(role string) bool
 	// Validate is the host plugin valid after configuration
@@ -58,11 +58,11 @@ func (h *Host) MatchPlugin(role string) HostPlugin {
 	return nil
 }
 
-// PluginIds retrieve the IDs of all of the plugin for the host.
+// PluginIDs retrieve the IDs of all of the plugin for the host.
 func (h *Host) PluginIDs() []string {
 	pids := []string{}
 	for _, p := range h.plugins {
-		pids = append(pids, p.Id())
+		pids = append(pids, p.ID())
 	}
 	return pids
 }
@@ -70,7 +70,7 @@ func (h *Host) PluginIDs() []string {
 // HasPlugin does the host have a plugin of the passed id.
 func (h *Host) HasPlugin(pid string) bool {
 	for _, p := range h.plugins {
-		if pid == p.Id() {
+		if pid == p.ID() {
 			return true
 		}
 	}

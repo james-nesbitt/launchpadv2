@@ -32,7 +32,7 @@ type dockerHostsReq struct {
 	dep dependency.Dependency
 }
 
-func (dhr dockerHostsReq) Id() string {
+func (dhr dockerHostsReq) ID() string {
 	return dhr.id
 }
 

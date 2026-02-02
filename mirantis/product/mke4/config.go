@@ -23,7 +23,7 @@ func operatorYaml() ([]byte, error) {
 	// @TODO import https://github.com/MirantisContainers/blueprint-cli/blob/main/pkg/utils/uri.go#L15
 	//       instead of rewriting it here
 
-	oryr, oryrerr := http.Get(ManifestUrlLatest)
+	oryr, oryrerr := http.Get(ManifestURLLatest)
 	if oryrerr != nil {
 		return []byte{}, oryrerr
 	}
@@ -61,7 +61,7 @@ func (c Config) OperatorResources() ([]kubeapi_unstructured.Unstructured, error)
 	return res, nil
 }
 
-// BlueprintResources provide an unstructured object describing the blueprint CR from config
+// BlueprintResource provide an unstructured object describing the blueprint CR from config
 // @TODO this thing sucks, and should be done using structs from the Blueprint Operator.
 func (c Config) BlueprintResource() (kubeapi_unstructured.Unstructured, error) {
 	var bp kubeapi_unstructured.Unstructured

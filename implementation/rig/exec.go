@@ -9,19 +9,14 @@ import (
 	"os"
 	"strings"
 
-	rig "github.com/k0sproject/rig/v2"
-
 	"github.com/Mirantis/launchpad/pkg/host/exec"
-	hostexec "github.com/Mirantis/launchpad/pkg/host/exec"
 )
 
-var (
-	ErrConnectFailed = errors.New("failed to connect to rig host")
-)
+var ErrConnectFailed = errors.New("failed to connect to rig host")
 
 // Connect prove that the host is reachable.
 func (p *hostPlugin) Connect(ctx context.Context) error {
-	slog.DebugContext(ctx, fmt.Sprintf("rig: connecting to host '%s'", p.h.Id()), slog.Any("rig", p.rig), slog.Any("host", p.h))
+	slog.DebugContext(ctx, fmt.Sprintf("rig: connecting to host '%s'", p.h.ID()), slog.Any("rig", p.rig), slog.Any("host", p.h))
 	if err := p.rig.Connect(ctx); err != nil {
 		return fmt.Errorf("%w; %s", ErrConnectFailed, err.Error())
 	}
@@ -29,7 +24,7 @@ func (p *hostPlugin) Connect(ctx context.Context) error {
 }
 
 // Exec a command.
-func (p *hostPlugin) Exec(ctx context.Context, cmd string, inr io.Reader, opts hostexec.ExecOptions) (string, string, error) {
+func (p *hostPlugin) Exec(ctx context.Context, cmd string, inr io.Reader, opts exec.ExecOptions) (string, string, error) {
 	slog.DebugContext(ctx, fmt.Sprintf("%s: Rig Exec: %s", p.hid(), cmd))
 
 	outs := strings.Builder{}
@@ -44,7 +39,7 @@ func (p *hostPlugin) Exec(ctx context.Context, cmd string, inr io.Reader, opts h
 		&errs,
 	)
 
-	var c *rig.Client = p.rig.Client
+	c := p.rig.Client
 	if cerr := c.Connect(ctx); cerr != nil {
 		return outs.String(), errs.String(), cerr
 	}
@@ -77,7 +72,7 @@ func (p *hostPlugin) Exec(ctx context.Context, cmd string, inr io.Reader, opts h
 func (p *hostPlugin) ExecInteractive(ctx context.Context, opts exec.ExecOptions) error {
 	slog.DebugContext(ctx, fmt.Sprintf("%s: Rig Exec Interactive", p.hid()))
 
-	var c *rig.Client = p.rig.Client
+	c := p.rig.Client
 	if cerr := c.Connect(ctx); cerr != nil {
 		return cerr
 	}

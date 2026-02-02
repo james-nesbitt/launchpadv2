@@ -1,10 +1,13 @@
+/*
+Package decode abstract decoding to avoid implementation lockin.
+*/
 package decode
 
 import (
 	"gopkg.in/yaml.v3"
 )
 
-func DecodeTestYaml(hyb []byte) func(interface{}) error {
+func DecodeTestYaml(hyb []byte) func(any) error {
 	dyn := make(chan *yaml.Node)
 
 	go func() {

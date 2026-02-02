@@ -18,12 +18,12 @@ type uninstallMCRStep struct {
 	id string
 }
 
-func (s uninstallMCRStep) Id() string {
+func (s uninstallMCRStep) ID() string {
 	return fmt.Sprintf("%s:mcr-uninstall", s.id)
 }
 
 func (s *uninstallMCRStep) Run(ctx context.Context) error {
-	slog.InfoContext(ctx, "running MCR uninstall step", slog.String("ID", s.Id()))
+	slog.InfoContext(ctx, "running MCR uninstall step", slog.String("ID", s.ID()))
 
 	hs, hsgerr := s.c.GetAllHosts(ctx)
 	if hsgerr != nil {
@@ -35,17 +35,17 @@ func (s *uninstallMCRStep) Run(ctx context.Context) error {
 
 		i, ierr := hm.DockerInfo(ctx)
 		if ierr != nil {
-			slog.InfoContext(ctx, fmt.Sprintf("%s: MCR not installed", h.Id()), slog.Any("host", h))
+			slog.InfoContext(ctx, fmt.Sprintf("%s: MCR not installed", h.ID()), slog.Any("host", h))
 		}
 
-		slog.InfoContext(ctx, fmt.Sprintf("%s: disabling and uninstalling MCR", h.Id()), slog.Any("host", h), slog.Any("info", i))
+		slog.InfoContext(ctx, fmt.Sprintf("%s: disabling and uninstalling MCR", h.ID()), slog.Any("host", h), slog.Any("info", i))
 
 		if err := hm.DisableMCRService(ctx); err != nil {
-			slog.InfoContext(ctx, fmt.Sprintf("%s: MCR disable failed", h.Id()), slog.Any("host", h))
+			slog.InfoContext(ctx, fmt.Sprintf("%s: MCR disable failed", h.ID()), slog.Any("host", h))
 			return err
 		}
 		if err := hm.UninstallMCR(ctx); err != nil {
-			slog.InfoContext(ctx, fmt.Sprintf("%s: MCR remove failed", h.Id()), slog.Any("host", h))
+			slog.InfoContext(ctx, fmt.Sprintf("%s: MCR remove failed", h.ID()), slog.Any("host", h))
 			return err
 		}
 

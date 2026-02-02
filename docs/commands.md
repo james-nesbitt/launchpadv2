@@ -1,13 +1,13 @@
 # Launchpad commands
 
-## Discover 
+## Discover
 
 Discover/Read the state of the project.
 
-## Apply 
+## Apply
 
-Apply the launchpad yaml config to the project.
+Apply the launchpad YAML config to the project.
 
-## Reset 
+## Reset
 
 Reset the state of the project by removing any installed/change components.

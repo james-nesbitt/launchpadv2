@@ -9,15 +9,15 @@ import (
 func Test_EventAddMerge(t *testing.T) {
 	es := dependency.Events{}
 
-	es.Add(&dependency.Event{Id: "one"})
+	es.Add(&dependency.Event{ID: "one"})
 
 	if !es.Contains("one") {
 		t.Errorf("events says it doesn't contain an added event: %+v", es)
 	}
 
 	esa := dependency.Events{
-		"two":   &dependency.Event{Id: "two"},
-		"three": &dependency.Event{Id: "three"},
+		"two":   &dependency.Event{ID: "two"},
+		"three": &dependency.Event{ID: "three"},
 	}
 
 	es.Merge(esa)
@@ -34,7 +34,7 @@ func Test_EventContains(t *testing.T) {
 		t.Errorf("empty events says it contains an event: %+v", es)
 	}
 
-	es.Add(&dependency.Event{Id: "add"})
+	es.Add(&dependency.Event{ID: "add"})
 
 	if !es.Contains("add") {
 		t.Errorf("events says it doesn't contain an added event: %+v", es)

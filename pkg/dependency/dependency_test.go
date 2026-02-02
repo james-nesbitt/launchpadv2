@@ -32,7 +32,7 @@ func Test_MockValidate(t *testing.T) {
 					t.Error("Dependency matching failed unexpectedly")
 					continue
 				}
-				if d.Id() != "my-dep" {
+				if d.ID() != "my-dep" {
 					t.Errorf("Dependency mathcing did not return the correct dependency: %+v", d)
 				}
 			}
@@ -62,7 +62,7 @@ func Test_MatchRequirements_Success(t *testing.T) {
 	if d == nil {
 		t.Error("MatchRequirements did not return any dependency")
 	}
-	if d.Id() != "this-one" {
+	if d.ID() != "this-one" {
 		t.Errorf("MatchRequirements returned the wrong dependency")
 	}
 }
@@ -112,17 +112,17 @@ func Test_DependenciesSanity(t *testing.T) {
 		t.Errorf("empty dependencies gave non-empty Id(): %+v", dsC)
 	}
 
-	if d := dsB.Get(d4.Id()); d == nil {
+	if d := dsB.Get(d4.ID()); d == nil {
 		t.Errorf("dependencies Get for known id returned null: %+v", dsB)
-	} else if d.Id() != d4.Id() {
+	} else if d.ID() != d4.ID() {
 		t.Errorf("dependencies get for known id has the wrong id: %+v", dsA)
 	}
 
 	dsA.Add(d7)
 
-	if d := dsA.Get(d7.Id()); d == nil {
+	if d := dsA.Get(d7.ID()); d == nil {
 		t.Errorf("dependencies get for added id returned nil: %+v", dsA)
-	} else if d.Id() != d7.Id() {
+	} else if d.ID() != d7.ID() {
 		t.Errorf("dependencies get for added id has the wrong id: %+v", dsA)
 	}
 }

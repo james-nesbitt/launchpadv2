@@ -15,10 +15,9 @@ type HostFactoryCliBuilder interface {
 // CliBuild build command cli for launchpad
 //
 // The hosts component allows HostPluginFactories to also build CLI.
-func (c *HostsComponent) CliBuild(cmd *cobra.Command, _ *project.Project) error {
-
+func (hc *HostsComponent) CliBuild(cmd *cobra.Command, _ *project.Project) error {
 	g := &cobra.Group{
-		ID:    c.Name(),
+		ID:    hc.Name(),
 		Title: "Hosts",
 	}
 	cmd.AddGroup(g)
@@ -35,7 +34,7 @@ func (c *HostsComponent) CliBuild(cmd *cobra.Command, _ *project.Project) error 
 		}
 
 		slog.Debug(fmt.Sprintf("%s host plugin factory builds clis", key))
-		if err := hpfcb.CliBuild(cmd, c); err != nil {
+		if err := hpfcb.CliBuild(cmd, hc); err != nil {
 			slog.Warn(fmt.Sprintf("%s host plugin factory cli build error", key))
 		}
 	}

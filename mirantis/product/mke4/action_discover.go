@@ -11,11 +11,11 @@ type discoverStep struct {
 	id string
 }
 
-func (s discoverStep) Id() string {
+func (s discoverStep) ID() string {
 	return fmt.Sprintf("%s:mke4-discover", s.id)
 }
 
 func (s discoverStep) Run(ctx context.Context) error {
-	slog.InfoContext(ctx, "running MKE4 discover step", slog.String("ID", s.Id()))
+	slog.InfoContext(ctx, "running MKE4 discover step", slog.String("ID", s.ID()))
 	return nil
 }

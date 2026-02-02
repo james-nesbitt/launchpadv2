@@ -8,15 +8,15 @@ import (
 	"github.com/Mirantis/launchpad/pkg/dependency"
 )
 
-func (p Component) RequiresDependencies(_ context.Context) (rs dependency.Requirements) {
-	if p.k8sr == nil {
-		p.k8sr = kubernetes.NewKubernetesRequirement(
-			fmt.Sprintf("%s:%s", p.Name(), kubernetes.ImplementationType),
-			fmt.Sprintf("MSR3 '%s' needs kubernetes implementation for installation", p.id),
+func (c Component) RequiresDependencies(_ context.Context) (rs dependency.Requirements) {
+	if c.k8sr == nil {
+		c.k8sr = kubernetes.NewKubernetesRequirement(
+			fmt.Sprintf("%s:%s", c.Name(), kubernetes.ImplementationType),
+			fmt.Sprintf("MSR3 '%s' needs kubernetes implementation for installation", c.id),
 			kubernetes.Version{},
 		)
 	}
-	rs = append(rs, p.k8sr)
+	rs = append(rs, c.k8sr)
 
 	return
 }

@@ -46,7 +46,7 @@ func Test_PhasesAddMerge(t *testing.T) {
 	}
 
 	for id, p := range phs {
-		if id != p.Id() {
+		if id != p.ID() {
 			t.Errorf("phases add didn't end up with the right phase keys: %+v", phs)
 		}
 	}
@@ -65,19 +65,18 @@ func Test_PhasesContains(t *testing.T) {
 	if phs.Contains("no") {
 		t.Errorf("Phases contains reports a phase which it shouldn't contain: %+v", phs)
 	}
-
 }
 
 func Test_PhasesOrder(t *testing.T) {
 	ctx := t.Context()
 
 	// create a bunch of events which we will share across the phases
-	ea := dependency.Event{Id: "A"}
-	eb := dependency.Event{Id: "B"}
-	ec := dependency.Event{Id: "C"}
-	ed := dependency.Event{Id: "D"}
-	ee := dependency.Event{Id: "E"}
-	ef := dependency.Event{Id: "F"}
+	ea := dependency.Event{ID: "A"}
+	eb := dependency.Event{ID: "B"}
+	ec := dependency.Event{ID: "C"}
+	ed := dependency.Event{ID: "D"}
+	ee := dependency.Event{ID: "E"}
+	ef := dependency.Event{ID: "F"}
 
 	// Create a bunch of phases with relationships that create an explicit order:
 	//  - no event free phases (as they end up in random order, so not testable)
@@ -105,10 +104,10 @@ func Test_PhasesOrder(t *testing.T) {
 	}
 
 	for i, p := range ops {
-		if fmt.Sprintf("%d", i) != p.Id() {
-			t.Errorf(" phase in wrong order %s != %d : %s", p.Id(), i, phasePrint(ctx, p))
+		if fmt.Sprintf("%d", i) != p.ID() {
+			t.Errorf(" phase in wrong order %s != %d : %s", p.ID(), i, phasePrint(ctx, p))
 		} else {
-			t.Logf("phase in right order %s != %d : %s", p.Id(), i, phasePrint(ctx, p))
+			t.Logf("phase in right order %s != %d : %s", p.ID(), i, phasePrint(ctx, p))
 		}
 	}
 }
@@ -116,12 +115,12 @@ func Test_PhasesOrder(t *testing.T) {
 // helper for pretty printing a Phase relationship to make testing easier.
 func phasePrint(ctx context.Context, p action.Phase) string {
 	pp := struct {
-		Id       string
+		ID       string
 		Delivers []string
 		Before   []string
 		After    []string
 	}{
-		Id:       p.Id(),
+		ID:       p.ID(),
 		Delivers: []string{},
 		Before:   []string{},
 		After:    []string{},
@@ -129,7 +128,7 @@ func phasePrint(ctx context.Context, p action.Phase) string {
 
 	if pd, ok := p.(dependency.DeliversEvents); ok {
 		for _, e := range pd.DeliversEvents(ctx) {
-			pp.Delivers = append(pp.Delivers, e.Id)
+			pp.Delivers = append(pp.Delivers, e.ID)
 		}
 	} else {
 		pp.Delivers = append(pp.Delivers, "none")
@@ -138,10 +137,10 @@ func phasePrint(ctx context.Context, p action.Phase) string {
 	if pr, ok := p.(dependency.RequiresEvents); ok {
 		bes, aes := pr.RequiresEvents(ctx)
 		for _, be := range bes {
-			pp.Before = append(pp.Before, be.Id)
+			pp.Before = append(pp.Before, be.ID)
 		}
 		for _, ae := range aes {
-			pp.After = append(pp.After, ae.Id)
+			pp.After = append(pp.After, ae.ID)
 		}
 	} else {
 		pp.Before = append(pp.Before, "none")

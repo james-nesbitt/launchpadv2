@@ -1,3 +1,6 @@
+/*
+Package dependency defines ways for components to define their dependencies on other components.
+*/
 package dependency
 
 import (
@@ -6,8 +9,8 @@ import (
 
 // Dependency response to a Dependency Requirement which can fulfill it.
 type Dependency interface {
-	// Id uniquely identify the Dependency
-	Id() string
+	// ID uniquely identify the Dependency
+	ID() string
 	// Describe the dependency for logging and auditing
 	Describe() string // Validate the the dependency thinks it has what it needs to fulfill it
 	// Validate the the dependency thinks it has what it needs to fulfill it

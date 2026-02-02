@@ -1,3 +1,6 @@
+/*
+Package stepped a Phase that is a sequence of step calls
+*/
 package stepped
 
 import "context"
@@ -16,6 +19,6 @@ func (ss *Steps) Merge(ssa Steps) {
 
 // Step in a stepped Phase.
 type Step interface {
-	Id() string
+	ID() string
 	Run(context.Context) error
 }

@@ -1,3 +1,6 @@
+/*
+Package project encapsulate components and config for launchpad.
+*/
 package project
 
 import (

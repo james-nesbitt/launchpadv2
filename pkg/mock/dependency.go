@@ -32,7 +32,7 @@ type dep struct {
 	m  func(context.Context) error // met handler
 }
 
-func (md dep) Id() string {
+func (md dep) ID() string {
 	return md.id
 }
 

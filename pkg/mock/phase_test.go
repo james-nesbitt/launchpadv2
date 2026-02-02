@@ -14,21 +14,21 @@ func Test_PhaseSanity(t *testing.T) {
 	ctx := t.Context()
 	id := "test"
 
-	var runErr error = errors.New("runError")
+	runErr := errors.New("runError")
 	var valErr error = nil
 
 	mp := mock.NewPhase(
 		id,
 		func(_ context.Context) error { return runErr },
 		func(_ context.Context) error { return valErr },
-		dependency.NewEvents(&dependency.Event{Id: "A"}),
-		dependency.NewEvents(&dependency.Event{Id: "B"}, &dependency.Event{Id: "C"}),
+		dependency.NewEvents(&dependency.Event{ID: "A"}),
+		dependency.NewEvents(&dependency.Event{ID: "B"}, &dependency.Event{ID: "C"}),
 		dependency.NewEvents(),
 	)
 
 	var p action.Phase = mp
 
-	if p.Id() != id {
+	if p.ID() != id {
 		t.Errorf("Phase returned wrong id: %+v", p)
 	}
 

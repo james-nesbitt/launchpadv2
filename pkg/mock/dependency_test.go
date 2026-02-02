@@ -22,7 +22,7 @@ func Test_DependencyStaticNoErrors(t *testing.T) {
 
 	d := mock.StaticDependency(id, desc, nil, nil)
 
-	assert.Equal(t, id, d.Id(), "mock dep returned wrong ID")
+	assert.Equal(t, id, d.ID(), "mock dep returned wrong ID")
 	assert.Equal(t, desc, d.Describe(), "mock dep returned wrong description")
 
 	assert.Nil(t, d.Validate(ctx), "mock dependency did not return expected nil validation")
@@ -39,7 +39,7 @@ func Test_DependencyStaticWErrors(t *testing.T) {
 
 	d := mock.StaticDependency(id, desc, verr, merr)
 
-	assert.Equal(t, id, d.Id(), "mock dep returned wrong ID")
+	assert.Equal(t, id, d.ID(), "mock dep returned wrong ID")
 	assert.Equal(t, desc, d.Describe(), "mock dep returned wrong description")
 
 	assert.ErrorIs(t, d.Validate(ctx), verr, "mock dependency did not return expected error")

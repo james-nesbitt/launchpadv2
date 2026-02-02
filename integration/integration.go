@@ -1,4 +1,8 @@
 //go:build integration
+
+/*
+Package integration support running the integration tests.
+*/
 package integration
 
 var (
@@ -139,5 +143,4 @@ spec:
 
 	// used for overriding with custom value for integration tests
 	IntegrationTestYamlDoNotCommit = ``
-
 )

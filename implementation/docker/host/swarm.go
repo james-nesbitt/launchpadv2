@@ -21,18 +21,18 @@ func DiscoverLeader(ctx context.Context, mhs host.Hosts) (*host.Host, error) {
 		}
 
 		if i.Swarm.ControlAvailable {
-			slog.DebugContext(ctx, fmt.Sprintf("%s: swarm already active, this host can act as a leader.", h.Id()), slog.Any("host", h))
+			slog.DebugContext(ctx, fmt.Sprintf("%s: swarm already active, this host can act as a leader.", h.ID()), slog.Any("host", h))
 			return h, nil
 		}
 	}
-	return nil, fmt.Errorf("No swarm leader discovered")
+	return nil, fmt.Errorf("no swarm leader discovered")
 }
 
 func InitSwarm(ctx context.Context, mhs host.Hosts) (*host.Host, error) {
 	for _, h := range mhs {
 		n, nerr := network.HostGetNetwork(h).Network(ctx)
 		if nerr != nil {
-			slog.WarnContext(ctx, fmt.Sprintf("%s: could not retrieve network for swarm initialization: %s", h.Id(), nerr.Error()))
+			slog.WarnContext(ctx, fmt.Sprintf("%s: could not retrieve network for swarm initialization: %s", h.ID(), nerr.Error()))
 			continue
 		}
 
@@ -41,12 +41,12 @@ func InitSwarm(ctx context.Context, mhs host.Hosts) (*host.Host, error) {
 		}
 
 		if err := HostGetDockerExec(h).SwarmInit(ctx, ir); err != nil {
-			slog.ErrorContext(ctx, fmt.Sprintf("%s: swarm initialize fail: %s", h.Id(), err.Error()))
+			slog.ErrorContext(ctx, fmt.Sprintf("%s: swarm initialize fail: %s", h.ID(), err.Error()))
 			continue
 		}
 
 		// swarm init succeeded on at least one manager, so we have a leader
-		slog.DebugContext(ctx, fmt.Sprintf("%s: swarm initialized. This is the new swarm leader", h.Id()), slog.Any("host", h))
+		slog.DebugContext(ctx, fmt.Sprintf("%s: swarm initialized. This is the new swarm leader", h.ID()), slog.Any("host", h))
 
 		return h, nil
 	}
@@ -66,7 +66,7 @@ func JoinSwarm(ctx context.Context, h *host.Host, li dockertypessystem.Info, si 
 
 	if hi, err := hd.Info(ctx); err == nil && hi.Swarm.LocalNodeState != "inactive" {
 		if hi.Swarm.NodeID == li.Swarm.NodeID {
-			slog.InfoContext(ctx, fmt.Sprintf("%s: host already in swarm as the leader", h.Id()))
+			slog.InfoContext(ctx, fmt.Sprintf("%s: host already in swarm as the leader", h.ID()))
 			return nil
 		}
 
@@ -75,16 +75,16 @@ func JoinSwarm(ctx context.Context, h *host.Host, li dockertypessystem.Info, si 
 				// Node is already in swarm
 
 				if hi.Swarm.ControlAvailable && role == "worker" {
-					slog.WarnContext(ctx, fmt.Sprintf("%s: host is already in the swarm, but is a worker when it is supposed to be a manager", h.Id()))
+					slog.WarnContext(ctx, fmt.Sprintf("%s: host is already in the swarm, but is a worker when it is supposed to be a manager", h.ID()))
 				} else if !hi.Swarm.ControlAvailable && role == "manager" {
-					slog.WarnContext(ctx, fmt.Sprintf("%s: host is already in the swarm, but is a manager when it is supposed to be a worker", h.Id()))
+					slog.WarnContext(ctx, fmt.Sprintf("%s: host is already in the swarm, but is a manager when it is supposed to be a worker", h.ID()))
 				}
 
 				// We should handle the above issues by promoting/demoting the hosts, but we are stuck in a place where
 				// the docker cli doesn't give that option.  We could make the host leave the swarm, but then it could
 				// disrupt the workload.
 
-				slog.InfoContext(ctx, fmt.Sprintf("%s: host already in swarm", h.Id()), slog.Any("host-swarm", hi.Swarm))
+				slog.InfoContext(ctx, fmt.Sprintf("%s: host already in swarm", h.ID()), slog.Any("host-swarm", hi.Swarm))
 				return nil
 
 			}
@@ -92,8 +92,8 @@ func JoinSwarm(ctx context.Context, h *host.Host, li dockertypessystem.Info, si 
 
 		// Node is in a swarm, but it is the wrong swarm
 		if lerr := hd.SwarmLeave(ctx, true); lerr != nil {
-			slog.ErrorContext(ctx, fmt.Sprintf("%s: host already in swarm", h.Id()), slog.Any("host-swarm", hi.Swarm), slog.Any("leader-swarm", li))
-			return fmt.Errorf("%s: was in another swarm, and failed to leave it", h.Id())
+			slog.ErrorContext(ctx, fmt.Sprintf("%s: host already in swarm", h.ID()), slog.Any("host-swarm", hi.Swarm), slog.Any("leader-swarm", li))
+			return fmt.Errorf("%s: was in another swarm, and failed to leave it", h.ID())
 		}
 	}
 
@@ -109,7 +109,7 @@ func JoinSwarm(ctx context.Context, h *host.Host, li dockertypessystem.Info, si 
 	}
 
 	if err := hd.SwarmJoin(ctx, r); err != nil {
-		return fmt.Errorf("%s: failed to join manager to swarm: %s", h.Id(), err.Error())
+		return fmt.Errorf("%s: failed to join manager to swarm: %s", h.ID(), err.Error())
 	}
 
 	return nil

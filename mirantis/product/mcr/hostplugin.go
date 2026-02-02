@@ -59,18 +59,18 @@ type hostPlugin struct {
 	h                *host.Host
 	SwarmRole        string `yaml:"role"`
 	ShouldSudoDocker bool   `yaml:"sudo_docker"`
-	DaemonJson       string `yaml:"daemon_json"`
+	DaemonJSON       string `yaml:"daemon_json"`
 }
 
-func (_ hostPlugin) Id() string {
-	return "mcr"
+func (hp hostPlugin) ID() string {
+	return fmt.Sprintf("mcr:%s", hp.h.ID())
 }
 
-func (_ hostPlugin) Validate() error {
+func (_ hostPlugin) Validate() error { //nolint:staticcheck // T.B.D.
 	return nil
 }
 
-func (_ hostPlugin) RoleMatch(role string) bool {
+func (_ hostPlugin) RoleMatch(role string) bool { //nolint:staticcheck // needed for the interface
 	switch role {
 	case HostRoleMCR:
 		return true
@@ -106,7 +106,7 @@ func (hp hostPlugin) DockerExec() *dockerimplementation.DockerExec {
 }
 
 func (hp hostPlugin) DockerConfig() string {
-	return hp.DaemonJson
+	return hp.DaemonJSON
 }
 
 func (hp hostPlugin) IsManager() bool {
@@ -125,7 +125,7 @@ func (hp hostPlugin) DockerInfo(ctx context.Context) (dockertypessystem.Info, er
 func (hp hostPlugin) DownloadMCRInstaller(ctx context.Context, c Config) error {
 	ir := c.InstallURLLinux
 
-	slog.InfoContext(ctx, fmt.Sprintf("%s: downloading MCR Installer: %s", hp.h.Id(), ir), slog.Any("host", hp.h))
+	slog.InfoContext(ctx, fmt.Sprintf("%s: downloading MCR Installer: %s", hp.h.ID(), ir), slog.Any("host", hp.h))
 
 	irs, igerr := http.Get(ir)
 	if igerr != nil {
@@ -134,7 +134,7 @@ func (hp hostPlugin) DownloadMCRInstaller(ctx context.Context, c Config) error {
 
 	defer irs.Body.Close()
 
-	if err := exec.HostGetFiles(hp.h).Upload(ctx, irs.Body, MCRInstallerPath, 0777, exec.ExecOptions{}); err != nil {
+	if err := exec.HostGetFiles(hp.h).Upload(ctx, irs.Body, MCRInstallerPath, 0o777, exec.ExecOptions{}); err != nil {
 		return err
 	}
 
@@ -142,17 +142,17 @@ func (hp hostPlugin) DownloadMCRInstaller(ctx context.Context, c Config) error {
 }
 
 func (hp hostPlugin) RunMCRInstaller(ctx context.Context, c Config) error {
-	slog.InfoContext(ctx, fmt.Sprintf("%s: running MCR Installer (%s)", hp.h.Id(), MCRInstallerPath), slog.Any("host", hp.h))
+	slog.InfoContext(ctx, fmt.Sprintf("%s: running MCR Installer (%s)", hp.h.ID(), MCRInstallerPath), slog.Any("host", hp.h))
 
 	cmd := fmt.Sprintf("DOCKER_URL=%s CHANNEL=%s VERSION=%s bash %s", c.RepoURL, c.Channel, c.Version, MCRInstallerPath)
 	if _, e, err := exec.HostGetExecutor(hp.h).Exec(ctx, cmd, nil, exec.ExecOptions{Sudo: true}); err != nil {
-		return fmt.Errorf("%s: mcr installer fail: %s \n %s", hp.h.Id(), err.Error(), e)
+		return fmt.Errorf("%s: mcr installer fail: %s \n %s", hp.h.ID(), err.Error(), e)
 	}
 	return nil
 }
 
 func (hp hostPlugin) UninstallMCR(ctx context.Context) error {
-	slog.InfoContext(ctx, fmt.Sprintf("%s: uninstall MCR: %s", hp.h.Id(), strings.Join(MCRServices, ", ")), slog.Any("host", hp.h))
+	slog.InfoContext(ctx, fmt.Sprintf("%s: uninstall MCR: %s", hp.h.ID(), strings.Join(MCRServices, ", ")), slog.Any("host", hp.h))
 
 	if err := exec.HostGetExecutor(hp.h).RemovePackages(ctx, MCRUninstallPackages); err != nil {
 		return err
@@ -162,7 +162,7 @@ func (hp hostPlugin) UninstallMCR(ctx context.Context) error {
 }
 
 func (hp hostPlugin) EnableMCRService(ctx context.Context) error {
-	slog.InfoContext(ctx, fmt.Sprintf("%s: enabling MCR services: %s", hp.h.Id(), strings.Join(MCRServices, ", ")), slog.Any("host", hp.h))
+	slog.InfoContext(ctx, fmt.Sprintf("%s: enabling MCR services: %s", hp.h.ID(), strings.Join(MCRServices, ", ")), slog.Any("host", hp.h))
 
 	if err := exec.HostGetExecutor(hp.h).ServiceEnable(ctx, MCRServices); err != nil {
 		return err
@@ -180,7 +180,7 @@ func (hp hostPlugin) RestartMCRService(ctx context.Context) error {
 }
 
 func (hp hostPlugin) DisableMCRService(ctx context.Context) error {
-	slog.InfoContext(ctx, fmt.Sprintf("%s: disabling MCR services: %s", hp.h.Id(), strings.Join(MCRServices, ", ")), slog.Any("host", hp.h))
+	slog.InfoContext(ctx, fmt.Sprintf("%s: disabling MCR services: %s", hp.h.ID(), strings.Join(MCRServices, ", ")), slog.Any("host", hp.h))
 
 	if err := exec.HostGetExecutor(hp.h).ServiceDisable(ctx, MCRServices); err != nil {
 		return err

@@ -5,11 +5,10 @@ import (
 	"time"
 
 	helmc "github.com/mittwald/go-helm-client"
-	helmclient "github.com/mittwald/go-helm-client"
 	helmrepo "helm.sh/helm/v3/pkg/repo"
 )
 
-func (c *Component) helmClient(ctx context.Context) (helmclient.Client, error) {
+func (c *Component) helmClient(ctx context.Context) (helmc.Client, error) {
 	ki, kierr := c.GetKubernetesImplementation(ctx)
 	if kierr != nil {
 		return nil, kierr

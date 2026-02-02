@@ -1,5 +1,4 @@
 package mke4
 
-// State.
-type State struct {
-}
+// State encapsulation.
+type State struct{}

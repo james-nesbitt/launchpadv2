@@ -30,7 +30,7 @@ func (c *Component) addMsr4HelmRepo(ctx context.Context) error {
 	hr := c.helmRepo()
 
 	if err := hc.AddOrUpdateChartRepo(hr); err != nil {
-		return fmt.Errorf("Error adding repo: %s", err.Error())
+		return fmt.Errorf("error adding repo: %s", err.Error())
 	}
 
 	return nil

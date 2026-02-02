@@ -19,7 +19,7 @@ func (c Component) ValidateK8sDependencyConfig(kc kubernetes.Version) error {
 func (c *Component) kubernetesImplementation(ctx context.Context) (*kubernetes.Kubernetes, error) {
 	lh := c.GetLeaderHost(ctx)
 	if lh == nil {
-		return nil, fmt.Errorf("No leader found")
+		return nil, fmt.Errorf("no leader found")
 	}
 
 	lkh := HostGetK0s(lh)
@@ -29,12 +29,12 @@ func (c *Component) kubernetesImplementation(ctx context.Context) (*kubernetes.K
 
 	kcs, kcserr := lkh.K0sKubeconfigAdmin(ctx)
 	if kcserr != nil {
-		return nil, fmt.Errorf("%s: Error retrieving kubeconfig for admin on leader; %w", lh.Id(), kcserr)
+		return nil, fmt.Errorf("%s: Error retrieving kubeconfig for admin on leader; %w", lh.ID(), kcserr)
 	}
 
 	kc, kcerr := kubernetes.ConfigFromKubeConf([]byte(kcs))
 	if kcerr != nil {
-		return nil, fmt.Errorf("%s: Error interpreting kubeconfig; %w", lh.Id(), kcserr)
+		return nil, fmt.Errorf("%s: Error interpreting kubeconfig; %w", lh.ID(), kcserr)
 	}
 
 	kc.Provider = KubernetesProvider

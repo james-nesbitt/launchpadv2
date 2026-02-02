@@ -11,11 +11,11 @@ type installOperatorStep struct {
 	id string
 }
 
-func (s installOperatorStep) Id() string {
+func (s installOperatorStep) ID() string {
 	return fmt.Sprintf("%s:install-operator", s.id)
 }
 
 func (s installOperatorStep) Run(ctx context.Context) error {
-	slog.InfoContext(ctx, "running MKE4 Operator install step", slog.String("ID", s.Id()))
+	slog.InfoContext(ctx, "running MKE4 Operator install step", slog.String("ID", s.ID()))
 	return nil
 }

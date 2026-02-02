@@ -1,3 +1,6 @@
+/*
+Package flags helper for managing flags for command lines.
+*/
 package flags
 
 import (
@@ -13,7 +16,7 @@ func (f *Flags) Add(s string) {
 	*f = append(*f, s)
 }
 
-// Add a flag with a value.
+// AddWithValue add a flag with a value.
 func (f *Flags) AddWithValue(key, value string) {
 	*f = append(*f, key+" "+value)
 }
@@ -88,7 +91,7 @@ func (f Flags) GetValue(s string) string {
 	return val
 }
 
-// GetValue returns the boolean value part of a flag such as true for a flag like "--san"
+// GetBoolean returns the boolean value part of a flag such as true for a flag like "--san"
 // If the flag is not defined returns false. If the flag is defined without a value, returns true
 // If no value is set, returns true.
 func (f Flags) GetBoolean(s string) (bool, error) {

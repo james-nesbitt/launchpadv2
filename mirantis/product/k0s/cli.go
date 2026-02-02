@@ -118,12 +118,12 @@ func (c *Component) CliBuild(cmd *cobra.Command, _ *project.Project) error {
 				kh := HostGetK0s(h)
 
 				if c.config.ShouldDownload() {
-					slog.InfoContext(ctx, fmt.Sprintf("%s: downloading binary to host", h.Id()))
+					slog.InfoContext(ctx, fmt.Sprintf("%s: downloading binary to host", h.ID()))
 					if err := kh.DownloadK0sBinary(ctx, c.config.Version); err != nil {
 						return err
 					}
 				} else {
-					slog.InfoContext(ctx, fmt.Sprintf("%s: uploading binary to host", h.Id()))
+					slog.InfoContext(ctx, fmt.Sprintf("%s: uploading binary to host", h.ID()))
 					if err := kh.UploadK0sBinary(ctx, c.config.Version); err != nil {
 						return err
 					}
@@ -197,24 +197,24 @@ func (c *Component) CliBuild(cmd *cobra.Command, _ *project.Project) error {
 			if l == nil {
 				return fmt.Errorf("%s: leader host not found", ln)
 			}
-			slog.InfoContext(ctx, fmt.Sprintf("%s: using as leader", l.Id()))
+			slog.InfoContext(ctx, fmt.Sprintf("%s: using as leader", l.ID()))
 
 			baseCfg := c.config.K0sConfig
 			csans := c.CollectClusterSans(ctx)
 
 			lkh := HostGetK0s(l)
 
-			slog.InfoContext(ctx, fmt.Sprintf("%s: writing config to leader host", l.Id()))
+			slog.InfoContext(ctx, fmt.Sprintf("%s: writing config to leader host", l.ID()))
 			if werr := lkh.BuildAndWriteK0sConfig(ctx, baseCfg, csans); werr != nil {
 				return werr
 			}
 
-			slog.InfoContext(ctx, fmt.Sprintf("%s: activating leader host", l.Id()))
+			slog.InfoContext(ctx, fmt.Sprintf("%s: activating leader host", l.ID()))
 			if err := lkh.InstallNewCluster(ctx, c.config); err != nil {
 				return err
 			}
 
-			fmt.Printf("%s: started new cluster", l.Id())
+			fmt.Printf("%s: started new cluster", l.ID())
 			return nil
 		},
 	}
@@ -270,7 +270,7 @@ func (c *Component) CliBuild(cmd *cobra.Command, _ *project.Project) error {
 				baseCfg := c.config.K0sConfig
 				csans := c.CollectClusterSans(ctx)
 
-				slog.InfoContext(ctx, fmt.Sprintf("%s: writing config to controller host", h.Id()))
+				slog.InfoContext(ctx, fmt.Sprintf("%s: writing config to controller host", h.ID()))
 				if werr := kh.BuildAndWriteK0sConfig(ctx, baseCfg, csans); werr != nil {
 					return werr
 				}
@@ -278,12 +278,12 @@ func (c *Component) CliBuild(cmd *cobra.Command, _ *project.Project) error {
 			case RoleWorker:
 			}
 
-			slog.InfoContext(ctx, fmt.Sprintf("%s: joining host as %s to leader %s", h.Id(), r, l.Id()))
+			slog.InfoContext(ctx, fmt.Sprintf("%s: joining host as %s to leader %s", h.ID(), r, l.ID()))
 			if err := kh.JoinCluster(ctx, l, r, c.config); err != nil {
 				return err
 			}
 
-			fmt.Printf("%s: joined cluster using leader %s", h.Id(), l.Id())
+			fmt.Printf("%s: joined cluster using leader %s", h.ID(), l.ID())
 			return nil
 		},
 	}
@@ -316,12 +316,12 @@ func (c *Component) CliBuild(cmd *cobra.Command, _ *project.Project) error {
 
 			kh := HostGetK0s(h)
 
-			slog.InfoContext(ctx, fmt.Sprintf("%s: stopping k0s on host", h.Id()))
+			slog.InfoContext(ctx, fmt.Sprintf("%s: stopping k0s on host", h.ID()))
 			if err := kh.K0sStop(ctx); err != nil {
 				return err
 			}
 
-			fmt.Printf("%s: stopped k0s components", h.Id())
+			fmt.Printf("%s: stopped k0s components", h.ID())
 			return nil
 		},
 	}
@@ -352,12 +352,12 @@ func (c *Component) CliBuild(cmd *cobra.Command, _ *project.Project) error {
 
 			kh := HostGetK0s(h)
 
-			slog.InfoContext(ctx, fmt.Sprintf("%s: resetting k0s", h.Id()))
+			slog.InfoContext(ctx, fmt.Sprintf("%s: resetting k0s", h.ID()))
 			if err := kh.K0sClean(ctx); err != nil {
 				return err
 			}
 
-			fmt.Printf("%s: reset", h.Id())
+			fmt.Printf("%s: reset", h.ID())
 			return nil
 		},
 	}
@@ -374,7 +374,7 @@ func (c *Component) CliBuild(cmd *cobra.Command, _ *project.Project) error {
 
 			lh := c.GetLeaderHost(ctx)
 			if lh == nil {
-				return fmt.Errorf("No leader found")
+				return fmt.Errorf("no leader found")
 			}
 
 			lkh := HostGetK0s(lh)
@@ -384,7 +384,7 @@ func (c *Component) CliBuild(cmd *cobra.Command, _ *project.Project) error {
 
 			kcs, kcserr := lkh.K0sKubeconfigAdmin(ctx)
 			if kcserr != nil {
-				return fmt.Errorf("%s: Error retrieving kubeconfig for admin on leader; %w", lh.Id(), kcserr)
+				return fmt.Errorf("%s: Error retrieving kubeconfig for admin on leader; %w", lh.ID(), kcserr)
 			}
 
 			fmt.Println(kcs)

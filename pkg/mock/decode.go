@@ -12,14 +12,14 @@ func init() {
 }
 
 // DecodeComponent component decoder used with the component injection system.
-func DecodeComponent(id string, d func(interface{}) error) (component.Component, error) {
+func DecodeComponent(id string, d func(any) error) (component.Component, error) {
 	c := ComponentDecode{}
 	c.Name = id
 
 	defaults.Set(&c)
 
 	if err := d(&c); err != nil {
-		return nil, fmt.Errorf("Failure to decode product '%s' : %w", ComponentType, err)
+		return nil, fmt.Errorf("failure to decode product '%s' : %w", ComponentType, err)
 	}
 
 	return NewComponentFromDecode(c), nil
@@ -32,7 +32,7 @@ func NewComponentFromDecode(cd ComponentDecode) component.Component {
 	}
 }
 
-// ComputeDecode data struct used to allow decoded data to be turned into a Mock Component.
+// ComponentDecode data struct used to allow decoded data to be turned into a Mock Component.
 type ComponentDecode struct {
 	Name string `yaml:"name" json:"name"`
 }

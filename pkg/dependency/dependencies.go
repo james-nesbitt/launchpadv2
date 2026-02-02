@@ -21,7 +21,7 @@ var (
 	ErrNotHandled = errors.New("dependency not handled by any provider")
 )
 
-// FullfillsDependencies components that can meet dependency needs.
+// ProvidesDependencies components that can meet dependency needs.
 type ProvidesDependencies interface {
 	// ProvidesDependency a dependency for some type of Requirements.
 	// - if the error .Is(ErrDependencyNotHandled) then  Provider doesn't handle such requirement
@@ -52,7 +52,7 @@ func (ds *Dependencies) Merge(nds Dependencies) {
 
 func (ds Dependencies) Get(id string) Dependency {
 	for _, d := range ds {
-		if d.Id() == id {
+		if d.ID() == id {
 			return d
 		}
 	}
@@ -62,12 +62,12 @@ func (ds Dependencies) Get(id string) Dependency {
 func (ds Dependencies) Ids() []string {
 	ids := []string{}
 	for _, d := range ds {
-		ids = append(ids, d.Id())
+		ids = append(ids, d.ID())
 	}
 	return ids
 }
 
-// UnMet dependency requirements set.
+// Invalid UnMet dependency requirements set.
 func (ds Dependencies) Invalid(ctx context.Context) Dependencies {
 	uds := Dependencies{}
 
@@ -85,7 +85,7 @@ func (ds Dependencies) Intersect(ds2 Dependencies) Dependencies {
 	icd := Dependencies{} // command dependencies that we own
 	for _, d2 := range ds2 {
 		for _, d1 := range ds {
-			if d1.Id() == d2.Id() {
+			if d1.ID() == d2.ID() {
 				icd = append(icd, d1)
 			}
 		}

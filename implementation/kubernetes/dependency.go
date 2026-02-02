@@ -31,7 +31,7 @@ type kubeDep struct {
 }
 
 // Id.
-func (kd kubeDep) Id() string {
+func (kd kubeDep) ID() string {
 	return kd.id
 }
 
@@ -56,10 +56,10 @@ func (kd *kubeDep) DeliversEvents(context.Context) dependency.Events {
 	if kd.events == nil {
 		kd.events = dependency.Events{
 			dependency.EventKeyActivated: &dependency.Event{
-				Id: fmt.Sprintf("%s:%s", kd.Id(), dependency.EventKeyActivated),
+				ID: fmt.Sprintf("%s:%s", kd.ID(), dependency.EventKeyActivated),
 			},
 			dependency.EventKeyDeActivated: &dependency.Event{
-				Id: fmt.Sprintf("%s:%s", kd.Id(), dependency.EventKeyDeActivated),
+				ID: fmt.Sprintf("%s:%s", kd.ID(), dependency.EventKeyDeActivated),
 			},
 		}
 	}

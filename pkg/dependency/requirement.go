@@ -7,8 +7,8 @@ import (
 
 // Requirement dependency definition from the perspective of the requirer.
 type Requirement interface {
-	// Id unique identifier for the requirement
-	Id() string
+	// ID unique identifier for the requirement
+	ID() string
 	// Describe the Requirements for labelling/auditing
 	Describe() string
 	// Match with a Dependency

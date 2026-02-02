@@ -22,10 +22,10 @@ func DepFactoryStatic(d dependency.Dependency, err error) func(context.Context, 
 	}
 }
 
-// DepFactoryIdMatch return a dependency factory that returns a dependendy set if the passed requirement id matches the passed id.
-func DepFactoryIdMatch(rid string, d dependency.Dependency) func(context.Context, dependency.Requirement) (dependency.Dependency, error) {
+// DepFactoryIDMatch return a dependency factory that returns a dependendy set if the passed requirement id matches the passed id.
+func DepFactoryIDMatch(rid string, d dependency.Dependency) func(context.Context, dependency.Requirement) (dependency.Dependency, error) {
 	return func(ctx context.Context, r dependency.Requirement) (dependency.Dependency, error) {
-		if rid == r.Id() {
+		if rid == r.ID() {
 			return d, nil
 		}
 		return nil, nil

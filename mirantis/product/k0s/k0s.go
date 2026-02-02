@@ -26,9 +26,7 @@ const (
 	DefaultK0sTokenPath  = "/etc/k0s/k0s-token"
 )
 
-var (
-	JoinTokenExpireDuration = time.Duration(10) * time.Minute
-)
+var JoinTokenExpireDuration = time.Duration(10) * time.Minute
 
 type k0sversion struct {
 	K0s          string `json:"k0s"`
@@ -41,8 +39,8 @@ type k0sversion struct {
 }
 
 var (
-	ErrK0sBinaryNotFound = errors.New("K0s binaries not installed onto the machine")
-	ErrK0sNotRunning     = errors.New("K0s not running on the machine")
+	ErrK0sBinaryNotFound = errors.New("k0s binaries not installed onto the machine")
+	ErrK0sNotRunning     = errors.New("k0s not running on the machine")
 )
 
 type k0sstatus struct {
@@ -69,7 +67,7 @@ func k0sErrorAnalyze(e string, err error) error {
 	return err
 }
 
-// DownloadURL url to use for the k0s binary for the config version.
+// DownloadK0sURL url to use for the k0s binary for the config version.
 func DownloadK0sURL(v version.Version, arch string) string {
 	// https://github.com/k0sproject/k0s/releases/download/v1.30.0%2Bk0s.0/k0s-v1.30.0+k0s.0-amd64
 	// v1.30.0%2Bk0s.0/k0s-v1.30.0+k0s.0-amd64

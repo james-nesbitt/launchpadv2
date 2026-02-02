@@ -32,11 +32,11 @@ func CliBuild(cmd *cobra.Command, c *host.HostsComponent) error {
 
 			he := HostGetExecutor(h)
 			if he == nil {
-				return fmt.Errorf("%s: host is not an executor", h.Id())
+				return fmt.Errorf("%s: host is not an executor", h.ID())
 			}
 
 			if err := he.Connect(ctx); err != nil {
-				return fmt.Errorf("%s: host failed to connect", h.Id())
+				return fmt.Errorf("%s: host failed to connect", h.ID())
 			}
 
 			opts := ExecOptions{
@@ -45,7 +45,7 @@ func CliBuild(cmd *cobra.Command, c *host.HostsComponent) error {
 
 			o, e, err := he.Exec(ctx, strings.Join(args, " "), os.Stdin, opts)
 			if err != nil {
-				return fmt.Errorf("%s: exec error: %s :: %s", h.Id(), err.Error(), e)
+				return fmt.Errorf("%s: exec error: %s :: %s", h.ID(), err.Error(), e)
 			}
 			fmt.Println(o)
 
@@ -74,18 +74,18 @@ func CliBuild(cmd *cobra.Command, c *host.HostsComponent) error {
 
 			he := HostGetExecutor(h)
 			if he == nil {
-				return fmt.Errorf("%s: host is not an executor", h.Id())
+				return fmt.Errorf("%s: host is not an executor", h.ID())
 			}
 
 			if err := he.Connect(ctx); err != nil {
-				return fmt.Errorf("%s: host failed to connect", h.Id())
+				return fmt.Errorf("%s: host failed to connect", h.ID())
 			}
 
 			opts := ExecOptions{}
 
 			err := he.ExecInteractive(ctx, opts)
 			if err != nil {
-				return fmt.Errorf("%s: exec error: %s", h.Id(), err.Error())
+				return fmt.Errorf("%s: exec error: %s", h.ID(), err.Error())
 			}
 
 			return nil

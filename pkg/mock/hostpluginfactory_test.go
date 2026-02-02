@@ -63,7 +63,7 @@ mock:
 		t.Fatal("could not unmarshal")
 	}
 
-	ds := map[string]func(interface{}) error{}
+	ds := map[string]func(any) error{}
 	for id, dn := range dns {
 		ds[id] = dn.Decode
 	}
@@ -74,7 +74,7 @@ mock:
 	h, herr := host.DecodeHost(ctx, id, ds)
 
 	assert.Nil(t, herr, "mock host decode returned unexpected error")
-	assert.Equal(t, id, h.Id(), "mock host for decode has the wrong ID")
+	assert.Equal(t, id, h.ID(), "mock host for decode has the wrong ID")
 
 	slog.Error("host debug", slog.Any("h", h))
 

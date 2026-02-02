@@ -14,12 +14,12 @@ type restartMCRStep struct {
 	id string
 }
 
-func (s restartMCRStep) Id() string {
+func (s restartMCRStep) ID() string {
 	return fmt.Sprintf("%s:mcr-restart", s.id)
 }
 
 func (s *restartMCRStep) Run(ctx context.Context) error {
-	slog.InfoContext(ctx, "running MCR restart step", slog.String("ID", s.Id()))
+	slog.InfoContext(ctx, "running MCR restart step", slog.String("ID", s.ID()))
 	hs, hsgerr := s.c.GetAllHosts(ctx)
 	if hsgerr != nil {
 		return hsgerr

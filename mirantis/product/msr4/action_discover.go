@@ -11,12 +11,12 @@ type discoverStep struct {
 	id string
 }
 
-func (s discoverStep) Id() string {
+func (s discoverStep) ID() string {
 	return fmt.Sprintf("%s:msr4-discover", s.id)
 }
 
 func (s discoverStep) Run(ctx context.Context) error {
-	slog.InfoContext(ctx, "running MSR4 discover step", slog.String("ID", s.Id()))
+	slog.InfoContext(ctx, "running MSR4 discover step", slog.String("ID", s.ID()))
 
 	r, rerr := s.c.getRelease(ctx)
 	if rerr != nil {

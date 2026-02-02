@@ -11,7 +11,7 @@ type baseStep struct {
 
 func (s baseStep) Validate(ctx context.Context) error {
 	if _, err := s.c.GetAllHosts(ctx); err != nil {
-		return fmt.Errorf("MCR Step validation fail: Host validation: %s", err.Error())
+		return fmt.Errorf("mcr Step validation fail: Host validation: %s", err.Error())
 	}
 
 	return nil

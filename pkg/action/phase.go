@@ -1,3 +1,6 @@
+/*
+Package action collections of functionality that can be executed as a single run.
+*/
 package action
 
 import (
@@ -10,7 +13,7 @@ import (
 //	  interfaces for that.
 type Phase interface {
 	// Uniquely identify the phase
-	Id() string
+	ID() string
 	// Execute the phase
 	Run(context.Context) error
 }

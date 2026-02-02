@@ -20,7 +20,7 @@ func Test_HostsEachSanity(t *testing.T) {
 		host.NewHost("six"),
 	)
 
-	var i int = 0
+	var i = 0
 	err := hs.Each(ctx, func(ctx context.Context, h *host.Host) error {
 		i = i + 1
 		return nil

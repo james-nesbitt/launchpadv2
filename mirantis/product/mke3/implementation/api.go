@@ -1,3 +1,6 @@
+/*
+Package implementation MKE3 functionality that other components can use
+*/
 package implementation
 
 type Config struct {

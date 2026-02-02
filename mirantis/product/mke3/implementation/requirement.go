@@ -32,7 +32,7 @@ type mke3Req struct {
 	dep dependency.Dependency
 }
 
-func (mke3r mke3Req) Id() string {
+func (mke3r mke3Req) ID() string {
 	return mke3r.id
 }
 

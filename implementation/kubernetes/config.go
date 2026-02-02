@@ -10,7 +10,7 @@ import (
 // Config for the kubernetes implementation.
 type Config struct {
 	Provider         string // some kubernetes configurations have a provider name
-	KubeCmdApiConfig kubeclientcmd.OverridingClientConfig
+	KubeCmdAPIConfig kubeclientcmd.OverridingClientConfig
 }
 
 // ConfigFromKubeConf create a kubernetes implementation configuration from kubeconf bytes.
@@ -18,7 +18,7 @@ func ConfigFromKubeConf(cb []byte) (Config, error) {
 	var c Config
 
 	if kckrc, err := kubeclientcmd.NewClientConfigFromBytes(cb); err == nil {
-		c.KubeCmdApiConfig = kckrc
+		c.KubeCmdAPIConfig = kckrc
 	} else {
 		return c, fmt.Errorf("could not interpret kubeconfig")
 	}
@@ -37,16 +37,15 @@ func ConfigFromEnv(o *kubeclientcmd.ConfigOverrides) (Config, error) {
 		return c, apicerr
 	}
 
-	c.KubeCmdApiConfig = kubeclientcmd.NewDefaultClientConfig(*apic, o)
+	c.KubeCmdAPIConfig = kubeclientcmd.NewDefaultClientConfig(*apic, o)
 
 	return c, nil
 }
 
-
 // KubeConfig produce yaml bytes for a kubeconfig for this implementation.
 // @NOTE does not work very well.
 func (c Config) KubeConfig() []byte {
-	rc, _ := c.KubeCmdApiConfig.MergedRawConfig()
+	rc, _ := c.KubeCmdAPIConfig.MergedRawConfig()
 
 	mb, mberr := yaml.Marshal(rc.DeepCopy())
 	if mberr != nil {

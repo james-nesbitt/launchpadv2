@@ -1,3 +1,6 @@
+/*
+Package config general launchpad configuration type for launchpad cmd.
+*/
 package config
 
 import (
@@ -24,7 +27,7 @@ type ConfigMeta struct {
 
 // ConfigFromYamllBytes convert bytes of yaml to a project object.
 func ConfigFromYamllBytes(b []byte) (project.Project, error) {
-	var cl project.Project = project.New()
+	cl := project.New()
 	var cb ConfigBase
 
 	defaults.Set(&cb)

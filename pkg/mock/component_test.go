@@ -19,34 +19,34 @@ func Test_ComponentSanityPass(t *testing.T) {
 
 	require.Equal(t, cn, c.Name(), "mock component had incorrect name: %s != %s", cn, c.Name())
 
-	c_d := c.Debug()
-	require.NotNil(t, c_d, "mock component gave non nil debug error: %s", c_d)
-	c_v := c.Validate(ctx)
-	require.Nil(t, c_v, "mock component gave non nil validate error: %+v", c_v)
+	cd := c.Debug()
+	require.NotNil(t, cd, "mock component gave non nil debug error: %s", cd)
+	cv := c.Validate(ctx)
+	require.Nil(t, cv, "mock component gave non nil validate error: %+v", cv)
 }
 
 func Test_ComponentSanityFail(t *testing.T) {
 	ctx := t.Context()
-	cv := errors.New("expected validate failure")
+	cve := errors.New("expected validate failure")
 
-	c := mock.NewSimpleComponent("name", nil, cv)
+	c := mock.NewSimpleComponent("name", nil, cve)
 
-	c_v := c.Validate(ctx)
-	require.Error(t, c_v, "mock component did not give expected validate error: %+v", cv, c_v)
+	cv := c.Validate(ctx)
+	require.Error(t, cv, "mock component did not give expected validate error: %+v", cve, cv)
 }
 
 func Test_ComponentSanityDebug(t *testing.T) {
 	cn := "compname"
-	cd := map[string]string{"test": "test"}
+	cdg := map[string]string{"test": "test"}
 
-	c := mock.NewSimpleComponent(cn, cd, nil)
+	c := mock.NewSimpleComponent(cn, cdg, nil)
 
-	c_d := c.Debug()
+	cd := c.Debug()
 
-	c_dd, ok := c_d.(mock.ComponentDebug)
-	assert.True(t, ok, "debug returned unexpected type: %+v", c_dd)
-	assert.Equal(t, c_dd.Name, cn, "incorrect debug name returned")
-	assert.Equal(t, c_dd.Debug, cd, "incorrect debug returned")
+	cdd, ok := cd.(mock.ComponentDebug)
+	assert.True(t, ok, "debug returned unexpected type: %+v", cdd)
+	assert.Equal(t, cdd.Name, cn, "incorrect debug name returned")
+	assert.Equal(t, cdd.Debug, cdg, "incorrect debug returned")
 }
 
 func Test_ComponentNilFactories(t *testing.T) {

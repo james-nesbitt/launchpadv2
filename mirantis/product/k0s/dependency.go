@@ -11,12 +11,11 @@ import (
 
 // --- Dependency requirements ---
 
-// Requires declare requirements needed for this component
+// RequiresDependencies declare requirements needed for this component
 //  1. at least one host with role "controller"
 //  2. any workers with role "worker" (optional)
 func (c *Component) RequiresDependencies(_ context.Context) dependency.Requirements {
 	if c.hs == nil {
-
 		c.hs = host.NewHostsFilterRequirement(
 			fmt.Sprintf("%s:%s", host.ComponentType, c.Name()),
 			fmt.Sprintf("K0S '%s' takes all nodes marked with K0S; needs at least one controller host as installation targets", c.Name()),
@@ -47,7 +46,6 @@ func (c *Component) RequiresDependencies(_ context.Context) dependency.Requireme
 				return fhs, nil
 			},
 		)
-
 	}
 
 	return dependency.Requirements{
@@ -57,7 +55,7 @@ func (c *Component) RequiresDependencies(_ context.Context) dependency.Requireme
 
 // --- Dependency provides ---
 
-// Provides dependencies
+// ProvidesDependencies does two things:
 //  1. provide any Kubernetes dependencies if the versions match
 //  2. provide any k0S dependencies if the version match
 func (p *Component) ProvidesDependencies(ctx context.Context, r dependency.Requirement) (dependency.Dependency, error) {

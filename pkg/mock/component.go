@@ -1,3 +1,6 @@
+/*
+Package mock debuggable and testable implementations for launchpad unit tests.
+*/
 package mock
 
 import (
@@ -11,7 +14,7 @@ const (
 )
 
 // NewSimpleComponent simplest of mocking components.
-func NewSimpleComponent(name string, debug interface{}, validate error) *comp {
+func NewSimpleComponent(name string, debug any, validate error) *comp {
 	return &comp{
 		name:     name,
 		debug:    debug,
@@ -22,7 +25,7 @@ func NewSimpleComponent(name string, debug interface{}, validate error) *comp {
 // comp simple mocking component.
 type comp struct {
 	name     string
-	debug    interface{}
+	debug    any
 	validate error
 }
 
@@ -32,7 +35,7 @@ func (c comp) Name() string {
 }
 
 // Debug the component by returning something that can be serialized.
-func (c comp) Debug() interface{} {
+func (c comp) Debug() any {
 	return ComponentDebug{
 		Name:  c.name,
 		Debug: c.debug,
@@ -45,7 +48,7 @@ func (c comp) Validate(_ context.Context) error {
 }
 
 // NewComponentWDependencies mocking component with dependencies.
-func NewComponentWDependencies(name string, debug interface{}, validate error, reqFactory func(context.Context) dependency.Requirements, depFactory func(context.Context, dependency.Requirement) (dependency.Dependency, error)) *compWDepedencies {
+func NewComponentWDependencies(name string, debug any, validate error, reqFactory func(context.Context) dependency.Requirements, depFactory func(context.Context, dependency.Requirement) (dependency.Dependency, error)) *compWDepedencies {
 	return &compWDepedencies{
 		comp:       comp{},
 		reqFactory: reqFactory,

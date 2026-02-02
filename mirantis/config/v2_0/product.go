@@ -56,7 +56,7 @@ func (scs *SpecProducts) UnmarshalYAML(py *yaml.Node) error {
 	}
 
 	if len(errss) > 0 {
-		return fmt.Errorf("Error decoding Spec products: %s", strings.Join(errss, "\n"))
+		return fmt.Errorf("error decoding Spec products: %s", strings.Join(errss, "\n"))
 	}
 
 	return nil

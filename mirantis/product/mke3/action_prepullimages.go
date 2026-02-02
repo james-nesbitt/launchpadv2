@@ -20,34 +20,34 @@ type prePullImagesStep struct {
 	id string
 }
 
-func (s prePullImagesStep) Id() string {
+func (s prePullImagesStep) ID() string {
 	return fmt.Sprintf("%s:mke3-image-prepull", s.id)
 }
 
 func (s prePullImagesStep) Run(ctx context.Context) error {
 	if !s.c.config.imagePrepullRequired() {
-		slog.InfoContext(ctx, "MKE3 Image Pre-Pull not required. Skipping.", slog.String("ID", s.Id()))
+		slog.InfoContext(ctx, "MKE3 Image Pre-Pull not required. Skipping.", slog.String("ID", s.ID()))
 	}
-	slog.InfoContext(ctx, "running MKE3 Image Pre-Pull step", slog.String("ID", s.Id()))
+	slog.InfoContext(ctx, "running MKE3 Image Pre-Pull step", slog.String("ID", s.ID()))
 
 	hs, gerr := s.c.GetManagerHosts(ctx)
 	if gerr != nil {
-		return fmt.Errorf("MKE3 pre-pull images step could not retrieve manager list: %s", gerr.Error())
+		return fmt.Errorf("mke3 pre-pull images step could not retrieve manager list: %s", gerr.Error())
 	}
 
-	var dpo dockertypesimage.PullOptions = s.c.config.imagePullOptions()
+	var dpo = s.c.config.imagePullOptions()
 
 	if err := hs.Each(ctx, func(ctx context.Context, h *host.Host) error {
-		slog.InfoContext(ctx, fmt.Sprintf("%s: prepulling images", h.Id()), slog.Any("host", h))
+		slog.InfoContext(ctx, fmt.Sprintf("%s: prepulling images", h.ID()), slog.Any("host", h))
 		is, err := listImages(ctx, h, s.c.config)
 		if err != nil {
-			return fmt.Errorf("%s error listing images for prepull: %s", h.Id(), err.Error())
+			return fmt.Errorf("%s error listing images for prepull: %s", h.ID(), err.Error())
 		}
 
-		slog.DebugContext(ctx, fmt.Sprintf("%s: images for prepull: %+v", h.Id(), is), slog.Any("host", h), slog.Any("images", is))
+		slog.DebugContext(ctx, fmt.Sprintf("%s: images for prepull: %+v", h.ID(), is), slog.Any("host", h), slog.Any("images", is))
 		return prePullImages(ctx, h, is, dpo)
 	}); err != nil {
-		return fmt.Errorf("MKE3 image pre-pull failed: %s", err.Error())
+		return fmt.Errorf("mke3 image pre-pull failed: %s", err.Error())
 	}
 
 	return nil
@@ -84,7 +84,7 @@ func prePullImages(ctx context.Context, h *host.Host, images []string, dpo docke
 	}
 
 	if len(errs) > 0 {
-		return fmt.Errorf("%s: image pull failed: %s", h.Id(), errors.Join(errs...).Error())
+		return fmt.Errorf("%s: image pull failed: %s", h.ID(), errors.Join(errs...).Error())
 	}
 	return nil
 }

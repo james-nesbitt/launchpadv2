@@ -10,7 +10,7 @@ var (
 	ErrRequirementNotMatched = errors.New("requirement not matched") // a Requirement exists but has no Dependency Matched (is nil)
 )
 
-// HasDependencies can determine its dependencies.
+// RequiresDependencies can determine its dependencies.
 type RequiresDependencies interface {
 	// Requires a set of Requirements indicating what dependency Requirements are needed
 	// - if the set is empty, then no requirements are needed

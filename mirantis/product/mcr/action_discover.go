@@ -15,24 +15,24 @@ type discoverStep struct {
 	failOnError bool
 }
 
-func (s discoverStep) Id() string {
+func (s discoverStep) ID() string {
 	return fmt.Sprintf("%s:mcr-discover", s.id)
 }
 
 func (s *discoverStep) Run(ctx context.Context) error {
-	slog.InfoContext(ctx, "running MCR discover step", slog.String("ID", s.Id()))
+	slog.InfoContext(ctx, "running MCR discover step", slog.String("ID", s.ID()))
 
 	hs, gherr := s.c.GetAllHosts(ctx)
 	if gherr != nil {
-		return fmt.Errorf("MCR has no hosts to discover: %s", gherr.Error())
+		return fmt.Errorf("mcr has no hosts to discover: %s", gherr.Error())
 	}
 
 	if err := hs.Each(ctx, func(ctx context.Context, h *host.Host) error {
-		slog.InfoContext(ctx, fmt.Sprintf("%s: discovering MCR state", h.Id()), slog.Any("host", h))
+		slog.InfoContext(ctx, fmt.Sprintf("%s: discovering MCR state", h.ID()), slog.Any("host", h))
 
 		if _, err := HostGetMCR(h).DockerInfo(ctx); err != nil {
-			slog.DebugContext(ctx, fmt.Sprintf("%s: MCR state discovery failure", h.Id()), slog.Any("host", h), slog.Any("error", err))
-			return fmt.Errorf("%s: failed to retrieve docker info: %s", h.Id(), err.Error())
+			slog.DebugContext(ctx, fmt.Sprintf("%s: MCR state discovery failure", h.ID()), slog.Any("host", h), slog.Any("error", err))
+			return fmt.Errorf("%s: failed to retrieve docker info: %s", h.ID(), err.Error())
 		}
 
 		return nil

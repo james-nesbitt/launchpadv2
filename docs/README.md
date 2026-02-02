@@ -1,4 +1,4 @@
-# Launchpad Docs 
+# Launchpad Docs
 
 - config.md
 - commands.md

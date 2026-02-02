@@ -46,7 +46,7 @@ type reqDepMatcher struct {
 }
 
 // Id unique identifier for the requirement.
-func (r reqDepMatcher) Id() string {
+func (r reqDepMatcher) ID() string {
 	return r.id
 }
 

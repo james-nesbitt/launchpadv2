@@ -1,3 +1,6 @@
+/*
+Package kubernetes brings a kubernetes component and implementation.
+*/
 package kubernetes
 
 import (
@@ -29,13 +32,13 @@ func (k Kubernetes) Provider() string {
 	return k.config.Provider
 }
 
-// IsValidaKubernetesVersion is the k8s version an acceptable value for this code base.
+// IsValidKubernetesVersion is the k8s version an acceptable value for this code base.
 func IsValidKubernetesVersion(_ Version) error {
 	// @TODO we need to figure out how to perform validation as a feature
 	return nil
 }
 
-// Determine the ServerVersion (good to test connection).
+// ServerVersion Determine the ServerVersion (good to test connection).
 func (k Kubernetes) ServerVersion() (*kubeversion.Info, error) {
 	krc, krcerr := k.Client()
 	if krcerr != nil {

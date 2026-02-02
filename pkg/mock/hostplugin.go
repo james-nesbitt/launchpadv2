@@ -44,7 +44,7 @@ type mockHostPlugin struct {
 	n *network.Network `yaml:"network"`
 }
 
-func (p mockHostPlugin) Id() string {
+func (p mockHostPlugin) ID() string {
 	return HostRoleMock
 }
 

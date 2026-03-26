@@ -1,53 +1,74 @@
-# Mirantis Launchpad Design
+# Launchpad Design
 
-## Common terms
+## Core Purpose
+Launchpad is designed to:
+1. **Facilitate management** of Mirantis products (MKE, MSR, K0s).
+2. **Stay flexible** as products and customer needs evolve.
+3. **Remain extensible** through a component-based architecture.
 
-### Component
+This is achieved through **interface-driven decoupling** and **abstract dependencies**.
 
-a Launchpad functional module which can participate in Launchpad by:
+---
 
-1. Participating in building commands by adding phases (and/or steps)
-2. Provide/Require dependencies to/from other components
-3. Provide Implementation specific code
+## Core Concepts
 
-Components are core functionality, collected into a project and used
-for building all other functionality.
+### 1. Component
+**Definition**: A modular unit that:
+- Builds commands (e.g., `apply`).
+- Provides/requires dependencies.
+- Implements interfaces (e.g., `action.CommandBuild`).
 
-Components work by implementing various Launchpad interfaces, indicating
-what functionality they offer.
+**Example**: MKE, MSR, or custom components.
 
-### Implementation
+---
 
-Deliver known functionality to other code, such as APIs or interfaces.
+### 2. Implementation
+**Definition**: Shared functionality (e.g., Kubernetes API) used by multiple components.
+**Example**: Both MKE and K0s components may provide the same Kubernetes implementation.
 
-Kept distinct from Components in that two Components may deliver that same
-functionality, and so they can share a code base.
+---
 
-Example: docker-swarm, kubernetes, the MKE api
+### 3. Command
+**Definition**: A single operation (e.g., `launchpad apply`) built from component phases.
 
-### Command
+**Flow**:
+1. Launchpad collects phases from components.
+2. Orders phases by dependencies.
+3. Executes phases sequentially.
 
-A single executable operation, built by collecting Phases from various
-providers (typically Components)
+**Example**:
+```mermaid
+graph LR
+  A[Component A] -->|Phase 1| B[Component B]
+  B -->|Phase 2| C[Component C]
+```
 
-A Phase is an isolated set of instructions, typically defined by a
-component. Phases typically advertise their dependencies so that they
-can be ordered.
+---
 
-### Dependency / Requirement
+### 4. Dependency System
+**Requirement**: A need (e.g., "Kubernetes cluster").
+**Dependency**: A fulfillment (e.g., "MKE provides Kubernetes").
 
-A Requirement is in indication that a Dependency is Required, and the
-Dependency is a fulfillment of that requirement.
+**Example**:
+```go
+// Component A requires Kubernetes.
+req := kubernetes.NewRequirement(">=1.20")
 
-This allows code to advertise what it needs, without having to know
-how the functionality is provided.  For example, a Component may rely
-on Kubernetes, so it advertises what Kubernetes it needs by providing a
-Requirement; then another component will see the Requirement and fulfill
-it if it can.  Kubernetes could be provided by another Component which
-discovers a Kubernetes project, or by one who will create a Kubernetes
-project.
+// Component B provides Kubernetes.
+dep := &KubernetesDependency{Version: "1.21"}
+```
 
-### Project
+---
 
-A set of Components, from which Dependencies are pulled, and Commands
-are built.
+### 5. Project
+**Definition**: A collection of components and configurations.
+
+**Example**:
+```go
+project := &project.Project{
+  Components: []component.Component{
+    mke.NewComponent(),
+    msr.NewComponent(),
+  },
+}
+```

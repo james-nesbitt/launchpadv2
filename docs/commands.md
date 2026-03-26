@@ -1,13 +1,40 @@
-# Launchpad commands
+# Launchpad Commands
 
-## Discover
+## Overview
+Launchpad provides CLI commands to manage clusters via YAML configurations.
 
-Discover/Read the state of the project.
+---
 
-## Apply
+## `discover`
+**Purpose**: Inspect the current state of a cluster/project.
+**Usage**:
+```bash
+launchpad discover --config <file.yaml>
+```
+**Output**: JSON/YAML summary of cluster state (nodes, components, dependencies).
+**Flags**:
+- `--output <format>`: Specify output format (`json`, `yaml`, `table`).
 
-Apply the launchpad YAML config to the project.
+---
 
-## Reset
+## `apply`
+**Purpose**: Apply a YAML configuration to a cluster.
+**Usage**:
+```bash
+launchpad apply --config <file.yaml>
+```
+**Flags**:
+- `--dry-run`: Validate without applying changes.
+- `--force`: Skip confirmation prompts.
 
-Reset the state of the project by removing any installed/change components.
+---
+
+## `reset`
+**Purpose**: Remove installed components and revert cluster state.
+**Usage**:
+```bash
+launchpad reset --config <file.yaml>
+```
+**Warning**: Irreversible. Use `--dry-run` first.
+**Flags**:
+- `--exclude <component>`: Skip resetting specific components (e.g., `--exclude mke`).

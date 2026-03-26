@@ -1,83 +1,73 @@
-# Component
+# Components
 
-Components in Launchpad are functional units which provide functionality that
-can be used by a cluster to build commands, provide cli options, and assist other
-components by fulfilling dependencies.
+## What is a Component?
+A **Component** is a modular unit in Launchpad that:
+1. **Builds commands** (e.g., `apply`, `reset`).
+2. **Provides/requires dependencies** (e.g., Kubernetes API, host roles).
+3. **Implements interfaces** (e.g., `action.CommandBuild`).
 
-## Building a Component
+Components enable **extensibility** by allowing new products (e.g., MKE, MSR) to be added via registration.
 
-A component is any struct that implements the component interface, which is a small
-interface that requires only that it can identify itself.
+---
 
-Components provide functionality by mutation in that they implement other interfaces
-which allow them to provide functionality.
+## Key Interfaces
 
-## Registering Components
+### 1. `action.CommandBuild`
+**Purpose**: Add execution phases to commands.
+**Example**:
+```go
+func (c *MyComponent) BuildCommand(cmd *action.Command, key string) error {
+  if key == "apply" {
+    cmd.AddPhase(&MyPhase{})
+  }
+  return nil
+}
+```
 
-Any Component instance can be added to a project.Project object, and that project
-will actively use the Component for building action.Commands.
+---
 
-Typically, Components are defined and configured using the config process which
-decodes Components defined in configuration. This usually requires that the
-Component has a decoder which is registered with the config builder used.
-An example, is that there is a public global array of ProductDecoder functions
-registered in product, which are typically populated in Component init() methods.
+### 2. Dependency Management
+#### `dependency.RequiresDependencies`
+**Purpose**: Declare required dependencies (e.g., host roles).
+**Example**:
+```go
+func (c *MyComponent) Requirements() []dependency.Requirement {
+  return []dependency.Requirement{
+    host.NewHostRolesRequirement("worker"),
+  }
+}
+```
 
-## Component interfaces
+#### `dependency.ProvidesDependencies`
+**Purpose**: Fulfill dependencies for other components.
+**Example**:
+```go
+func (c *MyComponent) Fulfill(req dependency.Requirement) (dependency.Dependency, error) {
+  if req.Type() == "kubernetes" {
+    return &KubernetesDependency{}, nil
+  }
+  return nil, errors.New("unsupported requirement")
+}
+```
 
-### Commands
+---
 
-If the Component implements the action.CommandBuild interface, then Launchpad will
-know to ask the Component to build execution Phases during command runs.
+## Registration
+**Process**:
+1. Define a `ProductDecoder` in `init()`:
+   ```go
+   func init() {
+     product.RegisterDecoder("my-component", NewMyComponentDecoder)
+   }
+   ```
+2. Add the component to `project.Project`.
 
-The Component is expected to recognize what Command will be run, based on a string
-key, and should add Phases to the Command as needed to proceed.
+---
 
-#### Commands and Dependencies
+## Implementations vs. Components
+| **Implementations**       | **Components**               |
+|---------------------------|------------------------------|
+| Shared functionality (e.g., Kubernetes API). | Project-specific logic.      |
+| No direct role in commands. | Build commands and phases.   |
 
-Any Command Phase added can include dependency.Dependency action.Events that are
-needed to run, and Launchpad will order the action.Phases in order to ensure
-that dependencies are met.
-
-### Dependency interfaces
-
-Components can require dependencies, and can fulfill dependencies.
-
-Launchpad will collect all dependency.Requirements, and try to match them with
-dependency.Dependencies during Validation, to make sure that all needed
-functionality is available.
-
-#### dependency.RequiresDependencies
-
-This Component has dependencies that need to be met by another Component.
-
-The Component should be ready to provide dependency.Requirement objects of the
-appropriate type for its needs (e.g. A host.HostRolesRequuirement to indicate
-that hosts of a certain role are needed.)
-
-#### dependency.ProvidesDependencies
-
-This Component can fulfill dependency.Requirements from other Components.
-
-The Component will be handed requirements, and if the Component can fulfill
-the Requirement, it should return an appropriate dependency.Dependency object.
-
-The Dependency could be called upon at any time, and so should be able to
-be called upon repeatedly.
-
-#### Commands and Dependencies
-
-If dependency fulfillment requires a Command phase, then the Component should
-add the Phase to any Command calls, and Dependency Events for if the Dependency
-will be made available, or removed during the Command execution
-
-## Implementations instead of Components
-
-Implementations are also a way of providing functionality, but are never used
-as Components.
-
-Implementations provided functionality by defining dependency.Requirement and
-matching dependency.Dependency types which other components can use.
-
-An example is "a Kubernetes client", which is a standard, but can be provided
-by either MKE3, or K0S.
+**Example**: Both MKE and K0s components may provide the same Kubernetes implementation.

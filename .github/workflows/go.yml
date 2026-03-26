@@ -6,8 +6,18 @@ name: Go
 on:
   push:
     branches: [ "main" ]
+    paths-ignore:
+      - 'docs/**'
+      - 'README.md'
+      - '.github/**'
+      - '**.md'
   pull_request:
     branches: [ "main" ]
+    paths-ignore:
+      - 'docs/**'
+      - 'README.md'
+      - '.github/**'
+      - '**.md'
 
 jobs:
 

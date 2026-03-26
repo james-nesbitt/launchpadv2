@@ -31,3 +31,9 @@ fmt:
 .PHONY: test
 test:
 	go test ./...
+
+# Run govulncheck to scan for vulnerabilities
+.PHONY: security
+security:
+	go install golang.org/x/vuln/cmd/govulncheck@latest
+	govulncheck ./...

@@ -36,11 +36,14 @@ This is achieved through **interface-driven decoupling** and **abstract dependen
 2. Orders phases by dependencies.
 3. Executes phases sequentially.
 
-**Example**:
+**Diagram: Command Execution Flow**
 ```mermaid
 graph LR
-  A[Component A] -->|Phase 1| B[Component B]
-  B -->|Phase 2| C[Component C]
+  A[CLI Command] -->|Parse Config| B[Engine]
+  B -->|Collect Phases| C[Component A]
+  C -->|Phase 1| D[Component B]
+  D -->|Phase 2| E[Component C]
+  E -->|Result| A
 ```
 
 ---
@@ -48,6 +51,14 @@ graph LR
 ### 4. Dependency System
 **Requirement**: A need (e.g., "Kubernetes cluster").
 **Dependency**: A fulfillment (e.g., "MKE provides Kubernetes").
+
+**Diagram: Dependency Resolution**
+```mermaid
+graph TD
+  A[Component A] -->|Requires| B[Kubernetes >=1.20]
+  C[Component B] -->|Provides| B
+  B -->|Resolved| D[Engine]
+```
 
 **Example**:
 ```go
@@ -63,6 +74,20 @@ dep := &KubernetesDependency{Version: "1.21"}
 ### 5. Project
 **Definition**: A collection of components and configurations.
 
+**Diagram: Project Structure**
+```mermaid
+classDiagram
+  class Project {
+    +Components[] Component
+    +Config Config
+  }
+  class Component {
+    +Name string
+    +Phases[] Phase
+  }
+  Project --> Component
+```
+
 **Example**:
 ```go
 project := &project.Project{
@@ -72,3 +97,26 @@ project := &project.Project{
   },
 }
 ```
+
+---
+
+## Architecture Overview
+
+### Diagram: High-Level Architecture
+```mermaid
+graph TD
+  A[CLI] -->|Commands| B[Engine]
+  B -->|Orchestrates| C[Components]
+  C -->|Provides/Requires| D[Dependencies]
+  B -->|Validates| E[Config]
+  C -->|Implements| F[Implementations]
+```
+
+### Key Components:
+| Component | Purpose | Location |
+|-----------|---------|----------|
+| CLI | User interface | `cmd/` |
+| Engine | Core orchestration | `pkg/engine/` |
+| Config | Configuration parsing | `pkg/config/` |
+| Components | Modular units (MKE, MSR) | `implementation/` |
+| Dependencies | Requirement resolution | `pkg/engine/dependencies/` |

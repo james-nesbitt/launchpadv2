@@ -3,7 +3,6 @@
 ## Backlog
 ### High Priority
 - [ ] Add AI-driven troubleshooting for `launchpad apply` failures.
-- [ ] Implement `--ai-optimize` flag for YAML configurations.
 - [ ] Create `examples/ai/` directory for AI workflows.
 
 ### Medium Priority
@@ -12,7 +11,6 @@
 - [ ] Integrate AI guidance into `launchpad debug` command.
 
 ### Low Priority
-- [ ] Add multi-cloud support for AI-driven optimizations.
 
 ---
 

@@ -12,6 +12,10 @@ const (
 	ProjectCliKey = "project"
 )
 
+var (
+	aiTroubleshoot bool
+)
+
 func CliBuild(cmd *cobra.Command, p *Project) error {
 	slog.DebugContext(cmd.Context(), "building cli commands from project")
 
@@ -79,9 +83,8 @@ func projectCliBuildStatus(cmd *cobra.Command, p *Project) {
 }
 
 func projectCliBuildApply(cmd *cobra.Command, p *Project) {
-
 	// applyCmd represents the apply command.
-	cmd.AddCommand(&cobra.Command{
+	applyCmd := &cobra.Command{
 		GroupID: ProjectCliKey,
 		Use:     "project:apply",
 		Short:   "Apply any component installs on your project",
@@ -99,12 +102,19 @@ func projectCliBuildApply(cmd *cobra.Command, p *Project) {
 			}
 
 			if err := sc.Run(ctx); err != nil {
+				if aiTroubleshoot {
+					if tserr := p.Troubleshoot(ctx, sc.Key, err); tserr != nil {
+						slog.ErrorContext(ctx, "AI troubleshooting failed", slog.Any("error", tserr))
+					}
+				}
 				return fmt.Errorf("project command [%s] execution failed: %s", sc.Key, err.Error())
 			}
 
 			return nil
 		},
-	})
+	}
+	applyCmd.Flags().BoolVar(&aiTroubleshoot, "ai-troubleshoot", false, "Enable AI-driven troubleshooting for command failures")
+	cmd.AddCommand(applyCmd)
 }
 
 func projectCliBuildReset(cmd *cobra.Command, p *Project) {

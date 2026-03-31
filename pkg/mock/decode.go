@@ -16,7 +16,9 @@ func DecodeComponent(id string, d func(any) error) (component.Component, error) 
 	c := ComponentDecode{}
 	c.Name = id
 
-	defaults.Set(&c)
+	if err := defaults.Set(&c); err != nil {
+		return nil, fmt.Errorf("failed to set mock defaults: %w", err)
+	}
 
 	if err := d(&c); err != nil {
 		return nil, fmt.Errorf("failure to decode product '%s' : %w", ComponentType, err)

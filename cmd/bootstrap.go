@@ -25,7 +25,10 @@ func Bootstrap(root *cobra.Command) project.Project {
 
 	// This should early pre-populate the above flags, which we will use to build more commands. This will
 	// be executed again with rootCmd.Execute()
-	root.ParseFlags(os.Args[1:])
+	if err := root.ParseFlags(os.Args[1:]); err != nil {
+		slog.Error("failed to parse early flags", slog.Any("error", err))
+		os.Exit(1)
+	}
 
 	if debug {
 		slog.SetLogLoggerLevel(slog.LevelDebug)
@@ -54,7 +57,7 @@ func boostrapBuildProject(ctx context.Context) error {
 		return fmt.Errorf("no config file defined")
 	}
 
-	f, foerr := os.Open(cfgFile)
+	f, foerr := os.Open(cfgFile) //nolint:gosec // user provided config file path
 	if foerr != nil {
 		return fmt.Errorf("could not access config '%s' : %s", cfgFile, foerr.Error())
 	}

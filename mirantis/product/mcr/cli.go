@@ -42,7 +42,9 @@ func (c Component) CliBuild(cmd *cobra.Command, _ project.Project) error {
 			infomu := sync.Mutex{}
 
 			if err := hs.Each(ctx, func(ctx context.Context, h *host.Host) error {
-				exec.HostGetExecutor(h).Connect(ctx)
+				if err := exec.HostGetExecutor(h).Connect(ctx); err != nil {
+					return fmt.Errorf("failed to connect to host %s: %w", h.ID(), err)
+				}
 				slog.InfoContext(ctx, fmt.Sprintf("%s: discovering MCR state", h.ID()), slog.Any("host", h))
 
 				i, err := dockerhost.HostGetDockerExec(h).Info(ctx)

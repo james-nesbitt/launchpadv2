@@ -19,7 +19,9 @@ func init() {
 // DecodeComponent decode a new component from an unmarshall decoder.
 func DecodeComponent(id string, d func(any) error) (component.Component, error) {
 	var mc mockConfig
-	defaults.Set(&mc)
+	if err := defaults.Set(&mc); err != nil {
+		return nil, fmt.Errorf("failed to set kubernetes defaults: %w", err)
+	}
 
 	if err := d(&mc); err != nil {
 		return nil, fmt.Errorf("failure to decode product '%s' : %w", ComponentType, err)

@@ -51,9 +51,12 @@ func main() {
 
 	slog.Debug("bootstrapping cli complete")
 
-	rootCmd.ParseFlags(os.Args[1:])
+	if err := rootCmd.ParseFlags(os.Args[1:]); err != nil {
+		slog.Error("failed to parse flags", slog.Any("error", err))
+		os.Exit(1)
+	}
 	if err := rootCmd.Execute(); err != nil {
-		slog.Error("failed to run command")
+		slog.Error("failed to run command", slog.Any("error", err))
 		os.Exit(1)
 	}
 }

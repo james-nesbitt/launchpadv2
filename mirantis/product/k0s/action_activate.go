@@ -54,7 +54,9 @@ func (s activateK0sStep) Run(ctx context.Context) error {
 			return werr
 		}
 
-		lkh.InstallNewCluster(ctx, s.c.config)
+		if err := lkh.InstallNewCluster(ctx, s.c.config); err != nil {
+			return fmt.Errorf("failed to install new cluster: %w", err)
+		}
 	}
 
 	chs, cherr := s.c.GetControllerHosts(ctx)
@@ -83,7 +85,9 @@ func (s activateK0sStep) Run(ctx context.Context) error {
 	slog.InfoContext(ctx, "In parallel adding worker hosts")
 	if err := whs.Each(ctx, func(ctx context.Context, h *host.Host) error {
 		eh := exec.HostGetExecutor(h)
-		eh.Connect(ctx)
+		if err := eh.Connect(ctx); err != nil {
+			return fmt.Errorf("failed to connect to host %s: %w", h.ID(), err)
+		}
 		kh := HostGetK0s(h)
 
 		slog.InfoContext(ctx, fmt.Sprintf("%s: joining as worker to '%s' cluster", h.ID(), l.ID()))

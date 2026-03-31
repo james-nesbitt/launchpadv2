@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	OpenAIModel = "gpt-4o" // Suggested default
+	OpenAIModel    = "gpt-4o" // Suggested default
 	OpenAIEndpoint = "https://api.openai.com/v1/chat/completions"
 )
 

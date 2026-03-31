@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
 	"sync"
 
 	"github.com/adrg/xdg"
@@ -40,10 +39,11 @@ func (qd *QueueDownload) Download(ctx context.Context, url string) (io.ReadClose
 
 	cd := irs.Header.Get("Content-Disposition")
 	_, params, _ := mime.ParseMediaType(cd)
-	if strings.Contains(params["filename"], "../") || strings.Contains(params["filename"], "..\\") {
-		return nil, "", fmt.Errorf("Invalid file path")
+	filename := filepath.Base(filepath.Clean(params["filename"]))
+	if filename == "." || filename == "/" {
+		return nil, "", fmt.Errorf("invalid filename")
 	}
-	fs := filepath.Join("launchpad", "k0s", params["filename"])
+	fs := filepath.Join("launchpad", "k0s", filename)
 
 	// only download one at a time (prevents duplicate downloads, and lowers bandwidth)
 	qd.mu.Lock()
@@ -52,7 +52,7 @@ func (qd *QueueDownload) Download(ctx context.Context, url string) (io.ReadClose
 	cfs, cfserr := xdg.SearchCacheFile(fs)
 	if cfserr != nil {
 		cfs, _ = xdg.CacheFile(fs)
-		cf, cferr := os.Create(cfs)
+		cf, cferr := os.Create(cfs) //nolint:gosec // user provided config file path
 		if cferr != nil {
 			return nil, cfs, cferr
 		}
@@ -65,7 +65,7 @@ func (qd *QueueDownload) Download(ctx context.Context, url string) (io.ReadClose
 		}
 	}
 
-	cf, cferr := os.Open(cfs)
+	cf, cferr := os.Open(cfs) //nolint:gosec // user provided config file path
 	if cferr != nil {
 		return nil, cfs, cferr
 	}

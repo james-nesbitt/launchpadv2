@@ -125,9 +125,13 @@ func (hp hostPlugin) DockerInfo(ctx context.Context) (dockertypessystem.Info, er
 func (hp hostPlugin) DownloadMCRInstaller(ctx context.Context, c Config) error {
 	ir := c.InstallURLLinux
 
+	if !strings.HasPrefix(ir, "https://") && !strings.HasPrefix(ir, "http://") {
+		return fmt.Errorf("invalid install URL (must be http/https): %s", ir)
+	}
+
 	slog.InfoContext(ctx, fmt.Sprintf("%s: downloading MCR Installer: %s", hp.h.ID(), ir), slog.Any("host", hp.h))
 
-	irs, igerr := http.Get(ir)
+	irs, igerr := http.Get(ir) //nolint:gosec // MCR installer download is intentional
 	if igerr != nil {
 		return igerr
 	}

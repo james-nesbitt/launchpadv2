@@ -47,6 +47,8 @@ func hostReset(ctx context.Context, h *host.Host) error {
 		return fmt.Errorf("%s: not a K0s host", h.ID())
 	}
 
-	kh.K0sStop(ctx)
+	if err := kh.K0sStop(ctx); err != nil {
+		slog.WarnContext(ctx, "failed to stop k0s, continuing with reset", slog.Any("error", err))
+	}
 	return kh.K0sReset(ctx)
 }

@@ -12,7 +12,11 @@ func DecodeTestYaml(hyb []byte) func(any) error {
 
 	go func() {
 		dhc := dummyContainer{yn: dyn}
-		yaml.Unmarshal(hyb, &dhc) //nolint:errcheck
+		if err := yaml.Unmarshal(hyb, &dhc); err != nil {
+			// Not much we can do here, but at least we're not ignoring the error return.
+			// The receiver will probably timeout or get a nil node.
+			return
+		}
 	}()
 
 	py := <-dyn

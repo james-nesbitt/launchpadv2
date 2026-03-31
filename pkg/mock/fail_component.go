@@ -59,5 +59,5 @@ func (p *FailPhase) Run(ctx context.Context) error {
 
 func init() {
 	// Register the fail component in a Way that it can be used for tests
-    // But since this is a mock, maybe I'll just use it directly in a test
+	// But since this is a mock, maybe I'll just use it directly in a test
 }

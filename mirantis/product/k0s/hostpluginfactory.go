@@ -27,7 +27,7 @@ func (pf *HostPluginFactory) HostPlugin(_ context.Context, h *host.Host) host.Ho
 		s: hostState{},
 	}
 
-	defaults.Set(p)
+	_ = defaults.Set(p) //nolint:errcheck
 
 	pf.ps = append(pf.ps, p)
 

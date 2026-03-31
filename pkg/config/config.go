@@ -30,7 +30,9 @@ func ConfigFromYamllBytes(b []byte) (project.Project, error) {
 	cl := project.New()
 	var cb ConfigBase
 
-	defaults.Set(&cb)
+	if err := defaults.Set(&cb); err != nil {
+		return cl, fmt.Errorf("failed to set config defaults: %w", err)
+	}
 
 	if err := yaml.Unmarshal(b, &cb); err != nil {
 		return cl, err

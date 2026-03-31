@@ -23,7 +23,7 @@ const (
 	DefaultK0sConfigPath = "/etc/k0s/k0sd.yaml"
 	DefaultK0sDataPath   = "/var/lib/k0s"
 	DefaultK0sBinaryPath = "/usr/bin/k0s"
-	DefaultK0sTokenPath  = "/etc/k0s/k0s-token"
+	DefaultK0sTokenPath  = "/etc/k0s/k0s-token" //nolint:gosec // this is just a path, not a secret.
 )
 
 var JoinTokenExpireDuration = time.Duration(10) * time.Minute

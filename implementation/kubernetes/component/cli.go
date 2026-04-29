@@ -41,7 +41,7 @@ func (c *Component) CliBuild(cmd *cobra.Command, _ *project.Project) error {
 	kcc := &cobra.Command{
 		GroupID: c.Name(),
 		Use:     fmt.Sprintf("%s:kubeconfig", c.Name()),
-		Short:   "Get the kubeconfig for the cluster (BROKEN)",
+		Short:   "Get the kubeconfig for the cluster",
 		Long:    ``,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cb := c.config.KubeConfig()

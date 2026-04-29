@@ -8,7 +8,7 @@ var (
 	K0sReleaseLinkBase = "https://github.com/k0sproject/k0s/releases/download"
 )
 
-// Config definition for the MCR product.
+// Config definition for the k0s product.
 type Config struct {
 	Version        version.Version `yaml:"version" json:"version"`
 	VersionChannel string          `yaml:"versionChannel,omitempty"`
@@ -21,9 +21,4 @@ type Config struct {
 type K0sMetadata struct {
 	ClusterID        string
 	VersionDefaulted bool
-}
-
-// ShouldDownload should we download binaries directly to the host, os should we upload from the running client machine.
-func (c Config) ShouldDownload() bool {
-	return true
 }

@@ -67,8 +67,6 @@ type HostConfig struct {
 	NoTaints         bool              `yaml:"noTaints,omitempty"`
 }
 
-type hostState struct{}
-
 // global Download Queue.
 var qd = download.NewQueueDownload(nil)
 
@@ -76,7 +74,6 @@ var qd = download.NewQueueDownload(nil)
 type hostPlugin struct {
 	h *host.Host
 	c HostConfig
-	s hostState
 }
 
 // Id uniquely identify the plugin.
@@ -379,7 +376,7 @@ func (p *hostPlugin) K0sStop(ctx context.Context) error {
 	return nil
 }
 
-// K0sStop run k0s reset on host.
+// K0sReset run k0s reset on host.
 func (p *hostPlugin) K0sReset(ctx context.Context) error {
 	args := []string{
 		"reset",
@@ -474,22 +471,22 @@ func (p *hostPlugin) k0sTokenPath() string {
 
 // BuildHostConfig Modify a passed base K0s config with host specific values, and including passed additional sans.
 func (p *hostPlugin) BuildHostConfig(ctx context.Context, basecfg K0sConfig, sans []string) (K0sConfig, error) {
-	hcfg := basecfg
-	slog.DebugContext(ctx, "base config", slog.Any("config", hcfg))
-
-	addUnlessExist := func(slice *[]string, s string) {
-		for _, v := range *slice {
-			if v == s {
-				return
-			}
-		}
-		*slice = append(*slice, s)
+	// Deep-copy the base config via round-trip so we don't mutate the original.
+	bs, merr := yaml.Marshal(basecfg)
+	if merr != nil {
+		return nil, fmt.Errorf("failed to marshal base k0s config: %w", merr)
 	}
+	var hcfg K0sConfig
+	if err := yaml.Unmarshal(bs, &hcfg); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal k0s config copy: %w", err)
+	}
+
+	slog.DebugContext(ctx, "base config", slog.Any("config", hcfg))
 
 	hn := network.HostGetNetwork(p.h)
 	n, nerr := hn.Network(ctx)
 	if nerr != nil {
-		return hcfg, nerr
+		return nil, nerr
 	}
 
 	var addr string
@@ -499,28 +496,71 @@ func (p *hostPlugin) BuildHostConfig(ctx context.Context, basecfg K0sConfig, san
 		addr = n.PublicAddress
 	}
 
-	hcfg.Spec.API.Address = addr
-	hcfg.Spec.Storage.Etcd.PeerAddress = addr
-	addUnlessExist(&sans, addr)
+	// Set host-specific addresses.
+	apiMap := hcfg.DigMapping("spec", "api")
+	apiMap["address"] = addr
+	hcfg.DigMapping("spec", "storage", "etcd")["peerAddress"] = addr
 
-	for _, s := range sans {
-		addUnlessExist(&hcfg.Spec.API.Sans, s)
-	}
+	// Merge SANs: addr + passed sans + 127.0.0.1, deduplicating.
+	all := append([]string{addr}, sans...)
+	all = append(all, "127.0.0.1")
 
-	addUnlessExist(&hcfg.Spec.API.Sans, "127.0.0.1")
+	existing := digStringSlice(apiMap, "sans")
+	merged := mergeUnique(existing, all)
 
-	if hcfg.Spec.API.K0sApiPort == 0 {
-		hcfg.Spec.API.K0sApiPort = 9443
+	sansIface := make([]interface{}, len(merged))
+	for i, v := range merged {
+		sansIface[i] = v
 	}
-	if hcfg.Spec.API.Port == 0 {
-		hcfg.Spec.API.Port = 6443
+	apiMap["sans"] = sansIface
+
+	// Default API ports if not set.
+	if apiMap["k0sApiPort"] == nil || apiMap["k0sApiPort"] == 0 {
+		apiMap["k0sApiPort"] = 9443
 	}
-	//	if hcfg.Spec.Konnectivity.AdminPort == 0 {
-	//		hcfg.Spec.Konnectivity.AdminPort = 8443
-	//	}
-	//	if hcfg.Spec.Konnectivity.AgentPort == 0 {
-	//		hcfg.Spec.Konnectivity.AgentPort = 8443
-	//	}
+	if apiMap["port"] == nil || apiMap["port"] == 0 {
+		apiMap["port"] = 6443
+	}
 
 	return hcfg, nil
+}
+
+// digStringSlice extracts a string slice from a key in a dig.Mapping.
+// yaml.v3 deserializes YAML sequences as []interface{}.
+func digStringSlice(m map[string]interface{}, key string) []string {
+	v, ok := m[key]
+	if !ok || v == nil {
+		return nil
+	}
+	raw, ok := v.([]interface{})
+	if !ok {
+		return nil
+	}
+	out := make([]string, 0, len(raw))
+	for _, item := range raw {
+		if s, ok := item.(string); ok {
+			out = append(out, s)
+		}
+	}
+	return out
+}
+
+// mergeUnique returns a slice with all elements from base, plus any elements
+// from additions that are not already present in base.
+func mergeUnique(base, additions []string) []string {
+	seen := make(map[string]struct{}, len(base)+len(additions))
+	out := make([]string, 0, len(base)+len(additions))
+	for _, s := range base {
+		if _, exists := seen[s]; !exists {
+			out = append(out, s)
+			seen[s] = struct{}{}
+		}
+	}
+	for _, s := range additions {
+		if _, exists := seen[s]; !exists {
+			out = append(out, s)
+			seen[s] = struct{}{}
+		}
+	}
+	return out
 }

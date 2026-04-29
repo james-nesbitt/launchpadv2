@@ -1,0 +1,54 @@
+[submodule "repos/kairos"]
+	path = repos/kairos
+	url = git@github.com:kairos-io/kairos.git
+[submodule "repos/provider-kairos"]
+	path = repos/provider-kairos
+	url = git@github.com:kairos-io/provider-kairos.git
+[submodule "repos/provider-kubeadm"]
+	path = repos/provider-kubeadm
+	url = git@github.com:kairos-io/provider-kubeadm.git
+[submodule "repos/kairos-init"]
+	path = repos/kairos-init
+	url = git@github.com:kairos-io/kairos-init.git
+[submodule "repos/auroraboot"]
+	path = repos/auroraboot
+	url = git@github.com:kairos-io/AuroraBoot.git
+[submodule "repos/kairos-agent"]
+	path = repos/kairos-agent
+	url = git@github.com:kairos-io/kairos-agent.git
+[submodule "repos/kairos-sdk"]
+	path = repos/kairos-sdk
+	url = git@github.com:kairos-io/kairos-sdk.git
+[submodule "repos/k0s"]
+	path = repos/k0s
+	url = git@github.com:k0sproject/k0s.git
+[submodule "repos/mke-release"]
+	path = repos/mke-release
+	url = git@github.com:MirantisContainers/mke-release.git
+[submodule "repos/mke"]
+	path = repos/mke
+	url = git@github.com:MirantisContainers/mke.git
+[submodule "repos/mke-operator"]
+	path = repos/mke-operator
+	url = git@github.com:MirantisContainers/mke-operator
+[submodule "repos/k0rdent-ui"]
+	path = repos/k0rdent-ui
+	url = git@github.com:k0rdent/k0rdent-ui.git
+[submodule "repos/k0sctl"]
+	path = repos/k0sctl
+	url = git@github.com:k0sproject/k0sctl.git
+[submodule "repos/k0rdent-enterprise"]
+	path = repos/k0rdent-enterprise
+	url = git@github.com:k0rdent/k0rdent-enterprise.git
+[submodule "repos/kcm"]
+	path = repos/kcm
+	url = git@github.com:k0rdent/kcm.git
+[submodule "repos/cluster-api-provider-gcp"]
+	path = repos/cluster-api-provider-gcp
+	url = https://github.com/kubernetes-sigs/cluster-api-provider-gcp.git
+[submodule "repos/k0smotron"]
+	path = repos/k0smotron
+	url = https://github.com/k0sproject/k0smotron.git
+[submodule "repos/cluster-api"]
+	path = repos/cluster-api
+	url = https://github.com/kubernetes-sigs/cluster-api.git

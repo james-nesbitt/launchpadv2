@@ -45,6 +45,10 @@ func (c *Component) CommandBuild(ctx context.Context, cmd *action.Command) error
 	case project.CommandKeyApply:
 		p := stepped.NewSteppedPhase(CommandPhaseApply, rs, ds, []string{dependency.EventKeyActivated})
 		p.Steps().Merge(stepped.Steps{
+			&validateHostsStep{
+				baseStep: bs,
+				id:       c.Name(),
+			},
 			&installK0sStep{
 				baseStep: bs,
 				id:       c.Name(),

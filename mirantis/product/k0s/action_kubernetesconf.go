@@ -17,5 +17,26 @@ func (s kubernetesConfStep) ID() string {
 
 func (s kubernetesConfStep) Run(ctx context.Context) error {
 	slog.InfoContext(ctx, "running k0s kubeconfig step", slog.String("ID", s.id))
+
+	l := s.c.GetLeaderHost(ctx)
+	if l == nil {
+		return fmt.Errorf("no leader host found; run discover first")
+	}
+
+	lkh := HostGetK0s(l)
+	if lkh == nil {
+		return fmt.Errorf("%s: leader has no k0s plugin", l.ID())
+	}
+
+	kc, kcerr := lkh.K0sKubeconfigAdmin(ctx)
+	if kcerr != nil {
+		return fmt.Errorf("%s: failed to retrieve admin kubeconfig: %w", l.ID(), kcerr)
+	}
+	if kc == "" {
+		return fmt.Errorf("%s: empty kubeconfig returned", l.ID())
+	}
+
+	// Write kubeconfig to stdout for consumption by callers.
+	fmt.Print(kc)
 	return nil
 }

@@ -117,14 +117,15 @@ func (c *Component) CliBuild(cmd *cobra.Command, _ *project.Project) error {
 			if err := hs.Each(ctx, func(ctx context.Context, h *host.Host) error {
 				kh := HostGetK0s(h)
 
-				if c.config.ShouldDownload() {
-					slog.InfoContext(ctx, fmt.Sprintf("%s: downloading binary to host", h.ID()))
-					if err := kh.DownloadK0sBinary(ctx, c.config.Version); err != nil {
+				// Default: download directly on host. Upload only if explicitly configured.
+				if kh.c.UploadBinary {
+					slog.InfoContext(ctx, fmt.Sprintf("%s: uploading binary to host", h.ID()))
+					if err := kh.UploadK0sBinary(ctx, c.config.Version); err != nil {
 						return err
 					}
 				} else {
-					slog.InfoContext(ctx, fmt.Sprintf("%s: uploading binary to host", h.ID()))
-					if err := kh.UploadK0sBinary(ctx, c.config.Version); err != nil {
+					slog.InfoContext(ctx, fmt.Sprintf("%s: downloading binary to host", h.ID()))
+					if err := kh.DownloadK0sBinary(ctx, c.config.Version); err != nil {
 						return err
 					}
 				}

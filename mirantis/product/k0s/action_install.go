@@ -41,12 +41,13 @@ func (s installK0sStep) Run(ctx context.Context) error {
 
 		kh := HostGetK0s(h)
 
-		if s.c.config.ShouldDownload() {
-			if err := kh.DownloadK0sBinary(ctx, s.c.config.Version); err != nil {
+		// Default: download directly on host. Upload only if explicitly configured.
+		if kh.c.UploadBinary {
+			if err := kh.UploadK0sBinary(ctx, s.c.config.Version); err != nil {
 				return err
 			}
 		} else {
-			if err := kh.UploadK0sBinary(ctx, s.c.config.Version); err != nil {
+			if err := kh.DownloadK0sBinary(ctx, s.c.config.Version); err != nil {
 				return err
 			}
 		}

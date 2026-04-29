@@ -16,7 +16,7 @@ module "provision" {
 
   // pass in a mix of nodegroups with the platform information
   nodegroups = { for k, ngd in local.nodegroups_wplatform : k => {
-    ami : ngd.ami
+    source_image : { ami : ngd.ami }
     count : ngd.count
     type : ngd.type
     keypair_id : module.common_key.keypair_id

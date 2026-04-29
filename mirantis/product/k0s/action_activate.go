@@ -7,6 +7,7 @@ import (
 
 	"github.com/Mirantis/launchpad/pkg/host"
 	"github.com/Mirantis/launchpad/pkg/host/exec"
+	"github.com/k0sproject/version"
 )
 
 /**
@@ -15,8 +16,20 @@ import (
  * K0S must already be installed and configured. Here
  * we ensure that a cluster is up and running.
  *
- * @TODO we don't yet do any version detection/comparison (desired vs running)
+ * If a host is already running k0s at the desired version, it is skipped.
  */
+
+// hostNeedsInstall returns true if the host needs k0s installed or upgraded.
+// Returns false only if k0s is already running at exactly the desired version.
+func HostNeedsInstall(info HostDiscovery, desired version.Version) bool {
+	if !info.Running {
+		return true
+	}
+	if info.RunningVersion == nil {
+		return true
+	}
+	return !info.RunningVersion.Equal(&desired)
+}
 
 type activateK0sStep struct {
 	baseStep
@@ -41,20 +54,29 @@ func (s activateK0sStep) Run(ctx context.Context) error {
 
 	lkh := HostGetK0s(l)
 
-	if ls, lserr := lkh.Status(ctx); lserr == nil {
-		slog.DebugContext(ctx, fmt.Sprintf("%s: discovered as leader", l.ID()), slog.Any("status", ls))
+	if !HostNeedsInstall(s.c.state.HostInfo[l.ID()], s.c.config.Version) {
+		slog.InfoContext(ctx, fmt.Sprintf("%s: leader k0s already at desired version, skipping", l.ID()))
 	} else {
-		// leader has no k0s running, so start a new cluster
-		slog.DebugContext(ctx, fmt.Sprintf("%s: using as leader in new cluster", l.ID()), slog.Any("status", ls))
-
-		lkh := HostGetK0s(l)
+		// If k0s is running (upgrade case), stop it before reinstalling.
+		// JoinCluster handles stop internally; we handle the leader manually here.
+		if _, sterr := lkh.Status(ctx); sterr == nil {
+			slog.InfoContext(ctx, fmt.Sprintf("%s: leader k0s running, stopping for install/upgrade", l.ID()))
+			if err := lkh.K0sStop(ctx); err != nil {
+				// Stop failure is non-fatal — k0s may be partially running.
+				slog.WarnContext(ctx, fmt.Sprintf("%s: stop failed (continuing with install): %s", l.ID(), err.Error()))
+			}
+		} else {
+			slog.DebugContext(ctx, fmt.Sprintf("%s: using as leader in new cluster", l.ID()))
+		}
 
 		slog.InfoContext(ctx, fmt.Sprintf("%s: writing config to leader host", l.ID()))
 		if werr := lkh.BuildAndWriteK0sConfig(ctx, baseCfg, csans); werr != nil {
 			return werr
 		}
 
-		lkh.InstallNewCluster(ctx, s.c.config)
+		if err := lkh.InstallNewCluster(ctx, s.c.config); err != nil {
+			return fmt.Errorf("failed to install new cluster on leader %s: %w", l.ID(), err)
+		}
 	}
 
 	chs, cherr := s.c.GetControllerHosts(ctx)
@@ -63,6 +85,11 @@ func (s activateK0sStep) Run(ctx context.Context) error {
 	}
 	slog.InfoContext(ctx, "Sequentially adding controller hosts")
 	if err := chs.Sequential(ctx, func(ctx context.Context, h *host.Host) error {
+		if !HostNeedsInstall(s.c.state.HostInfo[h.ID()], s.c.config.Version) {
+			slog.InfoContext(ctx, fmt.Sprintf("%s: k0s already at desired version, skipping", h.ID()))
+			return nil
+		}
+
 		kh := HostGetK0s(h)
 
 		slog.InfoContext(ctx, fmt.Sprintf("%s: writing config to controller host", h.ID()))
@@ -82,6 +109,11 @@ func (s activateK0sStep) Run(ctx context.Context) error {
 	}
 	slog.InfoContext(ctx, "In parallel adding worker hosts")
 	if err := whs.Each(ctx, func(ctx context.Context, h *host.Host) error {
+		if !HostNeedsInstall(s.c.state.HostInfo[h.ID()], s.c.config.Version) {
+			slog.InfoContext(ctx, fmt.Sprintf("%s: k0s already at desired version, skipping", h.ID()))
+			return nil
+		}
+
 		eh := exec.HostGetExecutor(h)
 		eh.Connect(ctx)
 		kh := HostGetK0s(h)

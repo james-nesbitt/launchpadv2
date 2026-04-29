@@ -24,7 +24,6 @@ func (pf *HostPluginFactory) HostPlugin(_ context.Context, h *host.Host) host.Ho
 	p := &hostPlugin{
 		h: h,
 		c: c,
-		s: hostState{},
 	}
 
 	defaults.Set(p)
@@ -44,7 +43,6 @@ func (pf *HostPluginFactory) HostPluginDecode(_ context.Context, h *host.Host, d
 	}
 	p := &hostPlugin{
 		h: h,
-		s: hostState{},
 	}
 
 	if err := d(&c); err != nil {

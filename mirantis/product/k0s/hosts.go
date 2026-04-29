@@ -10,12 +10,24 @@ import (
 	"github.com/Mirantis/launchpad/pkg/host/exec"
 )
 
-// GetLeaderHost find a leader or chose one host as leader
+// GetLeaderHost returns the k0s leader host.
 //
-// @NOTE this function needs a lot of cleaning up.
+// If the discover step has already run, the leader stored in state is returned
+// immediately. Otherwise, falls back to a heuristic scan: the first controller
+// with k0s running. The fallback is expensive (SSH per host) and should only
+// occur on fresh installs before discover has executed.
 func (c Component) GetLeaderHost(ctx context.Context) *host.Host {
+	// Prefer the leader elected during the discover step.
+	if c.state.Leader != nil {
+		return c.state.Leader
+	}
+
+	// Fall back to heuristic: first controller with k0s running.
+	// This path is taken on fresh installs before discover has run.
+	slog.DebugContext(ctx, "GetLeaderHost: no discovered leader; falling back to heuristic (run discover for accuracy)")
+
 	controllers, cerr := c.GetControllerHosts(ctx)
-	if cerr != nil && len(controllers) == 0 {
+	if cerr != nil || len(controllers) == 0 {
 		return nil
 	}
 
@@ -26,21 +38,19 @@ func (c Component) GetLeaderHost(ctx context.Context) *host.Host {
 		}
 
 		kh := HostGetK0s(h)
-
 		if _, err := kh.Version(ctx); err != nil {
 			continue
 		}
 		if _, err := kh.Status(ctx); err != nil {
 			continue
 		}
-
 		return h
 	}
 
 	return first
 }
 
-// GetControllerHosts get the docker hosts for managers.
+// GetControllerHosts get the k0s controller hosts.
 func (c Component) GetControllerHosts(ctx context.Context) (host.Hosts, error) {
 	hs, err := c.GetAllHosts(ctx)
 	if err != nil {
@@ -60,7 +70,7 @@ func (c Component) GetControllerHosts(ctx context.Context) (host.Hosts, error) {
 	return mhs, nil
 }
 
-// GetWorkerHosts get the docker hosts for workers.
+// GetWorkerHosts get the k0s worker hosts.
 func (c Component) GetWorkerHosts(ctx context.Context) (host.Hosts, error) {
 	hs, err := c.GetAllHosts(ctx)
 	if err != nil {
@@ -80,7 +90,7 @@ func (c Component) GetWorkerHosts(ctx context.Context) (host.Hosts, error) {
 	return whs, nil
 }
 
-// GetAllHosts get the docker hosts for all hosts.
+// GetAllHosts get all k0s hosts.
 func (c Component) GetAllHosts(ctx context.Context) (host.Hosts, error) {
 	ghs, err := getRequirementHosts(ctx, c.hs)
 	if err != nil {
@@ -118,7 +128,7 @@ func (c Component) GetAllHosts(ctx context.Context) (host.Hosts, error) {
 	return hs, nil
 }
 
-// getRequirementHosts retrieve the matching docker hosts f the hosts requirement
+// getRequirementHosts retrieve the matching k0s hosts from the hosts requirement.
 //
 // This needs to go through the following steps/checks:
 //  1. is the requirement nil

@@ -24,7 +24,7 @@ func (s uninstallK0sStep) Run(ctx context.Context) error {
 	errs := []error{}
 
 	if whs, whserr := s.c.GetAllHosts(ctx); whserr != nil {
-
+		errs = append(errs, fmt.Errorf("could not retrieve hosts for uninstall: %w", whserr))
 	} else {
 		if err := whs.Each(ctx, func(ctx context.Context, h *host.Host) error {
 			slog.InfoContext(ctx, fmt.Sprintf("%s: k0s reset", h.ID()))
@@ -47,6 +47,10 @@ func hostReset(ctx context.Context, h *host.Host) error {
 		return fmt.Errorf("%s: not a K0s host", h.ID())
 	}
 
-	kh.K0sStop(ctx)
+	if err := kh.K0sStop(ctx); err != nil {
+		// K0sStop failure is non-fatal: k0s may already be stopped or removed.
+		// Log and continue to reset.
+		slog.WarnContext(ctx, fmt.Sprintf("%s: k0s stop failed (continuing to reset): %s", h.ID(), err.Error()))
+	}
 	return kh.K0sReset(ctx)
 }

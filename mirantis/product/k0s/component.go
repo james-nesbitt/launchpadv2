@@ -13,7 +13,7 @@ import (
 const (
 	ComponentType = "k0s"
 
-	// HostRoles roles that MCR considers targets for installation on.
+	// HostRoles roles that k0s considers targets for installation on.
 	ControllerHostRole = "controller"
 	WorkerHostRole     = "worker"
 )

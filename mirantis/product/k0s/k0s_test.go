@@ -1,14 +1,11 @@
 package k0s_test
 
 import (
-	"net/http"
 	"testing"
 
 	"github.com/k0sproject/version"
 
 	"github.com/Mirantis/launchpad/mirantis/product/k0s"
-	"github.com/Mirantis/launchpad/pkg/host"
-	"github.com/Mirantis/launchpad/pkg/mock"
 	"gopkg.in/yaml.v3"
 )
 
@@ -84,66 +81,19 @@ var (
 `
 )
 
-func NotTest_ConfigURL(t *testing.T) {
+// Test_ConfigURL verifies the download URL format without making network calls.
+func Test_ConfigURL(t *testing.T) {
 	arch := "amd64"
 	vs := "v1.30.0+k0s.0"
 	v, verr := version.NewVersion(vs)
-	if verr != verr {
+	if verr != nil {
 		t.Errorf("err with version %s: %s", vs, verr.Error())
 	}
 
 	url := k0s.DownloadK0sURL(*v, arch)
-
-	r, err := http.Get(url)
-	if err != nil {
-		t.Errorf("couldn't download version:")
-	}
-	r.Body.Close()
-}
-
-func NotTest_BuildHostConfig(t *testing.T) {
-	ctx := t.Context()
-	ny := `
-network:
-  private_address: 192.168.100.10
-  public_address: 100.1.1.10
-`
-	ky := `
-role: controller
-`
-
-	h := host.NewHost("dummy")
-
-	var nc yaml.Node
-	if err := yaml.Unmarshal([]byte(ny), &nc); err != nil {
-		t.Fatalf("fail to unmarshal mock host plugin yaml: %s", err.Error())
-	}
-	if err := h.DecodeHostPlugin(ctx, mock.HostRoleMock, nc.Decode); err != nil {
-		t.Fatalf("fail to decode k0s host plugin: %s", err.Error())
-	}
-
-	var kc yaml.Node
-	if err := yaml.Unmarshal([]byte(ky), &kc); err != nil {
-		t.Fatalf("fail to unmarshal test yaml: %s", err.Error())
-	}
-	if err := h.DecodeHostPlugin(ctx, k0s.ComponentType, kc.Decode); err != nil {
-		t.Fatalf("fail to decode k0s host plugin: %s", err.Error())
-	}
-
-	var cfg k0s.K0sConfig
-	if err := yaml.Unmarshal([]byte(cfgy), &cfg); err != nil {
-		t.Fatalf("fail to decode k0s yaml: %s", err.Error())
-	}
-
-	sans := []string{
-		"san.example.org",
-	}
-
-	kh := k0s.HostGetK0s(h)
-
-	cfg, cfgerr := kh.BuildHostConfig(ctx, cfg, sans)
-	if cfgerr != nil {
-		t.Fatalf("fail to build host config: %s", cfgerr.Error())
+	expected := "https://github.com/k0sproject/k0s/releases/download/v1.30.0+k0s.0/k0s-v1.30.0+k0s.0-amd64"
+	if url != expected {
+		t.Errorf("unexpected URL: got %s, want %s", url, expected)
 	}
 }
 
@@ -155,4 +105,7 @@ func Test_K0SConfigModify(t *testing.T) {
 
 	t.Logf("Initial CFG: %+v", cfg)
 
+	if cfg.Dig("spec", "api", "k0sApiPort") == nil {
+		t.Error("expected spec.api.k0sApiPort to be present")
+	}
 }

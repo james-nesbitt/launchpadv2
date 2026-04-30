@@ -93,6 +93,20 @@ func TestSort_CircularDependency(t *testing.T) {
 	assert.ErrorIs(t, err, ErrCouldNotSort)
 }
 
+func TestSort_LargeCircularDependency(t *testing.T) {
+	// A multi-node cycle: 1 -> 2 -> 3 -> 4 -> 5 -> 1
+	input := Orderables{
+		{Key: "step-1", Delivers: []string{"l1"}, Before: []string{"l2"}},
+		{Key: "step-2", Delivers: []string{"l2"}, Before: []string{"l3"}},
+		{Key: "step-3", Delivers: []string{"l3"}, Before: []string{"l4"}},
+		{Key: "step-4", Delivers: []string{"l4"}, Before: []string{"l5"}},
+		{Key: "step-5", Delivers: []string{"l5"}, Before: []string{"l1"}},
+	}
+
+	_, err := Sort(input)
+	assert.ErrorIs(t, err, ErrCouldNotSort)
+}
+
 func TestSort_MissingDependency(t *testing.T) {
 	input := Orderables{
 		{Key: "item-1", Before: []string{"non-existent"}},

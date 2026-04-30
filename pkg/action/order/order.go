@@ -102,7 +102,9 @@ func Sort(os Orderables) (Orderables, error) {
 		return Orderables{}, fmt.Errorf("%w; %s", ErrSortDependencyNotDelivered, errors.Join(rerrs...).Error())
 	}
 
-	soi, err := graph.TopologicalSort(g)
+	soi, err := graph.StableTopologicalSort(g, func(a, b int) bool {
+		return os[a].Key < os[b].Key
+	})
 	if err != nil {
 		return Orderables{}, fmt.Errorf("%w: %v", ErrCouldNotSort, err)
 	}

@@ -41,7 +41,7 @@ func (qd *QueueDownload) Download(ctx context.Context, url string) (io.ReadClose
 	cd := irs.Header.Get("Content-Disposition")
 	_, params, _ := mime.ParseMediaType(cd)
 	if strings.Contains(params["filename"], "../") || strings.Contains(params["filename"], "..\\") {
-		return nil, "", fmt.Errorf("Invalid file path")
+		return nil, "", fmt.Errorf("invalid file path")
 	}
 	fs := filepath.Join("launchpad", "k0s", params["filename"])
 

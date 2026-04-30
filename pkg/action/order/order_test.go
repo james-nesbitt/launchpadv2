@@ -1,75 +1,124 @@
-package order_test
+package order
 
 import (
 	"fmt"
 	"testing"
 
-	"github.com/Mirantis/launchpad/pkg/action/order"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-func Test_Ordering(t *testing.T) {
-	os := order.Orderables{}
+func validateOrder(t *testing.T, original, sorted Orderables) {
+	t.Helper()
+	require.Equal(t, len(original), len(sorted), "Sorted size mismatch")
 
-	os = append(os, order.Orderable{
-		Key:      "2",
-		Delivers: []string{},
-		Before:   []string{"A"},
-		After:    []string{},
-	})
-	os = append(os, order.Orderable{
-		Key:      "3",
-		Delivers: []string{"B"},
-		Before:   []string{"A"},
-		After:    []string{"D"},
-	})
-	os = append(os, order.Orderable{
-		Key:      "0",
-		Delivers: []string{"X"},
-		Before:   []string{},
-		After:    []string{"A"},
-	})
-	os = append(os, order.Orderable{
-		Key:      "6",
-		Delivers: []string{"E"},
-		Before:   []string{"B", "C"},
-		After:    []string{},
-	})
-	os = append(os, order.Orderable{
-		Key:      "1",
-		Delivers: []string{"A"},
-		Before:   []string{},
-		After:    []string{},
-	})
-	os = append(os, order.Orderable{
-		Key:      "4",
-		Delivers: []string{"C"},
-		Before:   []string{"B"},
-		After:    []string{"D"},
-	})
-	os = append(os, order.Orderable{
-		Key:      "5",
-		Delivers: []string{"D"},
-		Before:   []string{},
-		After:    []string{"E"},
-	})
-
-	if len(os) != 7 {
-		t.Errorf("orderables length is wrong: %+v", os)
-	}
-
-	sos, err := order.Sort(os)
-	if err != nil {
-		t.Errorf("orderables sort unexpected error: %s", err.Error())
-	}
-	if len(sos) != len(os) {
-		t.Errorf("not enough orderables returned in sort operation: %+v - %+v", os, sos)
-	}
-
-	for i, so := range sos {
-		if fmt.Sprintf("%d", i) != so.Key {
-			t.Errorf("orderable in wrong order [%d] %+v", i, so)
-		} else {
-			t.Logf("orderable in right order [%d] %+v", i, so)
+	// Map labels to their position in the sorted list
+	deliveryMap := make(map[string][]int)
+	for i, o := range sorted {
+		for _, d := range o.Delivers {
+			deliveryMap[d] = append(deliveryMap[d], i)
 		}
+	}
+
+	for i, o := range sorted {
+		// Must come AFTER all providers of labels in Before
+		for _, b := range o.Before {
+			providers, ok := deliveryMap[b]
+			if !ok {
+				t.Errorf("Item %s requires label %s which is not delivered", o.Key, b)
+				continue
+			}
+			for _, providerIdx := range providers {
+				if providerIdx > i {
+					t.Errorf("Constraint violation: %s must be after delivery of %s (provided by item at index %d, currently at index %d)", o.Key, b, providerIdx, i)
+				}
+			}
+		}
+
+		// Must come BEFORE all providers of labels in After
+		for _, a := range o.After {
+			providers, ok := deliveryMap[a]
+			if !ok {
+				continue // After labels are optional
+			}
+			for _, providerIdx := range providers {
+				if providerIdx < i {
+					t.Errorf("Constraint violation: %s must be before delivery of %s (provided by item at index %d, currently at index %d)", o.Key, a, providerIdx, i)
+				}
+			}
+		}
+	}
+}
+
+func TestSort(t *testing.T) {
+	tests := []struct {
+		name        string
+		input       Orderables
+		expectError error
+	}{
+		{
+			name: "Linear dependency",
+			input: Orderables{
+				{Key: "step2", Before: []string{"a"}},
+				{Key: "step1", Delivers: []string{"a"}},
+			},
+		},
+		{
+			name: "Complex graph",
+			input: Orderables{
+				{Key: "infrastructure", Delivers: []string{"cloud"}},
+				{Key: "network", Delivers: []string{"vpc"}, Before: []string{"cloud"}},
+				{Key: "compute", Delivers: []string{"nodes"}, Before: []string{"vpc"}},
+				{Key: "storage", Delivers: []string{"ebs"}, Before: []string{"cloud"}},
+				{Key: "database", Delivers: []string{"rds"}, Before: []string{"vpc", "ebs"}},
+				{Key: "application", Delivers: []string{"web"}, Before: []string{"nodes", "rds"}},
+				{Key: "monitoring", Before: []string{"web"}},
+				{Key: "cleanup", After: []string{"web"}}, // cleanup must be before web
+			},
+		},
+		{
+			name: "Circular dependency",
+			input: Orderables{
+				{Key: "a", Delivers: []string{"label-a"}, Before: []string{"label-b"}},
+				{Key: "b", Delivers: []string{"label-b"}, Before: []string{"label-a"}},
+			},
+			expectError: ErrCouldNotSort,
+		},
+		{
+			name: "Missing dependency",
+			input: Orderables{
+				{Key: "a", Before: []string{"missing"}},
+			},
+			expectError: ErrSortDependencyNotDelivered,
+		},
+		{
+			name: "Multiple delivers",
+			input: Orderables{
+				{Key: "p1", Delivers: []string{"a", "b"}},
+				{Key: "c1", Before: []string{"a"}},
+				{Key: "c2", Before: []string{"b"}},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			sorted, err := Sort(tt.input)
+			if tt.expectError != nil {
+				assert.ErrorIs(t, err, tt.expectError)
+				return
+			}
+
+			require.NoError(t, err)
+			validateOrder(t, tt.input, sorted)
+
+			// Simple visual check for complex graph
+			if tt.name == "Complex graph" {
+				fmt.Printf("\nSorted order for '%s':\n", tt.name)
+				for i, o := range sorted {
+					fmt.Printf("%d: %s\n", i, o.Key)
+				}
+			}
+		})
 	}
 }

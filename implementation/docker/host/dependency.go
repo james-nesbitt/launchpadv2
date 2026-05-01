@@ -58,6 +58,10 @@ func (dhd dockerHostsDep) ProvidesDockerHost(ctx context.Context) host.Hosts {
 	return d
 }
 
+func (dhd dockerHostsDep) ProduceHosts(ctx context.Context) (host.Hosts, error) {
+	return dhd.factory(ctx)
+}
+
 func (dhd dockerHostsDep) DeliversEvents(context.Context) dependency.Events {
 	if dhd.events == nil {
 		dhd.events = dependency.Events{

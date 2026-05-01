@@ -7,14 +7,14 @@ require (
 	github.com/bmatcuk/doublestar/v4 v4.10.0
 	github.com/creasty/defaults v1.8.0
 	github.com/docker/docker v28.5.2+incompatible
+	github.com/dominikbraun/graph v0.23.0
 	github.com/jellydator/validation v1.2.0
 	github.com/k0sproject/dig v0.4.0
-	github.com/k0sproject/rig/v2 v2.0.0-alpha.3
+	github.com/k0sproject/rig/v2 v2.0.0-alpha.3.0.20260430133110-7c4fe5cc4e7f
 	github.com/k0sproject/version v0.8.0
 	github.com/mittwald/go-helm-client v0.12.19
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.11.1
-	github.com/yourbasic/graph v0.0.0-20210606180040-8ecfec1c2869
 	gopkg.in/yaml.v3 v3.0.1
 	helm.sh/helm/v3 v3.20.2
 	k8s.io/apimachinery v0.36.0
@@ -49,7 +49,6 @@ require (
 	github.com/davidmz/go-pageant v1.0.2 // indirect
 	github.com/docker/go-connections v0.7.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
-	github.com/dominikbraun/graph v0.23.0 // indirect
 	github.com/emicklei/go-restful/v3 v3.13.0 // indirect
 	github.com/evanphx/json-patch v5.9.11+incompatible // indirect
 	github.com/exponent-io/jsonpath v0.0.0-20210407135951-1de76d718b3f // indirect

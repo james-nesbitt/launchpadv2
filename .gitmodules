@@ -1,0 +1,73 @@
+[submodule ".context/mke-release"]
+	path = .context/mke-release
+	url = git@github.com:MirantisContainers/mke-release.git
+[submodule ".context/provider-kubeadm"]
+	path = .context/provider-kubeadm
+	url = git@github.com:kairos-io/provider-kubeadm.git
+[submodule ".context/kairos-sdk"]
+	path = .context/kairos-sdk
+	url = git@github.com:kairos-io/kairos-sdk.git
+[submodule ".context/kairos-init"]
+	path = .context/kairos-init
+	url = git@github.com:kairos-io/kairos-init.git
+[submodule ".context/k0sctl"]
+	path = .context/k0sctl
+	url = git@github.com:k0sproject/k0sctl.git
+[submodule ".context/provider-kairos"]
+	path = .context/provider-kairos
+	url = git@github.com:kairos-io/provider-kairos.git
+[submodule ".context/auroraboot"]
+	path = .context/auroraboot
+	url = git@github.com:kairos-io/AuroraBoot.git
+[submodule ".context/k0rdent-enterprise"]
+	path = .context/k0rdent-enterprise
+	url = git@github.com:k0rdent/k0rdent-enterprise.git
+[submodule ".context/kcm"]
+	path = .context/kcm
+	url = git@github.com:k0rdent/kcm.git
+[submodule ".context/kairos"]
+	path = .context/kairos
+	url = git@github.com:kairos-io/kairos.git
+	branch = master
+[submodule ".context/k0rdent-ui"]
+	path = .context/k0rdent-ui
+	url = git@github.com:k0rdent/k0rdent-ui.git
+[submodule ".context/mke-operator"]
+	path = .context/mke-operator
+	url = git@github.com:MirantisContainers/mke-operator
+[submodule ".context/kairos-agent"]
+	path = .context/kairos-agent
+	url = git@github.com:kairos-io/kairos-agent.git
+[submodule ".context/cluster-api-provider-gcp"]
+	path = .context/cluster-api-provider-gcp
+	url = https://github.com/kubernetes-sigs/cluster-api-provider-gcp.git
+[submodule ".context/k0smotron"]
+	path = .context/k0smotron
+	url = https://github.com/k0sproject/k0smotron.git
+[submodule ".context/mke"]
+	path = .context/mke
+	url = git@github.com:MirantisContainers/mke.git
+[submodule ".context/cluster-api"]
+	path = .context/cluster-api
+	url = https://github.com/kubernetes-sigs/cluster-api.git
+[submodule ".context/k0s"]
+	path = .context/k0s
+	url = git@github.com:k0sproject/k0s.git
+[submodule ".context/k0rdent"]
+	path = .context/k0rdent
+	url = https://github.com/k0rdent/k0rdent.git
+[submodule ".context/msr4"]
+	path = .context/msr4
+	url = https://github.com/mirantis/harbor.git
+	branch = release-4.13.0
+[submodule ".context/mcr"]
+	path = .context/mcr
+	url = https://github.com/mirantis/ee-engine.git
+	branch = master
+[submodule ".context/msr2"]
+	path = .context/msr2
+	url = https://github.com/mirantis/dhe-deploy.git
+[submodule ".context/mke3"]
+	path = .context/mke3
+	url = https://github.com/Mirantis/orca.git
+	branch = master

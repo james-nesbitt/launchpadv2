@@ -73,6 +73,7 @@ Pre-built binaries are available in [GitHub Releases](https://github.com/Miranti
 - [Design](./docs/design.md): Architecture, interfaces, and dependency system.
 
 ### Development
+- [Testing Protocol](./FAST_TESTING.md): High-speed testing using GCP.
 - [TODO](./docs/TODO.md): Backlog and roadmap.
 - [Examples](./examples/): Sample configurations and scripts.
 

@@ -12,6 +12,7 @@ import (
 
 	"github.com/k0sproject/version"
 
+	"github.com/k0sproject/dig"
 	"gopkg.in/yaml.v3"
 
 	"github.com/Mirantis/launchpad/pkg/host"
@@ -100,7 +101,11 @@ func (p *hostPlugin) Validate() error {
 }
 
 func (p hostPlugin) IsController() bool {
-	return p.c.Role == "controller"
+	return p.c.Role == RoleController || p.c.Role == RoleControllerWorker || p.c.Role == RoleSingle
+}
+
+func (p hostPlugin) IsWorker() bool {
+	return p.c.Role == RoleWorker || p.c.Role == RoleControllerWorker || p.c.Role == RoleSingle
 }
 
 // Version retrieve plugin host k0s version (know error if k0s binary is missing).
@@ -263,6 +268,12 @@ func (p *hostPlugin) InstallNewCluster(ctx context.Context, c Config) error {
 		args = append(args, "--enable-dynamic-config")
 	}
 
+	if p.c.Role == RoleSingle {
+		args = append(args, "--single")
+	} else if p.c.Role == RoleControllerWorker {
+		args = append(args, "--enable-worker")
+	}
+
 	slog.InfoContext(ctx, fmt.Sprintf("%s: installing leader: %s", p.h.ID(), args))
 
 	_, e, ierr := eh.Exec(ctx, p.k0sCommand(args), nil, exec.ExecOptions{Sudo: true})
@@ -281,6 +292,11 @@ func (p *hostPlugin) InstallNewCluster(ctx context.Context, c Config) error {
 
 // JoinCluster Join the plugin host to an existing k0s cluster.
 func (p *hostPlugin) JoinCluster(ctx context.Context, l *host.Host, role string, c Config) error {
+	if p.h.ID() == l.ID() {
+		slog.DebugContext(ctx, fmt.Sprintf("%s: host is leader, skipping join", p.h.ID()))
+		return nil
+	}
+
 	lkh := HostGetK0s(l)
 	eh := exec.HostGetExecutor(p.h)
 	fh := exec.HostGetFiles(p.h)
@@ -305,6 +321,14 @@ func (p *hostPlugin) JoinCluster(ctx context.Context, l *host.Host, role string,
 
 	if c.DynamicConfig {
 		args = append(args, "--enable-dynamic-config")
+	}
+
+	if role == RoleController {
+		if p.c.Role == RoleSingle {
+			args = append(args, "--single")
+		} else if p.c.Role == RoleControllerWorker {
+			args = append(args, "--enable-worker")
+		}
 	}
 
 	// disable any running services
@@ -477,13 +501,17 @@ func (p *hostPlugin) BuildHostConfig(ctx context.Context, basecfg K0sConfig, san
 	hcfg := basecfg
 	slog.DebugContext(ctx, "base config", slog.Any("config", hcfg))
 
-	addUnlessExist := func(slice *[]string, s string) {
-		for _, v := range *slice {
+	if hcfg.Spec == nil {
+		hcfg.Spec = make(dig.Mapping)
+	}
+
+	addUnlessExist := func(slice []any, s any) []any {
+		for _, v := range slice {
 			if v == s {
-				return
+				return slice
 			}
 		}
-		*slice = append(*slice, s)
+		return append(slice, s)
 	}
 
 	hn := network.HostGetNetwork(p.h)
@@ -499,28 +527,36 @@ func (p *hostPlugin) BuildHostConfig(ctx context.Context, basecfg K0sConfig, san
 		addr = n.PublicAddress
 	}
 
-	hcfg.Spec.API.Address = addr
-	hcfg.Spec.Storage.Etcd.PeerAddress = addr
-	addUnlessExist(&sans, addr)
+	api := hcfg.Spec.DigMapping("api")
+	api["address"] = addr
+
+	if api["k0sApiPort"] == nil || api["k0sApiPort"] == 0 {
+		api["k0sApiPort"] = 9443
+	}
+	if api["port"] == nil || api["port"] == 0 {
+		api["port"] = 6443
+	}
+
+	storage := hcfg.Spec.DigMapping("storage")
+	if storage["type"] == nil || storage["type"] == "" {
+		storage["type"] = "etcd"
+	}
+	if storage["type"] == "etcd" {
+		etcd := storage.DigMapping("etcd")
+		etcd["peerAddress"] = addr
+	}
+
+	var currentSans []any
+	if s, ok := api["sans"].([]any); ok {
+		currentSans = s
+	}
+	currentSans = addUnlessExist(currentSans, addr)
+	currentSans = addUnlessExist(currentSans, "127.0.0.1")
 
 	for _, s := range sans {
-		addUnlessExist(&hcfg.Spec.API.Sans, s)
+		currentSans = addUnlessExist(currentSans, s)
 	}
-
-	addUnlessExist(&hcfg.Spec.API.Sans, "127.0.0.1")
-
-	if hcfg.Spec.API.K0sApiPort == 0 {
-		hcfg.Spec.API.K0sApiPort = 9443
-	}
-	if hcfg.Spec.API.Port == 0 {
-		hcfg.Spec.API.Port = 6443
-	}
-	//	if hcfg.Spec.Konnectivity.AdminPort == 0 {
-	//		hcfg.Spec.Konnectivity.AdminPort = 8443
-	//	}
-	//	if hcfg.Spec.Konnectivity.AgentPort == 0 {
-	//		hcfg.Spec.Konnectivity.AgentPort = 8443
-	//	}
+	api["sans"] = currentSans
 
 	return hcfg, nil
 }

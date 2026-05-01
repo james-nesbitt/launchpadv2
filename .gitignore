@@ -4,3 +4,8 @@ vendor
 launchpad.y*
 kubeconfig*
 
+examples/terraform/gcp-simple/.terraform/
+examples/terraform/gcp-simple/*.tfstate*
+examples/terraform/gcp-simple/id_rsa
+examples/terraform/gcp-simple/tfplan
+examples/terraform/gcp-simple/.terraform.lock.hcl

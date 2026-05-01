@@ -83,13 +83,13 @@ func (p *hostPlugin) ExecInteractive(ctx context.Context, opts exec.ExecOptions)
 // InstallPackages install some packages.
 func (p *hostPlugin) InstallPackages(ctx context.Context, packages []string) error {
 	slog.DebugContext(ctx, fmt.Sprintf("%s: RIG install packages", p.hid()), slog.Any("packages", packages))
-	return p.rig.Sudo().PackageManagerService.PackageManager().Install(ctx, packages...)
+	return p.rig.Sudo().PackageManager().Install(ctx, packages...)
 }
 
 // RemovePackages install some packages.
 func (p *hostPlugin) RemovePackages(ctx context.Context, packages []string) error {
 	slog.DebugContext(ctx, fmt.Sprintf("%s: RIG install packages", p.hid()), slog.Any("packages", packages))
-	return p.rig.Sudo().PackageManagerService.PackageManager().Remove(ctx, packages...)
+	return p.rig.Sudo().PackageManager().Remove(ctx, packages...)
 }
 
 // ServiceEnable enable and start some services.

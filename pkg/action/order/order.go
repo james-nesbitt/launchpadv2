@@ -9,11 +9,11 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/yourbasic/graph"
+	"github.com/dominikbraun/graph"
 )
 
 var (
-	ErrSortDependencyNotDelivered = errors.New("sorting dependecy not delivered")
+	ErrSortDependencyNotDelivered = errors.New("sorting dependency not delivered")
 	ErrCouldNotSort               = errors.New("could not sort")
 )
 
@@ -62,28 +62,38 @@ func Sort(os Orderables) (Orderables, error) {
 		}
 	}
 
-	g := graph.New(len(os))
+	g := graph.New(graph.IntHash, graph.Directed())
 
-	// for any label, add an aedge between the delivers and the after/before elements
+	for i := range os {
+		if err := g.AddVertex(i); err != nil {
+			return nil, fmt.Errorf("failed to add vertex: %w", err)
+		}
+	}
 
 	rerrs := []error{}
 	for k, l := range ls {
-		db := ls[k].deliveredBy
+		db := l.deliveredBy
 
 		if len(l.before) > 0 && len(db) == 0 {
 			rerrs = append(rerrs, fmt.Errorf("%s is not delivered, but is required", k))
 		}
 
-		// things that come "before" a "delivers" get a pos *s cost
+		// things that come "before" this element (labels)
+		// so: deliverer -> element
 		for _, b := range l.before {
-			for i, d := range db {
-				g.AddCost(d, b, int64(i*2))
+			for _, d := range db {
+				if err := g.AddEdge(d, b); err != nil && !errors.Is(err, graph.ErrEdgeAlreadyExists) {
+					return nil, fmt.Errorf("failed to add edge (before): %w", err)
+				}
 			}
 		}
-		// things that come "after" a "delivers" get a pos cost
+		// things that come "after" this element (labels)
+		// so: element -> deliverer
 		for _, a := range l.after {
-			for i, d := range db {
-				g.AddCost(a, d, int64(i))
+			for _, d := range db {
+				if err := g.AddEdge(a, d); err != nil && !errors.Is(err, graph.ErrEdgeAlreadyExists) {
+					return nil, fmt.Errorf("failed to add edge (after): %w", err)
+				}
 			}
 		}
 	}
@@ -92,9 +102,11 @@ func Sort(os Orderables) (Orderables, error) {
 		return Orderables{}, fmt.Errorf("%w; %s", ErrSortDependencyNotDelivered, errors.Join(rerrs...).Error())
 	}
 
-	soi, ok := graph.TopSort(g)
-	if !ok {
-		return Orderables{}, ErrCouldNotSort
+	soi, err := graph.StableTopologicalSort(g, func(a, b int) bool {
+		return os[a].Key < os[b].Key
+	})
+	if err != nil {
+		return Orderables{}, fmt.Errorf("%w: %v", ErrCouldNotSort, err)
 	}
 
 	sos := Orderables{}

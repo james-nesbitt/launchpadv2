@@ -1,21 +1,15 @@
 
 LOCAL_TAG?=0.0.0
 
-GOLANGCILINT?=$(shell which golangci-lint)
-ifeq (, $(GOLANGCILINT))
-	GOLANGCILINT=?docker run -ti --rm -v "$(CURDIR):/data" -w "/data" golangci/golangci-lint:latest golangci-lint
-endif
-
-# Lint by running golangci-lint in a docker container
+# Lint by running golangci-lint
 .PHONY: lint
 lint:
-	$(GOLANGCILINT) run ./...
+	golangci-lint run ./...
 
-# Local install of the plugin
-# @SEE README.md on how to use the locally built plugin
+# Local build of the binary
 .PHONY: local
 local:
-	GORELEASER_CURRENT_TAG="$(LOCAL_TAG)" goreleaser build --clean --single-target --skip=validate --snapshot
+	go build -o dist/launchpad ./mirantis/cmd/launchpad/main.go
 
 dist:
 	GORELEASER_CURRENT_TAG="$(LOCAL_TAG)" goreleaser build --clean --skip=validate

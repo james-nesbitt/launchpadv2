@@ -15,9 +15,12 @@ import (
 )
 
 const (
-	RoleController    = "controller"
+	RoleController       = "controller"
+	RoleWorker           = "worker"
+	RoleControllerWorker = "controller+worker"
+	RoleSingle           = "single"
+
 	ServiceController = "k0scontroller"
-	RoleWorker        = "worker"
 	ServiceWorker     = "k0sworker"
 
 	DefaultK0sConfigPath = "/etc/k0s/k0sd.yaml"

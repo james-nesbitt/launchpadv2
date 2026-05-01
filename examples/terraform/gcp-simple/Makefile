@@ -24,9 +24,9 @@ ssh:
 gcloud-ssh:
 	gcloud compute ssh $(shell terraform output -raw instance_name) --zone=$(shell terraform output -raw zone) --tunnel-through-iap
 
-# Apply launchpad project (Unsets SSH_AUTH_SOCK to avoid agent interference)
+# Apply launchpad project
 launchpad-apply: launchpad-yaml
-	unset SSH_AUTH_SOCK && ../../../dist/launchpad project:apply --config launchpad.yaml
+	../../../dist/launchpad project:apply --config launchpad.yaml
 
 clean:
 	@if [ -z "$(PROJECT_ID)" ]; then echo "Error: PROJECT_ID not set and could not be detected via gcloud"; exit 1; fi

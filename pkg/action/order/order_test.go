@@ -8,6 +8,9 @@ import (
 	"github.com/Mirantis/launchpad/pkg/action/order"
 )
 
+// Test_Ordering verifies the basic ordering logic with a known set of 7 orderables
+// that have specific Delivers, Before, and After constraints. It ensures that the
+// result matches a pre-calculated sequence (0-6).
 func Test_Ordering(t *testing.T) {
 	os := order.Orderables{}
 
@@ -75,6 +78,9 @@ func Test_Ordering(t *testing.T) {
 	}
 }
 
+// TestSort_ComplexCases uses a table-driven approach to verify various graph scenarios
+// including linear chains, disconnected components, and error cases like cycles
+// or missing dependencies.
 func TestSort_ComplexCases(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -164,6 +170,8 @@ func TestSort_ComplexCases(t *testing.T) {
 	}
 }
 
+// TestSort_StressTest generates a large-scale DAG (1000 nodes) to verify the
+// performance and correctness of the topological sort implementation under load.
 func TestSort_StressTest(t *testing.T) {
 	const count = 1000
 	os := order.Orderables{}
@@ -197,6 +205,9 @@ func TestSort_StressTest(t *testing.T) {
 		t.Errorf("Stress test produced invalid order: %v", err)
 	}
 }
+
+// verifyOrder is a test helper that validates if a sorted slice of Orderables
+// satisfies all 'Before' and 'After' constraints defined in the original set.
 func verifyOrder(os order.Orderables, sorted order.Orderables) error {
 	if len(os) != len(sorted) {
 		return fmt.Errorf("length mismatch: os=%d, sorted=%d", len(os), len(sorted))

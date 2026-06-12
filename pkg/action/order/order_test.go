@@ -1,6 +1,7 @@
 package order_test
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -72,4 +73,143 @@ func Test_Ordering(t *testing.T) {
 			t.Logf("orderable in right order [%d] %+v", i, so)
 		}
 	}
+}
+
+func TestSort_ComplexCases(t *testing.T) {
+	tests := []struct {
+		name    string
+		os      order.Orderables
+		want    []string
+		wantErr error
+	}{
+		{
+			name: "Linear Chain",
+			os: order.Orderables{
+				{Key: "C", Delivers: []string{"C"}, Before: []string{"B"}},
+				{Key: "A", Delivers: []string{"A"}},
+				{Key: "B", Delivers: []string{"B"}, Before: []string{"A"}},
+			},
+			want: []string{"A", "B", "C"},
+		},
+		{
+			name: "Disconnected Components",
+			os: order.Orderables{
+				{Key: "A", Delivers: []string{"A"}},
+				{Key: "B", Delivers: []string{"B"}},
+			},
+			want: []string{"A", "B"},
+		},
+		{
+			name: "Cycle Detection",
+			os: order.Orderables{
+				{Key: "A", Delivers: []string{"A"}, Before: []string{"B"}},
+				{Key: "B", Delivers: []string{"B"}, Before: []string{"A"}},
+			},
+			wantErr: order.ErrCouldNotSort,
+		},
+		{
+			name: "Missing Dependency",
+			os: order.Orderables{
+				{Key: "A", Before: []string{"Missing"}},
+			},
+			wantErr: order.ErrSortDependencyNotDelivered,
+		},
+		{
+			name: "Empty List",
+			os:   order.Orderables{},
+			want: []string{},
+		},
+		{
+			name: "Single Element",
+			os: order.Orderables{
+				{Key: "A", Delivers: []string{"A"}},
+			},
+			want: []string{"A"},
+		},
+		{
+			name: "Complex DAG",
+			os: order.Orderables{
+				{Key: "1", Delivers: []string{"D1"}},
+				{Key: "2", Delivers: []string{"D2"}},
+				{Key: "3", Before: []string{"D1", "D2"}},
+				{Key: "4", Before: []string{"D3"}},
+				{Key: "5", Delivers: []string{"D3"}, Before: []string{"D1"}},
+				{Key: "6", Before: []string{"D2", "D3"}},
+			},
+			want: []string{"1", "2", "5", "3", "4", "6"}, 
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := order.Sort(tt.os)
+			if tt.wantErr != nil {
+				if !errors.Is(err, tt.wantErr) {
+					t.Errorf("Sort() error = %v, wantErr %v", err, tt.wantErr)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("Sort() unexpected error: %v", err)
+			}
+			if len(got) != len(tt.want) {
+				t.Errorf("Sort() length = %v, want %v", len(got), len(tt.want))
+				return
+			}
+			
+			if err := verifyOrder(tt.os, got); err != nil {
+				t.Errorf("Sort() produced invalid order: %v", err)
+			}
+		})
+	}
+}
+
+func verifyOrder(os order.Orderables, sorted order.Orderables) error {
+	if len(os) != len(sorted) {
+		return fmt.Errorf("length mismatch: os=%d, sorted=%d", len(os), len(sorted))
+	}
+
+	pos := make(map[string]int)
+	for i, o := range sorted {
+		pos[o.Key] = i
+	}
+
+	for _, o := range os {
+		myPos := pos[o.Key]
+
+		for _, label := range o.Before {
+			foundProvider := false
+			for _, provider := range os {
+				for _, dl := range provider.Delivers {
+					if dl == label {
+						foundProvider = true
+						if pos[provider.Key] >= myPos {
+							return fmt.Errorf("constraint violation: provider %s of %s must come before %s", provider.Key, label, o.Key)
+						}
+					}
+				}
+			}
+			if !foundProvider {
+				return fmt.Errorf("missing provider for label %s required by %s", label, o.Key)
+			}
+		}
+
+		for _, label := range o.After {
+			foundProvider := false
+			for _, provider := range os {
+				for _, dl := range provider.Delivers {
+					if dl == label {
+						foundProvider = true
+						if pos[provider.Key] <= myPos {
+							return fmt.Errorf("constraint violation: provider %s of %s must come after %s", provider.Key, label, o.Key)
+						}
+					}
+				}
+			}
+			if !foundProvider {
+				return fmt.Errorf("missing provider for label %s required by %s", label, o.Key)
+			}
+		}
+	}
+	return nil
 }

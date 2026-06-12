@@ -14,7 +14,6 @@ require (
 	github.com/mittwald/go-helm-client v0.12.19
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.11.1
-	github.com/yourbasic/graph v0.0.0-20210606180040-8ecfec1c2869
 	gopkg.in/yaml.v3 v3.0.1
 	helm.sh/helm/v3 v3.20.1
 	k8s.io/apimachinery v0.35.3

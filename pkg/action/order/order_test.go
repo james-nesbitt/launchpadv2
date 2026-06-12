@@ -164,6 +164,39 @@ func TestSort_ComplexCases(t *testing.T) {
 	}
 }
 
+func TestSort_StressTest(t *testing.T) {
+	const count = 1000
+	os := order.Orderables{}
+
+	for i := 0; i < count; i++ {
+		o := order.Orderable{
+			Key:      fmt.Sprintf("%d", i),
+			Delivers: []string{fmt.Sprintf("D%d", i)},
+		}
+		// Each element (except the first) depends on the one before it
+		if i > 0 {
+			o.Before = append(o.Before, fmt.Sprintf("D%d", i-1))
+		}
+		// Add some random breadth constraints to increase complexity
+		if i > 10 && i%10 == 0 {
+			o.Before = append(o.Before, fmt.Sprintf("D%d", i-10))
+		}
+		os = append(os, o)
+	}
+
+	sos, err := order.Sort(os)
+	if err != nil {
+		t.Fatalf("Stress test sort unexpected error: %v", err)
+	}
+
+	if len(sos) != count {
+		t.Errorf("Stress test length mismatch: got %d, want %d", len(sos), count)
+	}
+
+	if err := verifyOrder(os, sos); err != nil {
+		t.Errorf("Stress test produced invalid order: %v", err)
+	}
+}
 func verifyOrder(os order.Orderables, sorted order.Orderables) error {
 	if len(os) != len(sorted) {
 		return fmt.Errorf("length mismatch: os=%d, sorted=%d", len(os), len(sorted))
@@ -212,37 +245,4 @@ func verifyOrder(os order.Orderables, sorted order.Orderables) error {
 		}
 	}
 	return nil
-}
-func TestSort_StressTest(t *testing.T) {
-	const count = 1000
-	os := order.Orderables{}
-
-	for i := 0; i < count; i++ {
-		o := order.Orderable{
-			Key:      fmt.Sprintf("%d", i),
-			Delivers: []string{fmt.Sprintf("D%d", i)},
-		}
-		// Each element (except the first) depends on the one before it
-		if i > 0 {
-			o.Before = append(o.Before, fmt.Sprintf("D%d", i-1))
-		}
-		// Add some random breadth constraints to increase complexity
-		if i > 10 && i%10 == 0 {
-			o.Before = append(o.Before, fmt.Sprintf("D%d", i-10))
-		}
-		os = append(os, o)
-	}
-
-	sos, err := order.Sort(os)
-	if err != nil {
-		t.Fatalf("Stress test sort unexpected error: %v", err)
-	}
-
-	if len(sos) != count {
-		t.Errorf("Stress test length mismatch: got %d, want %d", len(sos), count)
-	}
-
-	if err := verifyOrder(os, sos); err != nil {
-		t.Errorf("Stress test produced invalid order: %v", err)
-	}
 }

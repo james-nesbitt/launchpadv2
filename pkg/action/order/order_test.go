@@ -136,7 +136,7 @@ func TestSort_ComplexCases(t *testing.T) {
 				{Key: "5", Delivers: []string{"D3"}, Before: []string{"D1"}},
 				{Key: "6", Before: []string{"D2", "D3"}},
 			},
-			want: []string{"1", "2", "5", "3", "4", "6"}, 
+			want: []string{"1", "2", "5", "3", "4", "6"},
 		},
 	}
 
@@ -156,7 +156,7 @@ func TestSort_ComplexCases(t *testing.T) {
 				t.Errorf("Sort() length = %v, want %v", len(got), len(tt.want))
 				return
 			}
-			
+
 			if err := verifyOrder(tt.os, got); err != nil {
 				t.Errorf("Sort() produced invalid order: %v", err)
 			}

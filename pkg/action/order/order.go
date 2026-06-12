@@ -8,8 +8,7 @@ package order
 import (
 	"errors"
 	"fmt"
-
-	"github.com/yourbasic/graph"
+	// Removed yourbasic/graph
 )
 
 var (
@@ -62,28 +61,25 @@ func Sort(os Orderables) (Orderables, error) {
 		}
 	}
 
-	g := graph.New(len(os))
-
-	// for any label, add an aedge between the delivers and the after/before elements
-
+	edges := [][2]int{}
 	rerrs := []error{}
 	for k, l := range ls {
-		db := ls[k].deliveredBy
+		db := l.deliveredBy
 
 		if len(l.before) > 0 && len(db) == 0 {
 			rerrs = append(rerrs, fmt.Errorf("%s is not delivered, but is required", k))
 		}
 
-		// things that come "before" a "delivers" get a pos *s cost
+		// things that come "before" a "delivers" get an edge
 		for _, b := range l.before {
-			for i, d := range db {
-				g.AddCost(d, b, int64(i*2))
+			for _, d := range db {
+				edges = append(edges, [2]int{d, b})
 			}
 		}
-		// things that come "after" a "delivers" get a pos cost
+		// things that come "after" a "delivers" get an edge
 		for _, a := range l.after {
-			for i, d := range db {
-				g.AddCost(a, d, int64(i))
+			for _, d := range db {
+				edges = append(edges, [2]int{a, d})
 			}
 		}
 	}
@@ -92,7 +88,7 @@ func Sort(os Orderables) (Orderables, error) {
 		return Orderables{}, fmt.Errorf("%w; %s", ErrSortDependencyNotDelivered, errors.Join(rerrs...).Error())
 	}
 
-	soi, ok := graph.TopSort(g)
+	soi, ok := topoSort(len(os), edges)
 	if !ok {
 		return Orderables{}, ErrCouldNotSort
 	}
@@ -103,4 +99,40 @@ func Sort(os Orderables) (Orderables, error) {
 	}
 
 	return sos, nil
+}
+
+func topoSort(nodes int, edges [][2]int) ([]int, bool) {
+	adj := make([][]int, nodes)
+	inDegree := make([]int, nodes)
+	for _, edge := range edges {
+		u, v := edge[0], edge[1]
+		adj[u] = append(adj[u], v)
+		inDegree[v]++
+	}
+
+	var queue []int
+	for i := 0; i < nodes; i++ {
+		if inDegree[i] == 0 {
+			queue = append(queue, i)
+		}
+	}
+
+	var result []int
+	for len(queue) > 0 {
+		u := queue[0]
+		queue = queue[1:]
+		result = append(result, u)
+
+		for _, v := range adj[u] {
+			inDegree[v]--
+			if inDegree[v] == 0 {
+				queue = append(queue, v)
+			}
+		}
+	}
+
+	if len(result) != nodes {
+		return nil, false
+	}
+	return result, true
 }
